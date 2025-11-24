@@ -1,0 +1,107 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { query, results } = await req.json();
+    
+    if (!query || !results || !Array.isArray(results)) {
+      return new Response(
+        JSON.stringify({ error: 'Query and results array are required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
+    }
+
+    console.log(`Synthesizing ${results.length} results for query: ${query}`);
+
+    // Prepare context from results
+    const context = results.slice(0, 50).map((result: any, idx: number) => {
+      return `[${idx + 1}] ${result.source} (${result.id}): ${result.title}\n${result.abstract || result.status || ''}`;
+    }).join('\n\n');
+
+    // Create synthesis prompt
+    const systemPrompt = `You are an expert biomedical research synthesizer. Your task is to create a comprehensive, factual summary of research findings.
+
+Guidelines:
+- Write 3-6 concise paragraphs
+- Focus on key findings and trends across sources
+- Mention specific evidence from the provided sources
+- Highlight any clinical trials or significant studies
+- Note gaps or areas needing further research
+- Keep strictly factual, no speculation
+- Write in clear, professional language`;
+
+    const userPrompt = `Based on the following research results about "${query}", provide a comprehensive synthesis:
+
+${context}
+
+Create a well-structured synthesis that answers the research question and highlights key findings.`;
+
+    // Call Lovable AI
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 2000
+      }),
+    });
+
+    if (!aiResponse.ok) {
+      if (aiResponse.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'Rate limit exceeded. Please try again in a moment.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (aiResponse.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'AI usage limit reached. Please add credits to continue.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      const errorText = await aiResponse.text();
+      console.error('AI API error:', aiResponse.status, errorText);
+      throw new Error(`AI synthesis failed: ${aiResponse.status}`);
+    }
+
+    const aiData = await aiResponse.json();
+    const synthesis = aiData.choices?.[0]?.message?.content || 'Unable to generate synthesis';
+
+    console.log('Synthesis completed successfully');
+
+    return new Response(
+      JSON.stringify({ synthesis }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('Error in synthesize-results:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});

@@ -3,15 +3,21 @@ import { FileText, Beaker, FileSearch, Scale } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface StatsCardsProps {
+  counts: {
+    pubmed: number;
+    clinical: number;
+    arxiv: number;
+    patents: number;
+  };
   isSearching: boolean;
 }
 
-export const StatsCards = ({ isSearching }: StatsCardsProps) => {
+export const StatsCards = ({ counts, isSearching }: StatsCardsProps) => {
   const stats = [
-    { label: "PubMed Articles", value: "47", icon: FileText, color: "text-blue-600" },
-    { label: "Clinical Trials", value: "23", icon: Beaker, color: "text-green-600" },
-    { label: "Preprints", value: "12", icon: FileSearch, color: "text-amber-600" },
-    { label: "Patents", value: "8", icon: Scale, color: "text-purple-600" },
+    { label: "PubMed Articles", value: counts.pubmed, icon: FileText, color: "text-blue-600" },
+    { label: "Clinical Trials", value: counts.clinical, icon: Beaker, color: "text-green-600" },
+    { label: "Preprints", value: counts.arxiv, icon: FileSearch, color: "text-amber-600" },
+    { label: "Patents", value: counts.patents, icon: Scale, color: "text-purple-600" },
   ];
 
   return (

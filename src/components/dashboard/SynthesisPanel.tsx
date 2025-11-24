@@ -3,19 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Download, Copy } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { SearchResult } from "@/lib/searchService";
+import { exportToPDF } from "@/lib/exportService";
 
 interface SynthesisPanelProps {
+  synthesis: string;
   isSearching: boolean;
+  query: string;
+  results: SearchResult[];
 }
 
-export const SynthesisPanel = ({ isSearching }: SynthesisPanelProps) => {
+export const SynthesisPanel = ({ synthesis, isSearching, query, results }: SynthesisPanelProps) => {
   const { toast } = useToast();
-
-  const synthesis = `Recent research indicates that GLP-1 receptor agonists like semaglutide may offer neuroprotective benefits for Parkinson's disease through multiple mechanisms. Studies show potential for reducing neuroinflammation, improving mitochondrial function, and promoting neuronal survival.
-
-Several Phase II clinical trials are currently evaluating semaglutide's efficacy in early Parkinson's disease, with preliminary results suggesting improvements in motor function and quality of life markers. The drug's established safety profile from diabetes treatment provides a favorable foundation for repurposing.
-
-However, larger-scale trials are needed to confirm these findings and establish optimal dosing regimens for neurological applications. The intersection of metabolic and neurodegenerative pathways presents an exciting frontier for therapeutic development.`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(synthesis);
@@ -23,6 +22,22 @@ However, larger-scale trials are needed to confirm these findings and establish 
       title: "Copied to clipboard",
       description: "AI synthesis has been copied to your clipboard.",
     });
+  };
+
+  const handleExport = async () => {
+    try {
+      await exportToPDF(query, results, synthesis);
+      toast({
+        title: "Export successful",
+        description: "Report has been downloaded as HTML (printable to PDF)",
+      });
+    } catch (error) {
+      toast({
+        title: "Export failed",
+        description: "There was an error exporting the report",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -45,7 +60,7 @@ However, larger-scale trials are needed to confirm these findings and establish 
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-5/6" />
           </div>
-        ) : (
+        ) : synthesis ? (
           <>
             <div className="prose prose-sm max-w-none">
               <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
@@ -67,6 +82,7 @@ However, larger-scale trials are needed to confirm these findings and establish 
                 variant="outline" 
                 size="sm" 
                 className="flex-1"
+                onClick={handleExport}
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export
@@ -75,10 +91,15 @@ However, larger-scale trials are needed to confirm these findings and establish 
             
             <div className="pt-4 border-t">
               <p className="text-xs text-muted-foreground">
-                Generated from 90 sources • Powered by AI
+                Generated from {results.length} sources • Powered by AI
               </p>
             </div>
           </>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">AI synthesis will appear here after search</p>
+          </div>
         )}
       </CardContent>
     </Card>

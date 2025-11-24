@@ -4,23 +4,43 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Database, FileText, Microscope, Scale } from "lucide-react";
 
-export const SearchFilters = () => {
-  const sources = [
-    { id: "pubmed", label: "PubMed", icon: Microscope, enabled: true },
-    { id: "clinical", label: "ClinicalTrials.gov", icon: FileText, enabled: true },
-    { id: "arxiv", label: "arXiv / Preprints", icon: Database, enabled: true },
-    { id: "patents", label: "Patents (EPO)", icon: Scale, enabled: false },
+interface SearchFiltersProps {
+  sources: {
+    pubmed: boolean;
+    clinical: boolean;
+    arxiv: boolean;
+    patents: boolean;
+  };
+  setSources: (sources: any) => void;
+  maxResults: number;
+  setMaxResults: (value: number) => void;
+}
+
+export const SearchFilters = ({ sources, setSources, maxResults, setMaxResults }: SearchFiltersProps) => {
+  const sourceOptions = [
+    { id: "pubmed", label: "PubMed", icon: Microscope },
+    { id: "clinical", label: "ClinicalTrials.gov", icon: FileText },
+    { id: "arxiv", label: "arXiv / Preprints", icon: Database },
+    { id: "patents", label: "Patents (EPO)", icon: Scale },
   ];
+
+  const handleSourceToggle = (sourceId: string) => {
+    setSources((prev: any) => ({ ...prev, [sourceId]: !prev[sourceId] }));
+  };
 
   return (
     <Card className="p-4">
       <div className="flex flex-wrap items-center gap-6">
         <div className="flex gap-4 flex-wrap">
-          {sources.map((source) => {
+          {sourceOptions.map((source) => {
             const Icon = source.icon;
             return (
               <div key={source.id} className="flex items-center gap-2">
-                <Checkbox id={source.id} defaultChecked={source.enabled} />
+                <Checkbox 
+                  id={source.id} 
+                  checked={sources[source.id as keyof typeof sources]}
+                  onCheckedChange={() => handleSourceToggle(source.id)}
+                />
                 <Label 
                   htmlFor={source.id} 
                   className="flex items-center gap-2 cursor-pointer text-sm font-medium"
@@ -34,8 +54,14 @@ export const SearchFilters = () => {
         </div>
         
         <div className="flex-1 min-w-[200px]">
-          <Label className="text-sm font-medium mb-2 block">Max Results: 20</Label>
-          <Slider defaultValue={[20]} max={100} min={5} step={5} />
+          <Label className="text-sm font-medium mb-2 block">Max Results: {maxResults}</Label>
+          <Slider 
+            value={[maxResults]} 
+            max={100} 
+            min={5} 
+            step={5}
+            onValueChange={(value) => setMaxResults(value[0])}
+          />
         </div>
       </div>
     </Card>
