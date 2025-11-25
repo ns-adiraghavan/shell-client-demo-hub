@@ -25,7 +25,10 @@ const Index = () => {
   });
   const { toast } = useToast();
 
-  const handleSearch = async () => {
+  const handleSearch = async (searchQuery?: string, searchSources?: any, searchMaxResults?: number) => {
+    const finalQuery = searchQuery || query;
+    const finalSources = searchSources || sources;
+    const finalMaxResults = searchMaxResults || maxResults;
     if (!query.trim()) {
       toast({
         title: "Empty query",
@@ -95,11 +98,13 @@ const Index = () => {
       
       <div className="container mx-auto px-4 py-6 space-y-6">
         <SearchFilters 
-          sources={sources}
-          setSources={setSources}
-          maxResults={maxResults}
-          setMaxResults={setMaxResults}
+          sources={sources} 
+          setSources={setSources} 
+          maxResults={maxResults} 
+          setMaxResults={setMaxResults} 
         />
+        
+        <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
         
         {hasSearched && (
           <>
