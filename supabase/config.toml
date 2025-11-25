@@ -9,5 +9,8 @@ verify_jwt = false
 [functions.search-arxiv]
 verify_jwt = false
 
+[functions.search-patents]
+verify_jwt = false
+
 [functions.synthesize-results]
 verify_jwt = false

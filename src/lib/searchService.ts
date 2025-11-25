@@ -54,6 +54,14 @@ export const searchAllSources = async (options: SearchOptions): Promise<SearchRe
     );
   }
 
+  if (sources.patents) {
+    searchPromises.push(
+      supabase.functions.invoke('search-patents', {
+        body: { query, maxResults }
+      })
+    );
+  }
+
   try {
     const responses = await Promise.allSettled(searchPromises);
 

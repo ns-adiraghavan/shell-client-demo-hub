@@ -1,15 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { SearchHeader } from "@/components/dashboard/SearchHeader";
 import { SearchFilters } from "@/components/dashboard/SearchFilters";
+import { AdvancedFilters, AdvancedFilterOptions } from "@/components/dashboard/AdvancedFilters";
 import { ResultsTabs } from "@/components/dashboard/ResultsTabs";
 import { SynthesisPanel } from "@/components/dashboard/SynthesisPanel";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { DocumentUpload } from "@/components/dashboard/DocumentUpload";
+import { Button } from "@/components/ui/button";
 import { searchAllSources, synthesizeResults, saveSearch, SearchResult } from "@/lib/searchService";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { History, LogOut } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [user, setUser] = useState<any>(null);
   const [query, setQuery] = useState("semaglutide Parkinson's disease");
   const [isSearching, setIsSearching] = useState(false);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
@@ -23,18 +31,67 @@ const Index = () => {
     arxiv: true,
     patents: false
   });
-  const { toast } = useToast();
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilterOptions>({
+    dateFrom: "",
+    dateTo: "",
+    studyTypes: [],
+    booleanOperator: "AND",
+    minImpactFactor: 0,
+  });
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+    };
+
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setUser(session.user);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (location.state) {
+      const { query: savedQuery, sources: savedSources, maxResults: savedMaxResults } = location.state as any;
+      if (savedQuery) setQuery(savedQuery);
+      if (savedSources) setSources(savedSources);
+      if (savedMaxResults) setMaxResults(savedMaxResults);
+      if (savedQuery) {
+        handleSearch(savedQuery, savedSources, savedMaxResults);
+      }
+    }
+  }, [location.state]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
 
   const handleSearch = async (searchQuery?: string, searchSources?: any, searchMaxResults?: number) => {
     const finalQuery = searchQuery || query;
     const finalSources = searchSources || sources;
     const finalMaxResults = searchMaxResults || maxResults;
-    if (!query.trim()) {
-      toast({
-        title: "Empty query",
-        description: "Please enter a search query",
-        variant: "destructive"
-      });
+    
+    if (!finalQuery.trim()) {
+      toast.error("Please enter a search query");
+      return;
+    }
+
+    const activeSourceCount = Object.values(finalSources).filter(Boolean).length;
+    if (activeSourceCount === 0) {
+      toast.error("Please select at least one data source");
       return;
     }
 
@@ -45,33 +102,26 @@ const Index = () => {
 
     try {
       const searchResults = await searchAllSources({
-        query,
-        maxResults,
-        sources
+        query: finalQuery,
+        maxResults: finalMaxResults,
+        sources: finalSources
       });
 
       setResults(searchResults);
 
       if (searchResults.length > 0) {
         setIsSynthesizing(true);
-        const synthesisText = await synthesizeResults(query, searchResults);
+        const synthesisText = await synthesizeResults(finalQuery, searchResults);
         setSynthesis(synthesisText);
         
-        // Auto-save search (optional - requires auth)
-        try {
-          await saveSearch(query, sources, maxResults, searchResults, synthesisText);
-        } catch (err) {
-          // Silent fail if not authenticated
-          console.log('Search not saved:', err);
-        }
+        await saveSearch(finalQuery, finalSources, finalMaxResults, searchResults, synthesisText);
+        toast.success("Search completed and saved!");
+      } else {
+        toast.info("No results found");
       }
     } catch (error) {
       console.error('Search error:', error);
-      toast({
-        title: "Search failed",
-        description: "There was an error performing the search. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Search failed. Please try again.");
     } finally {
       setIsSearching(false);
       setIsSynthesizing(false);
@@ -88,15 +138,31 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <SearchHeader 
-        query={query}
-        setQuery={setQuery}
-        onSearch={handleSearch}
-        isSearching={isSearching}
-      />
-      
-      <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <SearchHeader 
+              query={query}
+              setQuery={setQuery}
+              onSearch={() => handleSearch()}
+              isSearching={isSearching}
+            />
+          </div>
+          {user && (
+            <div className="flex items-center gap-2 ml-4">
+              <Button variant="outline" onClick={() => navigate("/history")} className="gap-2">
+                <History className="h-4 w-4" />
+                History
+              </Button>
+              <Button variant="outline" onClick={handleSignOut} className="gap-2">
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
+          )}
+        </div>
+        
         <SearchFilters 
           sources={sources} 
           setSources={setSources} 
@@ -142,7 +208,7 @@ const Index = () => {
                 </p>
                 <div className="pt-6">
                   <button 
-                    onClick={handleSearch}
+                    onClick={() => handleSearch()}
                     className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
                   >
                     Start Your Search
