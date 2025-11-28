@@ -8,6 +8,8 @@ import { ResultsTabs } from "@/components/dashboard/ResultsTabs";
 import { SynthesisPanel } from "@/components/dashboard/SynthesisPanel";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { DocumentUpload } from "@/components/dashboard/DocumentUpload";
+import { DataVisualization } from "@/components/dashboard/DataVisualization";
+import { DocumentChat } from "@/components/dashboard/DocumentChat";
 import { Button } from "@/components/ui/button";
 import { searchAllSources, synthesizeResults, saveSearch, SearchResult } from "@/lib/searchService";
 import { toast } from "sonner";
@@ -175,13 +177,17 @@ const Index = () => {
         {hasSearched && (
           <>
             <StatsCards counts={getCounts()} isSearching={isSearching} />
+            
+            <DataVisualization results={results} isLoading={isSearching} />
+            
             <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 space-y-6">
                 <ResultsTabs 
                   results={results} 
                   isSearching={isSearching}
                   query={query}
                 />
+                <DocumentChat />
               </div>
               <div>
                 <SynthesisPanel 
