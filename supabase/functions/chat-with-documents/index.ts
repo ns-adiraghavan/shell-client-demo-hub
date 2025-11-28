@@ -12,33 +12,60 @@ serve(async (req) => {
   }
 
   try {
-    const { message, documentId, conversationHistory } = await req.json();
-    
-    if (!message) {
-      throw new Error('Message is required');
-    }
+    const { message, documentId, documentIds, conversationHistory, mode = 'chat' } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Build context from conversation history
-    const messages = [
-      {
-        role: 'system',
-        content: documentId && documentId !== 'all'
+    let systemPrompt = '';
+    let userPrompt = '';
+
+    // Configure prompts based on mode
+    switch (mode) {
+      case 'summarize':
+        systemPrompt = documentId && documentId !== 'all'
+          ? 'You are a research assistant. Provide a comprehensive summary of the research document, including: 1) Main objectives, 2) Methodology, 3) Key findings, 4) Conclusions, 5) Implications. Be detailed but concise.'
+          : 'You are a research assistant. Provide a comprehensive summary synthesizing all uploaded research documents. Identify common themes, methodologies, and key findings across the papers.';
+        userPrompt = 'Please provide a detailed summary of the document(s).';
+        break;
+
+      case 'key-findings':
+        systemPrompt = documentId && documentId !== 'all'
+          ? 'You are a research assistant. Extract and list the key findings from the research document. Focus on: 1) Main discoveries, 2) Statistical significance, 3) Novel contributions, 4) Practical implications. Use bullet points for clarity.'
+          : 'You are a research assistant. Extract and synthesize key findings across all research documents. Identify patterns, contradictions, and consensus findings.';
+        userPrompt = 'Please extract the key findings from the document(s).';
+        break;
+
+      case 'compare':
+        if (!documentIds || documentIds.length < 2) {
+          throw new Error('At least 2 documents required for comparison');
+        }
+        systemPrompt = 'You are a research assistant performing comparative analysis. Compare the selected research documents focusing on: 1) Research objectives and questions, 2) Methodologies used, 3) Key findings and results, 4) Conclusions and implications, 5) Strengths and limitations. Highlight similarities, differences, and complementary insights.';
+        userPrompt = `Please provide a detailed comparative analysis of ${documentIds.length} research documents.`;
+        break;
+
+      case 'chat':
+      default:
+        if (!message) {
+          throw new Error('Message is required for chat mode');
+        }
+        systemPrompt = documentId && documentId !== 'all'
           ? 'You are a helpful research assistant. Answer questions about the specific research document the user is asking about. Be precise and cite relevant sections when possible.'
-          : 'You are a helpful research assistant. Answer questions by synthesizing information across all uploaded research documents. Provide comprehensive answers and cite which documents you\'re referencing when relevant.'
-      },
+          : 'You are a helpful research assistant. Answer questions by synthesizing information across all uploaded research documents. Provide comprehensive answers and cite which documents you are referencing when relevant.';
+        userPrompt = message;
+        break;
+    }
+
+    // Build messages for AI
+    const messages = [
+      { role: 'system', content: systemPrompt },
       ...(conversationHistory || []).map((msg: any) => ({
         role: msg.role,
         content: msg.content
       })),
-      {
-        role: 'user',
-        content: message
-      }
+      { role: 'user', content: userPrompt }
     ];
 
     // Call Lovable AI
@@ -52,7 +79,7 @@ serve(async (req) => {
         model: 'google/gemini-2.5-flash',
         messages,
         temperature: 0.7,
-        max_tokens: 1000
+        max_tokens: 2000
       }),
     });
 

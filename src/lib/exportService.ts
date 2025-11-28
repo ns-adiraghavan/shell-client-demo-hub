@@ -1,5 +1,118 @@
 import { SearchResult } from "./searchService";
 
+export const exportToBibTeX = (results: SearchResult[], query: string) => {
+  const bibEntries = results.map((result, index) => {
+    const key = `${result.source.toLowerCase()}${index + 1}`;
+    const year = result.date ? new Date(result.date).getFullYear() : 'n.d.';
+    const authors = result.authors || 'Anonymous';
+    
+    let entry = '';
+    if (result.source === 'PubMed' || result.source === 'arXiv') {
+      entry = `@article{${key},\n`;
+      entry += `  author = {${authors}},\n`;
+      entry += `  title = {${result.title}},\n`;
+      entry += `  year = {${year}},\n`;
+      if (result.abstract) entry += `  abstract = {${result.abstract.substring(0, 200)}...},\n`;
+      entry += `  url = {${result.url}}\n`;
+      entry += `}`;
+    } else if (result.source === 'ClinicalTrials') {
+      entry = `@misc{${key},\n`;
+      entry += `  title = {${result.title}},\n`;
+      entry += `  year = {${year}},\n`;
+      if (result.phase) entry += `  note = {Phase: ${result.phase}},\n`;
+      entry += `  howpublished = {ClinicalTrials.gov},\n`;
+      entry += `  url = {${result.url}}\n`;
+      entry += `}`;
+    } else if (result.source === 'Patents') {
+      entry = `@patent{${key},\n`;
+      entry += `  author = {${authors}},\n`;
+      entry += `  title = {${result.title}},\n`;
+      entry += `  year = {${year}},\n`;
+      entry += `  url = {${result.url}}\n`;
+      entry += `}`;
+    }
+    
+    return entry;
+  }).join('\n\n');
+
+  const content = `% BibTeX Bibliography\n% Query: ${query}\n% Generated: ${new Date().toLocaleDateString()}\n\n${bibEntries}`;
+  downloadFile(content, `pharmaai-bibliography-${query.replace(/\s+/g, '-')}-${Date.now()}.bib`, 'text/plain');
+};
+
+export const exportToRIS = (results: SearchResult[], query: string) => {
+  const risEntries = results.map(result => {
+    const year = result.date ? new Date(result.date).getFullYear() : '';
+    const authors = (result.authors || 'Anonymous').split(',').map(a => a.trim());
+    
+    let entry = '';
+    if (result.source === 'PubMed' || result.source === 'arXiv') {
+      entry = 'TY  - JOUR\n';
+    } else if (result.source === 'ClinicalTrials') {
+      entry = 'TY  - DATA\n';
+    } else if (result.source === 'Patents') {
+      entry = 'TY  - PAT\n';
+    }
+    
+    authors.forEach(author => {
+      entry += `AU  - ${author}\n`;
+    });
+    entry += `TI  - ${result.title}\n`;
+    if (year) entry += `PY  - ${year}\n`;
+    if (result.abstract) entry += `AB  - ${result.abstract}\n`;
+    entry += `UR  - ${result.url}\n`;
+    if (result.phase) entry += `N1  - Phase: ${result.phase}\n`;
+    entry += 'ER  - \n';
+    
+    return entry;
+  }).join('\n');
+
+  const content = `Provider: PharmaAI\nDatabase: Multi-source Research Database\nContent: text/plain; charset="utf-8"\n\n${risEntries}`;
+  downloadFile(content, `pharmaai-bibliography-${query.replace(/\s+/g, '-')}-${Date.now()}.ris`, 'application/x-research-info-systems');
+};
+
+export const exportToEndNote = (results: SearchResult[], query: string) => {
+  const endNoteEntries = results.map(result => {
+    const year = result.date ? new Date(result.date).getFullYear() : '';
+    const authors = (result.authors || 'Anonymous').split(',').map(a => a.trim());
+    
+    let entry = '';
+    if (result.source === 'PubMed' || result.source === 'arXiv') {
+      entry = '%0 Journal Article\n';
+    } else if (result.source === 'ClinicalTrials') {
+      entry = '%0 Online Database\n';
+    } else if (result.source === 'Patents') {
+      entry = '%0 Patent\n';
+    }
+    
+    authors.forEach(author => {
+      entry += `%A ${author}\n`;
+    });
+    entry += `%T ${result.title}\n`;
+    if (year) entry += `%D ${year}\n`;
+    if (result.abstract) entry += `%X ${result.abstract}\n`;
+    entry += `%U ${result.url}\n`;
+    if (result.phase) entry += `%Z Phase: ${result.phase}\n`;
+    
+    return entry;
+  }).join('\n\n');
+
+  const content = endNoteEntries;
+  downloadFile(content, `pharmaai-bibliography-${query.replace(/\s+/g, '-')}-${Date.now()}.enw`, 'text/plain');
+};
+
+const downloadFile = (content: string, filename: string, mimeType: string) => {
+  const blob = new Blob([content], { type: `${mimeType};charset=utf-8;` });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 export const exportToCSV = (results: SearchResult[], query: string) => {
   const headers = ['Source', 'ID', 'Title', 'Authors', 'Date', 'Abstract/Status', 'URL'];
   const csvRows = [headers.join(',')];
@@ -18,16 +131,7 @@ export const exportToCSV = (results: SearchResult[], query: string) => {
   });
 
   const csvContent = csvRows.join('\n');
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  
-  link.setAttribute('href', url);
-  link.setAttribute('download', `pharmaai-results-${query.replace(/\s+/g, '-')}-${Date.now()}.csv`);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  downloadFile(csvContent, `pharmaai-results-${query.replace(/\s+/g, '-')}-${Date.now()}.csv`, 'text/csv');
 };
 
 export const exportToPDF = async (

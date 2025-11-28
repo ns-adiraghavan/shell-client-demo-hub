@@ -2,10 +2,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Download } from "lucide-react";
+import { ExternalLink, Download, FileText, BookOpen } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SearchResult } from "@/lib/searchService";
-import { exportToCSV } from "@/lib/exportService";
+import { exportToCSV, exportToBibTeX, exportToRIS, exportToEndNote } from "@/lib/exportService";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ResultsTabsProps {
   results: SearchResult[];
@@ -20,6 +27,7 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
 
   const handleExportCSV = () => {
     exportToCSV(results, query);
+    toast.success("CSV exported successfully");
   };
 
   const renderResults = (sourceResults: SearchResult[]) => {
@@ -81,10 +89,44 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Results</h2>
         {results.length > 0 && !isSearching && (
-          <Button onClick={handleExportCSV} variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export CSV
-          </Button>
+          <div className="flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Export Citations
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => {
+                  exportToBibTeX(results, query);
+                  toast.success("BibTeX exported successfully");
+                }}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  BibTeX (.bib)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  exportToRIS(results, query);
+                  toast.success("RIS exported successfully");
+                }}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  RIS (.ris)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  exportToEndNote(results, query);
+                  toast.success("EndNote exported successfully");
+                }}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  EndNote (.enw)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <Button onClick={handleExportCSV} variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
         )}
       </div>
 
