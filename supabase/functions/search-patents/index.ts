@@ -67,7 +67,7 @@ serve(async (req) => {
     const data = await searchResponse.json();
     console.log('EPO API Response structure:', JSON.stringify(data).substring(0, 500));
     
-    // Parse EPO response format - handle both array and single document
+    // Parse EPO response format
     const results = [];
     const worldPatentData = data['ops:world-patent-data'];
     const biblioSearch = worldPatentData?.['ops:biblio-search'];
@@ -83,95 +83,43 @@ serve(async (req) => {
       );
     }
     
-    let documents = searchResult['exchange-documents'];
+    // EPO returns publication-reference array
+    let publications = searchResult['ops:publication-reference'];
     
-    // Handle single document (not in array)
-    if (documents && !Array.isArray(documents)) {
-      documents = [documents];
-    }
-    
-    if (!documents || documents.length === 0) {
-      console.log('No documents found in search result');
+    if (!publications || publications.length === 0) {
+      console.log('No publications found in search result');
       return new Response(
         JSON.stringify({ results: [] }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    console.log(`Processing ${documents.length} patent documents`);
+    console.log(`Processing ${publications.length} patent publications`);
     
-    for (const doc of documents.slice(0, maxResults)) {
+    for (const pub of publications.slice(0, maxResults)) {
       try {
-        const exchangeDoc = doc['exchange-document'] || doc;
-        const biblio = exchangeDoc['bibliographic-data'];
-        if (!biblio) {
-          console.log('Skipping document without bibliographic data');
-          continue;
-        }
-
-        const publicationRef = biblio['publication-reference']?.['document-id'];
-        const docId = Array.isArray(publicationRef) ? publicationRef[0] : publicationRef;
+        const docId = pub['document-id'];
         
         const docNumber = docId?.['doc-number']?.['$'] || docId?.['doc-number'] || 'N/A';
         const country = docId?.['country']?.['$'] || docId?.['country'] || '';
         const kind = docId?.['kind']?.['$'] || docId?.['kind'] || '';
         const date = docId?.['date']?.['$'] || docId?.['date'] || '';
 
-        // Handle title - can be array or single object
-        let title = 'No title available';
-        const inventionTitle = biblio['invention-title'];
-        if (inventionTitle) {
-          if (Array.isArray(inventionTitle)) {
-            title = inventionTitle[0]?.['$'] || inventionTitle[0] || title;
-          } else {
-            title = inventionTitle['$'] || inventionTitle || title;
-          }
-        }
+        // For basic search results, we only get minimal data
+        // We'll need to fetch full details for each patent if needed
+        const patentId = `${country}${docNumber}${kind}`;
         
-        // Handle abstract
-        let abstract = '';
-        const abstractData = biblio['abstract'];
-        if (abstractData) {
-          if (Array.isArray(abstractData)) {
-            const firstAbstract = abstractData[0];
-            if (firstAbstract?.['p']) {
-              const pData = Array.isArray(firstAbstract['p']) ? firstAbstract['p'][0] : firstAbstract['p'];
-              abstract = pData?.['$'] || pData || '';
-            }
-          } else if (abstractData['p']) {
-            const pData = Array.isArray(abstractData['p']) ? abstractData['p'][0] : abstractData['p'];
-            abstract = pData?.['$'] || pData || '';
-          }
-        }
-        
-        // Handle applicants
-        const parties = biblio['parties'];
-        let applicantNames = 'Unknown';
-        if (parties?.['applicants']?.['applicant']) {
-          const applicants = Array.isArray(parties['applicants']['applicant']) 
-            ? parties['applicants']['applicant'] 
-            : [parties['applicants']['applicant']];
-          
-          applicantNames = applicants
-            .map((a: any) => {
-              const name = a['applicant-name']?.['name'];
-              return name?.['$'] || name || '';
-            })
-            .filter(Boolean)
-            .join(', ') || 'Unknown';
-        }
-
         results.push({
           source: 'Patents',
-          id: `${country}${docNumber}${kind}`,
-          title: title,
-          abstract: abstract ? abstract.substring(0, 500) : '',
-          authors: applicantNames,
+          id: patentId,
+          title: `Patent ${patentId}`,
+          abstract: '',
+          authors: 'View patent for details',
           date: date ? `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}` : 'N/A',
           url: `https://worldwide.espacenet.com/patent/search/family/publication/?q=${docNumber}`
         });
       } catch (docError) {
-        console.error('Error processing patent document:', docError);
+        console.error('Error processing patent publication:', docError);
         continue;
       }
     }

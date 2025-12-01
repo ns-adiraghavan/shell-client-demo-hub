@@ -38,11 +38,13 @@ serve(async (req) => {
 Guidelines:
 - Write 3-6 concise paragraphs
 - Focus on key findings and trends across sources
-- Mention specific evidence from the provided sources
+- ALWAYS cite sources using [number] format (e.g., [1], [2], [3])
+- Include multiple citations when discussing related findings
 - Highlight any clinical trials or significant studies
 - Note gaps or areas needing further research
 - Keep strictly factual, no speculation
-- Write in clear, professional language`;
+- Write in clear, professional language
+- Ensure every claim is backed by numbered citations`;
 
     const userPrompt = `Based on the following research results about "${query}", provide a comprehensive synthesis:
 
