@@ -46,6 +46,51 @@ serve(async (req) => {
         userPrompt = `Please provide a detailed comparative analysis of ${documentIds.length} research documents.`;
         break;
 
+      case 'meta-analysis':
+        if (!documentIds || documentIds.length < 2) {
+          throw new Error('At least 2 documents required for meta-analysis');
+        }
+        systemPrompt = `You are a research meta-analyst. Analyze the ${documentIds.length} selected documents as a cohesive body of research and generate a comprehensive meta-analysis report with the following structure:
+
+## Executive Summary
+Provide a high-level overview of the collective research
+
+## Research Overview
+- Total number of studies analyzed
+- Research timeframe and contexts
+- Primary research domains and themes
+
+## Methodology Analysis
+- Common methodological approaches
+- Sample sizes and study designs
+- Data collection methods
+
+## Key Findings Synthesis
+- Convergent findings across studies
+- Divergent or conflicting results
+- Statistical significance patterns
+- Effect sizes and outcomes
+
+## Trends and Patterns
+- Temporal trends in the research
+- Geographical or contextual patterns
+- Evolution of findings over time
+
+## Limitations and Gaps
+- Common limitations across studies
+- Research gaps identified
+- Areas requiring further investigation
+
+## Practical Implications
+- Real-world applications
+- Recommendations for practitioners
+- Policy implications
+
+## Conclusion
+Synthesize the overall contribution of this body of research`;
+        userPrompt = `Please generate a comprehensive meta-analysis report for these ${documentIds.length} research documents.`;
+        break;
+
       case 'chat':
       default:
         if (!message) {

@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, FileText, Loader2, Sparkles, ListChecks, GitCompare } from "lucide-react";
+import { Send, FileText, Loader2, Sparkles, ListChecks, GitCompare, BarChart3 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -30,6 +30,7 @@ export const DocumentChat = () => {
   const [summary, setSummary] = useState("");
   const [keyFindings, setKeyFindings] = useState("");
   const [comparison, setComparison] = useState("");
+  const [metaAnalysis, setMetaAnalysis] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -182,6 +183,42 @@ export const DocumentChat = () => {
     );
   };
 
+  const selectAllDocuments = () => {
+    setSelectedDocuments(documents.map(doc => doc.id));
+  };
+
+  const clearDocumentSelection = () => {
+    setSelectedDocuments([]);
+  };
+
+  const generateMetaAnalysis = async () => {
+    if (selectedDocuments.length < 2) {
+      toast.error("Select at least 2 documents for meta-analysis");
+      return;
+    }
+
+    setIsLoading(true);
+    setMetaAnalysis("");
+
+    try {
+      const { data, error } = await supabase.functions.invoke('chat-with-documents', {
+        body: { 
+          documentIds: selectedDocuments,
+          mode: 'meta-analysis'
+        }
+      });
+
+      if (error) throw error;
+      setMetaAnalysis(data.response || "Could not generate meta-analysis.");
+      toast.success("Meta-analysis report generated");
+    } catch (error) {
+      console.error('Error generating meta-analysis:', error);
+      toast.error("Failed to generate meta-analysis");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -202,7 +239,7 @@ export const DocumentChat = () => {
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         <Tabs defaultValue="chat" className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="chat" className="flex items-center gap-1">
               <Send className="h-3 w-3" />
               Chat
@@ -218,6 +255,10 @@ export const DocumentChat = () => {
             <TabsTrigger value="compare" className="flex items-center gap-1">
               <GitCompare className="h-3 w-3" />
               Compare
+            </TabsTrigger>
+            <TabsTrigger value="meta-analysis" className="flex items-center gap-1">
+              <BarChart3 className="h-3 w-3" />
+              Meta-Analysis
             </TabsTrigger>
           </TabsList>
 
@@ -374,7 +415,27 @@ export const DocumentChat = () => {
 
           <TabsContent value="compare" className="flex-1 flex flex-col gap-4 mt-4">
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Select documents to compare:</p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Select documents to compare:</p>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={selectAllDocuments}
+                    disabled={documents.length === 0}
+                  >
+                    Select All
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={clearDocumentSelection}
+                    disabled={selectedDocuments.length === 0}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              </div>
               <ScrollArea className="h-32 border rounded-md p-2">
                 {documents.map(doc => (
                   <div key={doc.id} className="flex items-center space-x-2 py-1">
@@ -416,6 +477,75 @@ export const DocumentChat = () => {
                 <div className="bg-muted rounded-lg p-4">
                   <h4 className="font-semibold mb-2">Comparative Analysis</h4>
                   <p className="whitespace-pre-wrap text-sm">{comparison}</p>
+                </div>
+              </ScrollArea>
+            )}
+          </TabsContent>
+
+          <TabsContent value="meta-analysis" className="flex-1 flex flex-col gap-4 mt-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Select documents for batch analysis:</p>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={selectAllDocuments}
+                    disabled={documents.length === 0}
+                  >
+                    Select All
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={clearDocumentSelection}
+                    disabled={selectedDocuments.length === 0}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              </div>
+              <ScrollArea className="h-32 border rounded-md p-2">
+                {documents.map(doc => (
+                  <div key={doc.id} className="flex items-center space-x-2 py-1">
+                    <Checkbox
+                      id={`meta-${doc.id}`}
+                      checked={selectedDocuments.includes(doc.id)}
+                      onCheckedChange={() => toggleDocumentSelection(doc.id)}
+                    />
+                    <label
+                      htmlFor={`meta-${doc.id}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {doc.filename}
+                    </label>
+                  </div>
+                ))}
+              </ScrollArea>
+            </div>
+
+            <Button 
+              onClick={generateMetaAnalysis} 
+              disabled={isLoading || selectedDocuments.length < 2}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating Report...
+                </>
+              ) : (
+                <>
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Generate Meta-Analysis ({selectedDocuments.length})
+                </>
+              )}
+            </Button>
+
+            {metaAnalysis && (
+              <ScrollArea className="flex-1 pr-4">
+                <div className="bg-muted rounded-lg p-4">
+                  <h4 className="font-semibold mb-2">Meta-Analysis Report</h4>
+                  <p className="whitespace-pre-wrap text-sm">{metaAnalysis}</p>
                 </div>
               </ScrollArea>
             )}
