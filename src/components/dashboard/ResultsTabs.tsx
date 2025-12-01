@@ -24,6 +24,7 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
   const pubmedResults = results.filter(r => r.source === 'PubMed');
   const clinicalResults = results.filter(r => r.source === 'ClinicalTrials');
   const arxivResults = results.filter(r => r.source === 'arXiv');
+  const patentResults = results.filter(r => r.source === 'Patents');
 
   const handleExportCSV = () => {
     exportToCSV(results, query);
@@ -48,22 +49,27 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
       );
     }
 
-    return sourceResults.map((result) => (
+    return sourceResults.map((result, index) => (
       <Card key={result.id} className="hover:shadow-md transition-shadow">
         <CardHeader>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <CardTitle className="text-lg mb-2 leading-tight">{result.title}</CardTitle>
-              <CardDescription className="text-sm">
-                {result.authors && `${result.authors} • `}
-                {result.date}
-              </CardDescription>
-              {result.phase && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <Badge variant="secondary">{result.phase}</Badge>
-                  {result.status && <Badge className="bg-success text-white">{result.status}</Badge>}
+              <div className="flex items-start gap-3">
+                <Badge variant="secondary" className="shrink-0 mt-1">#{index + 1}</Badge>
+                <div className="flex-1">
+                  <CardTitle className="text-lg mb-2 leading-tight">{result.title}</CardTitle>
+                  <CardDescription className="text-sm">
+                    {result.authors && `${result.authors} • `}
+                    {result.date}
+                  </CardDescription>
+                  {result.phase && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <Badge variant="secondary">{result.phase}</Badge>
+                      {result.status && <Badge className="bg-success text-white">{result.status}</Badge>}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
             <Badge variant="outline" className="shrink-0">{result.source}</Badge>
           </div>
@@ -131,11 +137,12 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="all">All ({results.length})</TabsTrigger>
           <TabsTrigger value="pubmed">PubMed ({pubmedResults.length})</TabsTrigger>
           <TabsTrigger value="clinical">Clinical ({clinicalResults.length})</TabsTrigger>
           <TabsTrigger value="arxiv">arXiv ({arxivResults.length})</TabsTrigger>
+          <TabsTrigger value="patents">Patents ({results.filter(r => r.source === 'Patents').length})</TabsTrigger>
         </TabsList>
         
         <TabsContent value="all" className="mt-4 space-y-4">
@@ -152,6 +159,10 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
         
         <TabsContent value="arxiv" className="mt-4 space-y-4">
           {renderResults(arxivResults)}
+        </TabsContent>
+        
+        <TabsContent value="patents" className="mt-4 space-y-4">
+          {renderResults(patentResults)}
         </TabsContent>
       </Tabs>
     </div>
