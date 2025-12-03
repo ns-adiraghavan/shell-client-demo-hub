@@ -34,8 +34,9 @@ serve(async (req) => {
     console.log(`Searching news for: ${query}, maxResults: ${maxResults}`);
 
     // Use Google News RSS feed (free, no API key required)
-    const encodedQuery = encodeURIComponent(`${query} biotech OR pharma OR healthcare OR clinical OR FDA`);
-    const rssUrl = `https://news.google.com/rss/search?q=${encodedQuery}&hl=en-US&gl=US&ceid=US:en`;
+    // Include global results and patent/legal terms
+    const encodedQuery = encodeURIComponent(`${query} (biotech OR pharma OR healthcare OR clinical OR FDA OR patent OR licensing OR court OR lawsuit OR regulatory)`);
+    const rssUrl = `https://news.google.com/rss/search?q=${encodedQuery}&hl=en&gl=US&ceid=US:en`;
     
     console.log('Fetching from Google News RSS:', rssUrl);
     
@@ -61,12 +62,27 @@ serve(async (req) => {
     let match;
     let count = 0;
 
+    // Helper to decode HTML entities
+    const decodeHtmlEntities = (text: string): string => {
+      return text
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&nbsp;/g, ' ')
+        .replace(/<[^>]*>/g, '') // Remove HTML tags
+        .replace(/\s+/g, ' ')    // Normalize whitespace
+        .trim();
+    };
+
     while ((match = itemRegex.exec(xmlText)) !== null && count < maxResults) {
       const itemXml = match[1];
       
       // Extract title
       const titleMatch = itemXml.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/);
-      const title = titleMatch ? (titleMatch[1] || titleMatch[2] || '').trim() : '';
+      const rawTitle = titleMatch ? (titleMatch[1] || titleMatch[2] || '').trim() : '';
+      const title = decodeHtmlEntities(rawTitle);
       
       // Extract link
       const linkMatch = itemXml.match(/<link>(.*?)<\/link>/);
@@ -88,8 +104,7 @@ serve(async (req) => {
       // Extract description/snippet
       const descMatch = itemXml.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>|<description>(.*?)<\/description>/s);
       let description = descMatch ? (descMatch[1] || descMatch[2] || '').trim() : '';
-      // Clean HTML tags from description
-      description = description.replace(/<[^>]*>/g, '').trim();
+      description = decodeHtmlEntities(description);
 
       if (title && link) {
         // Format date
