@@ -76,7 +76,11 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
           </div>
         </CardHeader>
         <CardContent>
-          {result.abstract && <p className="text-sm text-muted-foreground mb-3">{result.abstract}</p>}
+          {result.abstract && (
+            <p className="text-sm text-muted-foreground mb-3 line-clamp-4">
+              {result.abstract.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').trim()}
+            </p>
+          )}
           {result.enrollment && <p className="text-sm text-muted-foreground mb-3">{result.enrollment}</p>}
           <a 
             href={result.url}
