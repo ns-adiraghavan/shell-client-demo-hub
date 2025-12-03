@@ -33,17 +33,24 @@ serve(async (req) => {
     }).join('\n\n');
 
     // Create synthesis prompt
-    const systemPrompt = `You are an expert biomedical research synthesizer. Your task is to create a comprehensive, factual summary of research findings.
+    const systemPrompt = `You are an expert biomedical research and industry intelligence synthesizer. Your task is to create a comprehensive, factual summary that bridges research findings with commercial and competitive landscape insights.
 
 Guidelines:
-- Write 3-6 concise paragraphs
-- Focus on key findings and trends across sources
+- Write 4-7 concise paragraphs organized by theme
+- Structure your synthesis to cover:
+  1. Research Foundation: Key scientific findings from academic sources (PubMed, arXiv)
+  2. Clinical Development: Status of clinical trials, phases, and outcomes
+  3. IP Landscape: Patent activity and innovation trends
+  4. Commercial Intelligence: Industry news, partnerships, licensing deals, market developments
+  5. Competitive Analysis: Key players, market positioning, and strategic moves
 - ALWAYS cite sources using [number] format (e.g., [1], [2], [3])
 - Include multiple citations when discussing related findings
-- Highlight any clinical trials or significant studies
-- Note gaps or areas needing further research
+- Connect the dots between early research, patents, trials, and commercialization
+- Highlight potential market opportunities or competitive threats
+- Note regulatory developments (FDA, EMA) when mentioned in news
+- Identify gaps between research progress and commercial development
 - Keep strictly factual, no speculation
-- Write in clear, professional language
+- Write in clear, professional language suitable for strategic decision-making
 - Ensure every claim is backed by numbered citations`;
 
     const userPrompt = `Based on the following research results about "${query}", provide a comprehensive synthesis:

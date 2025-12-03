@@ -21,6 +21,7 @@ export interface SearchOptions {
     clinical: boolean;
     arxiv: boolean;
     patents: boolean;
+    news: boolean;
   };
 }
 
@@ -57,6 +58,14 @@ export const searchAllSources = async (options: SearchOptions): Promise<SearchRe
   if (sources.patents) {
     searchPromises.push(
       supabase.functions.invoke('search-patents', {
+        body: { query, maxResults }
+      })
+    );
+  }
+
+  if (sources.news) {
+    searchPromises.push(
+      supabase.functions.invoke('search-news', {
         body: { query, maxResults }
       })
     );
