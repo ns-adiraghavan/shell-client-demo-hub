@@ -5,6 +5,41 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function fetchWithRetry(url: string, maxRetries = 3): Promise<Response | null> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`arXiv API attempt ${attempt}/${maxRetries}`);
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (PharmaAI Research Dashboard)'
+        }
+      });
+      
+      if (response.ok) {
+        return response;
+      }
+      
+      console.log(`arXiv API returned ${response.status} on attempt ${attempt}`);
+      
+      if (response.status === 503 && attempt < maxRetries) {
+        // Wait before retry (exponential backoff)
+        await sleep(1000 * attempt);
+        continue;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error(`arXiv fetch error on attempt ${attempt}:`, error);
+      if (attempt < maxRetries) {
+        await sleep(1000 * attempt);
+      }
+    }
+  }
+  return null;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -22,17 +57,16 @@ serve(async (req) => {
 
     console.log(`Searching arXiv for: ${query}, max results: ${maxResults}`);
 
-    // Search arXiv API
     const url = `https://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(query)}&start=0&max_results=${maxResults}`;
     
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (PharmaAI Research Dashboard)'
-      }
-    });
+    const response = await fetchWithRetry(url);
 
-    if (!response.ok) {
-      throw new Error(`arXiv API failed: ${response.status}`);
+    if (!response) {
+      console.log('arXiv API unavailable, returning empty results');
+      return new Response(
+        JSON.stringify({ results: [], count: 0, warning: 'arXiv API temporarily unavailable' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const xmlText = await response.text();
