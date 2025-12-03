@@ -27,37 +27,86 @@ serve(async (req) => {
 
     console.log(`Synthesizing ${results.length} results for query: ${query}`);
 
-    // Prepare context from results
-    const context = results.slice(0, 50).map((result: any, idx: number) => {
-      return `[${idx + 1}] ${result.source} (${result.id}): ${result.title}\n${result.abstract || result.status || ''}`;
+    // Sort results by date (newest first) and group by source
+    const sortedResults = [...results].sort((a, b) => {
+      const dateA = new Date(a.date || '1900').getTime();
+      const dateB = new Date(b.date || '1900').getTime();
+      return dateB - dateA;
+    });
+
+    // Prepare context from results with dates for chronological narrative
+    const context = sortedResults.slice(0, 50).map((result: any, idx: number) => {
+      const dateInfo = result.date ? `(${result.date})` : '';
+      return `[${idx + 1}] ${result.source} ${dateInfo} - ${result.id}: ${result.title}\n${result.abstract || result.status || 'No abstract'}`;
     }).join('\n\n');
 
-    // Create synthesis prompt
-    const systemPrompt = `You are an expert biomedical research and industry intelligence synthesizer. Your task is to create a comprehensive, factual summary that bridges research findings with commercial and competitive landscape insights.
+    // Create synthesis prompt for chronological narrative
+    const systemPrompt = `You are an expert biomedical research and competitive intelligence analyst. Your task is to create a comprehensive narrative that tells the STORY of developments from recent to historical, weaving together research, patents, clinical trials, and industry news.
 
-Guidelines:
-- Write 4-7 concise paragraphs organized by theme
-- Structure your synthesis to cover:
-  1. Research Foundation: Key scientific findings from academic sources (PubMed, arXiv)
-  2. Clinical Development: Status of clinical trials, phases, and outcomes
-  3. IP Landscape: Patent activity and innovation trends
-  4. Commercial Intelligence: Industry news, partnerships, licensing deals, market developments
-  5. Competitive Analysis: Key players, market positioning, and strategic moves
-- ALWAYS cite sources using [number] format (e.g., [1], [2], [3])
-- Include multiple citations when discussing related findings
-- Connect the dots between early research, patents, trials, and commercialization
-- Highlight potential market opportunities or competitive threats
-- Note regulatory developments (FDA, EMA) when mentioned in news
-- Identify gaps between research progress and commercial development
-- Keep strictly factual, no speculation
-- Write in clear, professional language suitable for strategic decision-making
-- Ensure every claim is backed by numbered citations`;
+CRITICAL GUIDELINES:
 
-    const userPrompt = `Based on the following research results about "${query}", provide a comprehensive synthesis:
+1. CHRONOLOGICAL NARRATIVE STRUCTURE:
+   - Start with the MOST RECENT developments (latest news, newest patents, recent trials)
+   - Progress backwards in time to show how we got here
+   - Connect each development to what came before it
+   - Show the evolution of the field over time
 
+2. REQUIRED SECTIONS (in this order):
+   **Current Landscape (Most Recent)**
+   - Latest industry news and market developments
+   - Recent patent filings and their implications
+   - Current clinical trial status and results
+   
+   **Recent Developments (Past 1-2 years)**
+   - Key research publications and breakthroughs
+   - Patent applications and IP strategy trends
+   - Trial progressions and regulatory milestones
+   
+   **Historical Foundation**
+   - Foundational research that enabled current work
+   - Early patents and original inventors
+   - How the science evolved to present day
+   
+   **Key Trends & Patterns**
+   - Emerging patterns across all sources
+   - Competitive positioning of key players
+   - Technology trajectory and future direction
+   
+   **Strategic Overview**
+   - Summary of the landscape
+   - Key players and their positions
+   - Opportunities and gaps identified
+
+3. CITATION RULES:
+   - ALWAYS use [number] citations (e.g., [1], [2], [3])
+   - Group related citations: [1, 2, 3] for connected findings
+   - Every factual claim MUST have a citation
+   - Use citations to show timeline connections
+
+4. NARRATIVE STYLE:
+   - Write as a cohesive story, not disconnected bullet points
+   - Use transitional phrases: "Building on this...", "Earlier research by...", "This led to..."
+   - Connect the dots between academia, industry, and clinical development
+   - Highlight cause-and-effect relationships
+
+5. CRITICAL REQUIREMENTS:
+   - Be strictly factual - no speculation
+   - Include specific dates where available
+   - Name key companies, institutions, and researchers
+   - Note regulatory milestones (FDA, EMA approvals)
+   - Identify competitive dynamics and market positioning`;
+
+    const userPrompt = `Analyze these research results about "${query}" and create a chronological narrative synthesis. The results are sorted by date (newest first).
+
+SOURCES (organized by date, newest first):
 ${context}
 
-Create a well-structured synthesis that answers the research question and highlights key findings.`;
+Create a comprehensive narrative that:
+1. Tells the story from current state back to historical foundations
+2. Connects research → patents → trials → commercialization
+3. Identifies key trends, players, and competitive dynamics
+4. Uses numbered citations throughout [1], [2], etc.
+5. Provides strategic insights and landscape overview`;
 
     // Call Lovable AI
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -73,7 +122,7 @@ Create a well-structured synthesis that answers the research question and highli
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.3,
-        max_tokens: 2000
+        max_tokens: 3000
       }),
     });
 

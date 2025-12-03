@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { query, maxResults } = await req.json();
+    const { query, maxResults = 10 } = await req.json();
 
     const EPO_CONSUMER_KEY = Deno.env.get('EPO_OPS_CONSUMER_KEY');
     const EPO_CONSUMER_SECRET = Deno.env.get('EPO_OPS_CONSUMER_SECRET');
@@ -45,7 +45,7 @@ serve(async (req) => {
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
 
-    // Search patents using OPS API
+    // Search patents using OPS API with bibliographic data
     const searchUrl = `https://ops.epo.org/3.2/rest-services/published-data/search?q=${encodeURIComponent(query)}&Range=1-${maxResults}`;
     
     const searchResponse = await fetch(searchUrl, {
@@ -65,15 +65,11 @@ serve(async (req) => {
     }
 
     const data = await searchResponse.json();
-    console.log('EPO API Response structure:', JSON.stringify(data).substring(0, 500));
     
     // Parse EPO response format
-    const results = [];
     const worldPatentData = data['ops:world-patent-data'];
     const biblioSearch = worldPatentData?.['ops:biblio-search'];
     const searchResult = biblioSearch?.['ops:search-result'];
-    
-    console.log('Search result available:', !!searchResult);
     
     if (!searchResult) {
       console.log('No search results in response');
@@ -83,7 +79,6 @@ serve(async (req) => {
       );
     }
     
-    // EPO returns publication-reference array
     let publications = searchResult['ops:publication-reference'];
     
     if (!publications || publications.length === 0) {
@@ -96,35 +91,109 @@ serve(async (req) => {
     
     console.log(`Processing ${publications.length} patent publications`);
     
-    for (const pub of publications.slice(0, maxResults)) {
+    // Fetch full bibliographic data for each patent (limited to avoid rate limits)
+    const results = [];
+    const patentsToFetch = publications.slice(0, Math.min(maxResults, 10));
+    
+    for (const pub of patentsToFetch) {
       try {
         const docId = pub['document-id'];
-        
-        const docNumber = docId?.['doc-number']?.['$'] || docId?.['doc-number'] || 'N/A';
+        const docNumber = docId?.['doc-number']?.['$'] || docId?.['doc-number'] || '';
         const country = docId?.['country']?.['$'] || docId?.['country'] || '';
         const kind = docId?.['kind']?.['$'] || docId?.['kind'] || '';
         const date = docId?.['date']?.['$'] || docId?.['date'] || '';
 
-        // For basic search results, we only get minimal data
-        // We'll need to fetch full details for each patent if needed
         const patentId = `${country}${docNumber}${kind}`;
+        
+        // Fetch full bibliographic data including title and abstract
+        const biblioUrl = `https://ops.epo.org/3.2/rest-services/published-data/publication/epodoc/${country}${docNumber}/biblio`;
+        
+        const biblioResponse = await fetch(biblioUrl, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        let title = `Patent ${patentId}`;
+        let abstract = '';
+        let applicants = '';
+
+        if (biblioResponse.ok) {
+          const biblioData = await biblioResponse.json();
+          const exchangeDoc = biblioData?.['ops:world-patent-data']?.['exchange-documents']?.['exchange-document'];
+          
+          // Handle array or single object
+          const doc = Array.isArray(exchangeDoc) ? exchangeDoc[0] : exchangeDoc;
+          
+          if (doc) {
+            // Extract title
+            const biblioSection = doc['bibliographic-data'];
+            const inventionTitle = biblioSection?.['invention-title'];
+            if (inventionTitle) {
+              if (Array.isArray(inventionTitle)) {
+                const enTitle = inventionTitle.find((t: any) => t['@lang'] === 'en');
+                title = enTitle?.['$'] || inventionTitle[0]?.['$'] || title;
+              } else {
+                title = inventionTitle['$'] || title;
+              }
+            }
+            
+            // Extract applicants
+            const parties = biblioSection?.['parties'];
+            const applicantList = parties?.['applicants']?.['applicant'];
+            if (applicantList) {
+              const appArray = Array.isArray(applicantList) ? applicantList : [applicantList];
+              const names = appArray
+                .slice(0, 3)
+                .map((a: any) => a['applicant-name']?.['name']?.['$'] || '')
+                .filter(Boolean);
+              applicants = names.join('; ') || 'View patent for details';
+            }
+            
+            // Extract abstract
+            const abstractSection = doc['abstract'];
+            if (abstractSection) {
+              const absArray = Array.isArray(abstractSection) ? abstractSection : [abstractSection];
+              const enAbstract = absArray.find((a: any) => a['@lang'] === 'en') || absArray[0];
+              if (enAbstract?.['p']) {
+                const pContent = enAbstract['p'];
+                if (Array.isArray(pContent)) {
+                  abstract = pContent.map((p: any) => p['$'] || '').join(' ');
+                } else {
+                  abstract = pContent['$'] || '';
+                }
+              }
+            }
+          }
+        }
+
+        // Format date
+        let formattedDate = 'N/A';
+        if (date && date.length >= 8) {
+          formattedDate = `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
+        }
         
         results.push({
           source: 'Patents',
           id: patentId,
-          title: `Patent ${patentId}`,
-          abstract: '',
-          authors: 'View patent for details',
-          date: date ? `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}` : 'N/A',
+          title: title,
+          abstract: abstract || 'Abstract not available - view patent for full details',
+          authors: applicants || 'View patent for details',
+          date: formattedDate,
           url: `https://worldwide.espacenet.com/patent/search/family/publication/?q=${docNumber}`
         });
+        
+        // Small delay to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
       } catch (docError) {
         console.error('Error processing patent publication:', docError);
         continue;
       }
     }
 
-    console.log(`Found ${results.length} patent results`);
+    console.log(`Found ${results.length} patent results with details`);
 
     return new Response(
       JSON.stringify({ results }),
