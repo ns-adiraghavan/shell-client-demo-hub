@@ -25,6 +25,7 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
   const clinicalResults = results.filter(r => r.source === 'ClinicalTrials');
   const arxivResults = results.filter(r => r.source === 'arXiv');
   const patentResults = results.filter(r => r.source === 'Patents');
+  const newsResults = results.filter(r => r.source === 'News');
 
   const handleExportCSV = () => {
     exportToCSV(results, query);
@@ -137,12 +138,13 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="all">All ({results.length})</TabsTrigger>
           <TabsTrigger value="pubmed">PubMed ({pubmedResults.length})</TabsTrigger>
           <TabsTrigger value="clinical">Clinical ({clinicalResults.length})</TabsTrigger>
           <TabsTrigger value="arxiv">arXiv ({arxivResults.length})</TabsTrigger>
-          <TabsTrigger value="patents">Patents ({results.filter(r => r.source === 'Patents').length})</TabsTrigger>
+          <TabsTrigger value="patents">Patents ({patentResults.length})</TabsTrigger>
+          <TabsTrigger value="news">News ({newsResults.length})</TabsTrigger>
         </TabsList>
         
         <TabsContent value="all" className="mt-4 space-y-4">
@@ -163,6 +165,10 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
         
         <TabsContent value="patents" className="mt-4 space-y-4">
           {renderResults(patentResults)}
+        </TabsContent>
+        
+        <TabsContent value="news" className="mt-4 space-y-4">
+          {renderResults(newsResults)}
         </TabsContent>
       </Tabs>
     </div>

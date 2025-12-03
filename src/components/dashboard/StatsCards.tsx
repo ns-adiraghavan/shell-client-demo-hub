@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Beaker, FileSearch, Scale } from "lucide-react";
+import { FileText, Beaker, FileSearch, Scale, Newspaper } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface StatsCardsProps {
@@ -8,6 +8,7 @@ interface StatsCardsProps {
     clinical: number;
     arxiv: number;
     patents: number;
+    news: number;
   };
   isSearching: boolean;
 }
@@ -18,10 +19,11 @@ export const StatsCards = ({ counts, isSearching }: StatsCardsProps) => {
     { label: "Clinical Trials", value: counts.clinical, icon: Beaker, color: "text-green-600" },
     { label: "Preprints", value: counts.arxiv, icon: FileSearch, color: "text-amber-600" },
     { label: "Patents", value: counts.patents, icon: Scale, color: "text-purple-600" },
+    { label: "Industry News", value: counts.news, icon: Newspaper, color: "text-rose-600" },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (

@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Database, FileText, Microscope, Scale } from "lucide-react";
+import { Database, FileText, Microscope, Scale, Newspaper } from "lucide-react";
 
 interface SearchFiltersProps {
   sources: {
@@ -10,6 +10,7 @@ interface SearchFiltersProps {
     clinical: boolean;
     arxiv: boolean;
     patents: boolean;
+    news: boolean;
   };
   setSources: (sources: any) => void;
   maxResults: number;
@@ -22,6 +23,7 @@ export const SearchFilters = ({ sources, setSources, maxResults, setMaxResults }
     { id: "clinical", label: "ClinicalTrials.gov", icon: FileText },
     { id: "arxiv", label: "arXiv / Preprints", icon: Database },
     { id: "patents", label: "Patents (EPO)", icon: Scale },
+    { id: "news", label: "Industry News", icon: Newspaper },
   ];
 
   const handleSourceToggle = (sourceId: string) => {

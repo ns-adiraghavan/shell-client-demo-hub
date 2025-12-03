@@ -31,7 +31,8 @@ const Index = () => {
     pubmed: true,
     clinical: true,
     arxiv: true,
-    patents: false
+    patents: false,
+    news: true
   });
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilterOptions>({
     dateFrom: "",
@@ -136,6 +137,7 @@ const Index = () => {
       clinical: results.filter(r => r.source === 'ClinicalTrials').length,
       arxiv: results.filter(r => r.source === 'arXiv').length,
       patents: results.filter(r => r.source === 'Patents').length,
+      news: results.filter(r => r.source === 'News').length,
     };
   };
 
