@@ -23,7 +23,7 @@ serve(async (req) => {
     console.log(`Searching PubMed for: ${query}, max results: ${maxResults}`);
 
     // Step 1: Search for article IDs
-    const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmax=${maxResults}&retmode=json`;
+    const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmax=${maxResults}&retmode=json&sort=date`;
     
     const searchResponse = await fetch(searchUrl, {
       headers: {
@@ -45,38 +45,89 @@ serve(async (req) => {
       );
     }
 
-    // Step 2: Fetch article summaries
-    const summaryUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${ids.join(',')}&retmode=json`;
+    // Step 2: Fetch full article data using efetch (includes abstracts)
+    const fetchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${ids.join(',')}&retmode=xml`;
     
-    const summaryResponse = await fetch(summaryUrl, {
+    const fetchResponse = await fetch(fetchUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (PharmaAI Research Dashboard)'
       }
     });
 
-    if (!summaryResponse.ok) {
-      throw new Error(`PubMed summary fetch failed: ${summaryResponse.status}`);
+    if (!fetchResponse.ok) {
+      throw new Error(`PubMed fetch failed: ${fetchResponse.status}`);
     }
 
-    const summaryData = await summaryResponse.json();
-    const result = summaryData.result;
+    const xmlText = await fetchResponse.text();
+    
+    // Parse XML to extract articles with abstracts
+    const articles = [];
+    const articleMatches = xmlText.matchAll(/<PubmedArticle>([\s\S]*?)<\/PubmedArticle>/g);
+    
+    for (const match of articleMatches) {
+      const articleXml = match[1];
+      
+      // Extract PMID
+      const pmidMatch = articleXml.match(/<PMID[^>]*>(\d+)<\/PMID>/);
+      const pmid = pmidMatch ? pmidMatch[1] : '';
+      
+      // Extract title
+      const titleMatch = articleXml.match(/<ArticleTitle>([\s\S]*?)<\/ArticleTitle>/);
+      let title = titleMatch ? titleMatch[1] : 'No title';
+      // Clean HTML tags from title
+      title = title.replace(/<[^>]*>/g, '').trim();
+      
+      // Extract abstract - combine all AbstractText elements
+      let abstract = '';
+      const abstractSection = articleXml.match(/<Abstract>([\s\S]*?)<\/Abstract>/);
+      if (abstractSection) {
+        const abstractTexts = abstractSection[1].matchAll(/<AbstractText[^>]*>([\s\S]*?)<\/AbstractText>/g);
+        const parts = [];
+        for (const absMatch of abstractTexts) {
+          let text = absMatch[1].replace(/<[^>]*>/g, '').trim();
+          if (text) parts.push(text);
+        }
+        abstract = parts.join(' ');
+      }
+      
+      // Extract authors
+      const authorList: string[] = [];
+      const authorMatches = articleXml.matchAll(/<Author[^>]*>[\s\S]*?<LastName>([\s\S]*?)<\/LastName>[\s\S]*?<ForeName>([\s\S]*?)<\/ForeName>[\s\S]*?<\/Author>/g);
+      for (const authorMatch of authorMatches) {
+        const lastName = authorMatch[1].trim();
+        const foreName = authorMatch[2].trim();
+        authorList.push(`${foreName} ${lastName}`);
+      }
+      const authors = authorList.length > 0 ? authorList.slice(0, 5).join(', ') + (authorList.length > 5 ? ' et al.' : '') : 'Unknown';
+      
+      // Extract publication date
+      let pubDate = 'Unknown';
+      const pubDateMatch = articleXml.match(/<PubDate>[\s\S]*?<Year>(\d{4})<\/Year>(?:[\s\S]*?<Month>(\w+|\d+)<\/Month>)?/);
+      if (pubDateMatch) {
+        const year = pubDateMatch[1];
+        const month = pubDateMatch[2] || '';
+        pubDate = month ? `${year} ${month}` : year;
+      }
+      
+      // Extract journal
+      const journalMatch = articleXml.match(/<Title>([\s\S]*?)<\/Title>/);
+      const journal = journalMatch ? journalMatch[1].trim() : '';
+      
+      if (pmid) {
+        articles.push({
+          source: 'PubMed',
+          id: pmid,
+          title: title,
+          abstract: abstract || 'Abstract not available',
+          authors: authors,
+          date: pubDate,
+          journal: journal,
+          url: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`
+        });
+      }
+    }
 
-    const articles = ids.map((id: string) => {
-      const article = result[id];
-      if (!article) return null;
-
-      return {
-        source: 'PubMed',
-        id: id,
-        title: article.title || 'No title',
-        abstract: article.sorttitle || article.title || 'No abstract available',
-        authors: article.authors?.map((a: any) => a.name).join(', ') || 'Unknown',
-        date: article.pubdate || 'Unknown',
-        url: `https://pubmed.ncbi.nlm.nih.gov/${id}/`
-      };
-    }).filter(Boolean);
-
-    console.log(`Found ${articles.length} PubMed articles`);
+    console.log(`Found ${articles.length} PubMed articles with abstracts`);
 
     return new Response(
       JSON.stringify({ results: articles, count: articles.length }),
