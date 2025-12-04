@@ -1,22 +1,49 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SearchResult } from "@/lib/searchService";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
+import { Brain, TrendingUp, Loader2 } from "lucide-react";
 
 interface DataVisualizationProps {
   results: SearchResult[];
   isLoading: boolean;
+  query?: string;
 }
 
-const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))'];
+const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
-export const DataVisualization = ({ results, isLoading }: DataVisualizationProps) => {
+const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, name, percent }: any) => {
+  const RADIAN = Math.PI / 180;
+  const radius = outerRadius + 30;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  return (
+    <text
+      x={x}
+      y={y}
+      fill="hsl(var(--foreground))"
+      textAnchor={x > cx ? 'start' : 'end'}
+      dominantBaseline="central"
+      className="text-xs font-medium"
+    >
+      {`${name} (${(percent * 100).toFixed(0)}%)`}
+    </text>
+  );
+};
+
+export const DataVisualization = ({ results, isLoading, query }: DataVisualizationProps) => {
+  const [chartAnalysis, setChartAnalysis] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
   // Process publication dates over time
   const dateData = results
     .filter(r => r.date)
     .reduce((acc, result) => {
       const year = new Date(result.date!).getFullYear();
-      if (!isNaN(year)) {
+      if (!isNaN(year) && year > 1990) {
         acc[year] = (acc[year] || 0) + 1;
       }
       return acc;
@@ -51,6 +78,40 @@ export const DataVisualization = ({ results, isLoading }: DataVisualizationProps
     value: count
   }));
 
+  // Fetch AI analysis when data changes
+  useEffect(() => {
+    const analyzeCharts = async () => {
+      if (results.length === 0 || !query) return;
+      
+      setIsAnalyzing(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('analyze-charts', {
+          body: {
+            query,
+            chartData: {
+              publicationTrend,
+              sourceBreakdown,
+              studyTypeDistribution
+            },
+            results: results.slice(0, 20)
+          }
+        });
+
+        if (error) throw error;
+        setChartAnalysis(data.analysis);
+      } catch (error) {
+        console.error('Chart analysis error:', error);
+        setChartAnalysis(null);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    };
+
+    if (results.length > 0 && query) {
+      analyzeCharts();
+    }
+  }, [results.length, query]);
+
   if (isLoading) {
     return (
       <Card>
@@ -76,60 +137,105 @@ export const DataVisualization = ({ results, isLoading }: DataVisualizationProps
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Research Analytics</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5" />
+          Research Analytics
+        </CardTitle>
         <CardDescription>Visual insights from {results.length} search results</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
+        {/* AI Chart Analysis */}
+        {(isAnalyzing || chartAnalysis) && (
+          <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-lg p-6 border border-primary/20">
+            <div className="flex items-center gap-2 mb-4">
+              <Brain className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-semibold text-primary">Strategic Intelligence Analysis</h3>
+            </div>
+            {isAnalyzing ? (
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Analyzing research landscape and commercial signals...</span>
+              </div>
+            ) : (
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+                  {chartAnalysis}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Publication Trend Over Time */}
         {publicationTrend.length > 0 && (
           <div>
             <h3 className="text-lg font-semibold mb-4">Publication Timeline</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={publicationTrend}>
+              <LineChart data={publicationTrend} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis 
                   dataKey="year" 
                   stroke="hsl(var(--foreground))"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                  interval={0}
                 />
                 <YAxis 
                   stroke="hsl(var(--foreground))"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                  width={40}
+                  label={{ 
+                    value: 'Publications', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 }
+                  }}
                 />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
-                    color: 'hsl(var(--foreground))'
+                    color: 'hsl(var(--foreground))',
+                    fontSize: '12px'
                   }}
+                  formatter={(value: number) => [value, 'Publications']}
                 />
-                <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
+                <Legend 
+                  wrapperStyle={{ 
+                    color: 'hsl(var(--foreground))',
+                    paddingTop: '20px'
+                  }} 
+                />
                 <Line 
                   type="monotone" 
                   dataKey="publications" 
                   stroke="hsl(var(--primary))" 
                   strokeWidth={2}
-                  dot={{ fill: 'hsl(var(--primary))' }}
+                  dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                  activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
+                  name="Publications per Year"
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-8">
           {/* Source Breakdown */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Source Distribution</h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart margin={{ top: 20, right: 80, left: 80, bottom: 20 }}>
                 <Pie
                   data={sourceBreakdown}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
+                  labelLine={true}
+                  label={CustomLabel}
+                  outerRadius={70}
                   fill="hsl(var(--primary))"
                   dataKey="value"
                 >
@@ -142,8 +248,10 @@ export const DataVisualization = ({ results, isLoading }: DataVisualizationProps
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
-                    color: 'hsl(var(--foreground))'
+                    color: 'hsl(var(--foreground))',
+                    fontSize: '12px'
                   }}
+                  formatter={(value: number, name: string) => [value, name]}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -153,27 +261,45 @@ export const DataVisualization = ({ results, isLoading }: DataVisualizationProps
           {studyTypeDistribution.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold mb-4">Clinical Trial Phases</h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={studyTypeDistribution}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={studyTypeDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis 
                     dataKey="name" 
                     stroke="hsl(var(--foreground))"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                    interval={0}
                   />
                   <YAxis 
                     stroke="hsl(var(--foreground))"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                    width={40}
+                    label={{ 
+                      value: 'Count', 
+                      angle: -90, 
+                      position: 'insideLeft',
+                      style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 }
+                    }}
                   />
                   <Tooltip 
                     contentStyle={{ 
                       backgroundColor: 'hsl(var(--card))',
                       border: '1px solid hsl(var(--border))',
                       borderRadius: '8px',
-                      color: 'hsl(var(--foreground))'
+                      color: 'hsl(var(--foreground))',
+                      fontSize: '12px'
                     }}
+                    formatter={(value: number) => [value, 'Trials']}
                   />
-                  <Bar dataKey="value" fill="hsl(var(--primary))" />
+                  <Bar 
+                    dataKey="value" 
+                    fill="hsl(var(--primary))" 
+                    radius={[4, 4, 0, 0]}
+                    name="Number of Trials"
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>

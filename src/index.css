@@ -43,6 +43,12 @@ All colors MUST be HSL.
     --success-green: 145 65% 45%;
     --warning-amber: 35 95% 55%;
 
+    --chart-1: 210 80% 45%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 35 95% 55%;
+    --chart-4: 280 65% 55%;
+    --chart-5: 340 70% 50%;
+
     --sidebar-background: 0 0% 98%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -93,6 +99,13 @@ All colors MUST be HSL.
     --medical-light: 215 22% 18%;
     --success-green: 145 65% 50%;
     --warning-amber: 35 95% 60%;
+
+    --chart-1: 210 85% 55%;
+    --chart-2: 160 65% 50%;
+    --chart-3: 35 95% 60%;
+    --chart-4: 280 70% 60%;
+    --chart-5: 340 75% 55%;
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;

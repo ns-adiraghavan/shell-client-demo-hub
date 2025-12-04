@@ -52,6 +52,13 @@ CRITICAL GUIDELINES:
    - Show the evolution of the field over time
 
 2. REQUIRED SECTIONS (in this order):
+   **🔥 Latest Commercial & Market Highlights**
+   - Most significant recent developments with COMMERCIAL implications
+   - Breaking news on licensing deals, partnerships, acquisitions
+   - Recent regulatory decisions, approvals, or setbacks
+   - Court rulings, IP disputes, patent challenges
+   - Market-moving events and their implications
+   
    **Current Landscape (Most Recent)**
    - Latest industry news and market developments
    - Recent patent filings and their implications
@@ -72,10 +79,18 @@ CRITICAL GUIDELINES:
    - Competitive positioning of key players
    - Technology trajectory and future direction
    
+   **Competitive & Commercial Intelligence**
+   - Key players and their market positions
+   - IP landscape and freedom to operate considerations
+   - Licensing opportunities and partnership dynamics
+   - Pricing strategies and market access developments
+   - Competitive rivalries and strategic moves
+   
    **Strategic Overview**
    - Summary of the landscape
-   - Key players and their positions
+   - Development stage assessment (research → clinical → commercial)
    - Opportunities and gaps identified
+   - Risk factors and challenges
 
 3. CITATION RULES:
    - ALWAYS use [number] citations (e.g., [1], [2], [3])
@@ -94,7 +109,9 @@ CRITICAL GUIDELINES:
    - Include specific dates where available
    - Name key companies, institutions, and researchers
    - Note regulatory milestones (FDA, EMA approvals)
-   - Identify competitive dynamics and market positioning`;
+   - Identify competitive dynamics and market positioning
+   - HIGHLIGHT commercially significant developments prominently
+   - Include any court rulings, patent disputes, or legal challenges`;
 
     const userPrompt = `Analyze these research results about "${query}" and create a chronological narrative synthesis. The results are sorted by date (newest first).
 

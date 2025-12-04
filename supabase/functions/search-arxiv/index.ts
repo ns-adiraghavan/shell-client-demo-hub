@@ -11,9 +11,15 @@ async function fetchWithRetry(url: string, maxRetries = 3): Promise<Response | n
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       console.log(`arXiv API attempt ${attempt}/${maxRetries}`);
+      
+      // Add delay before each request to respect rate limits
+      if (attempt > 1) {
+        await sleep(3000 * attempt); // Longer backoff for retries
+      }
+      
       const response = await fetch(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (PharmaAI Research Dashboard)'
+          'User-Agent': 'Mozilla/5.0 (PharmaAI Research Dashboard; mailto:research@example.com)'
         }
       });
       
@@ -23,9 +29,12 @@ async function fetchWithRetry(url: string, maxRetries = 3): Promise<Response | n
       
       console.log(`arXiv API returned ${response.status} on attempt ${attempt}`);
       
-      if (response.status === 503 && attempt < maxRetries) {
-        // Wait before retry (exponential backoff)
-        await sleep(1000 * attempt);
+      // Handle both 503 (service unavailable) and 429 (rate limited)
+      if ((response.status === 503 || response.status === 429) && attempt < maxRetries) {
+        const retryAfter = response.headers.get('Retry-After');
+        const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 5000 * attempt;
+        console.log(`Rate limited, waiting ${waitTime}ms before retry`);
+        await sleep(waitTime);
         continue;
       }
       
@@ -33,7 +42,7 @@ async function fetchWithRetry(url: string, maxRetries = 3): Promise<Response | n
     } catch (error) {
       console.error(`arXiv fetch error on attempt ${attempt}:`, error);
       if (attempt < maxRetries) {
-        await sleep(1000 * attempt);
+        await sleep(3000 * attempt);
       }
     }
   }
