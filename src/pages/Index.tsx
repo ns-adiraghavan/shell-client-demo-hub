@@ -180,7 +180,7 @@ const Index = () => {
           <>
             <StatsCards counts={getCounts()} isSearching={isSearching} />
             
-            <DataVisualization results={results} isLoading={isSearching} />
+            <DataVisualization results={results} isLoading={isSearching} query={query} />
             
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
