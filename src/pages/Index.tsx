@@ -6,6 +6,7 @@ import { SearchFilters } from "@/components/dashboard/SearchFilters";
 import { AdvancedFilters, AdvancedFilterOptions } from "@/components/dashboard/AdvancedFilters";
 import { ResultsTabs } from "@/components/dashboard/ResultsTabs";
 import { SynthesisPanel } from "@/components/dashboard/SynthesisPanel";
+import { CompetitiveLandscape } from "@/components/dashboard/CompetitiveLandscape";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { DocumentUpload } from "@/components/dashboard/DocumentUpload";
 import { DataVisualization } from "@/components/dashboard/DataVisualization";
@@ -191,13 +192,16 @@ const Index = () => {
                 />
                 <DocumentChat />
               </div>
-              <div>
+              <div className="space-y-4">
                 <SynthesisPanel 
                   synthesis={synthesis}
                   isSearching={isSynthesizing}
                   query={query}
                   results={results}
                 />
+                {synthesis && results.length > 0 && (
+                  <CompetitiveLandscape results={results} synthesis={synthesis} />
+                )}
               </div>
             </div>
           </>

@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { SearchResult } from "@/lib/searchService";
 import { exportToPDF } from "@/lib/exportService";
+import ReactMarkdown from "react-markdown";
 
 interface SynthesisPanelProps {
   synthesis: string;
@@ -62,10 +63,19 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results }: Synth
           </div>
         ) : synthesis ? (
           <>
-            <div className="prose prose-sm max-w-none">
-              <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
+              <ReactMarkdown
+                components={{
+                  h2: ({ children }) => <h2 className="text-base font-semibold mt-4 mb-2 text-primary">{children}</h2>,
+                  h3: ({ children }) => <h3 className="text-sm font-semibold mt-3 mb-1.5 text-foreground">{children}</h3>,
+                  p: ({ children }) => <p className="text-sm text-foreground leading-relaxed mb-2">{children}</p>,
+                  ul: ({ children }) => <ul className="text-sm space-y-1 mb-2 list-disc pl-4">{children}</ul>,
+                  li: ({ children }) => <li className="text-foreground">{children}</li>,
+                  strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                }}
+              >
                 {synthesis}
-              </p>
+              </ReactMarkdown>
             </div>
             
             <div className="flex gap-2 pt-4 border-t">
