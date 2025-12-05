@@ -46,17 +46,19 @@ serve(async (req) => {
 CRITICAL FORMATTING RULES:
 - Use clean markdown with proper headings (## for main sections, ### for subsections)
 - Use bullet points with proper spacing
-- Do NOT use ** for bold within sentences - use it only for emphasis on key terms
+- Use **bold** ONLY for key entity names and important terms
 - Keep paragraphs readable with line breaks between them
 - Use numbered lists for sequential items
+- DO NOT use raw markdown symbols like ### or ** in output - render properly formatted text
 
 REQUIRED SECTIONS (in this order):
 
 ## 🔥 Latest Commercial & Market Highlights
-- Most significant recent developments with COMMERCIAL implications
+PRIORITIZE: Recent legal rulings (court decisions, patent judgments), regulatory approvals/rejections, and breaking market news
+- Court rulings, patent challenges, IP disputes - HIGHLIGHT THESE PROMINENTLY
+- Recent regulatory decisions, approvals, or setbacks in ANY jurisdiction
 - Breaking news on licensing deals, partnerships, acquisitions
-- Recent regulatory decisions, approvals, or setbacks
-- Court rulings, IP disputes, patent challenges
+- Most significant recent developments with COMMERCIAL implications
 
 ## Key Entities & Market Players
 List the main companies, institutions, and organizations involved:
@@ -64,10 +66,11 @@ List the main companies, institutions, and organizations involved:
 - Group by type: Pharmaceutical companies, Biotech startups, Research institutions, Regulatory bodies
 
 ## Geographic & Jurisdictional Insights
-Break down developments by region:
-- **United States**: FDA activities, US-based trials, American companies
-- **Europe**: EMA decisions, European patents, EU market access
-- **Asia-Pacific**: China, Japan, India regulatory landscape, regional players
+Break down developments by region - ESPECIALLY highlight recent legal/regulatory actions:
+- **India**: Court rulings, patent disputes, compulsory licensing, CDSCO approvals, local manufacturers
+- **United States**: FDA activities, US court decisions, US-based trials, American companies
+- **Europe**: EMA decisions, EPO patent rulings, European patents, EU market access
+- **Asia-Pacific**: China NMPA, Japan PMDA, regional regulatory landscape, regional players
 - **Other Regions**: Emerging markets, global partnerships
 
 ## Current Landscape (Most Recent)

@@ -138,7 +138,7 @@ export const CompetitiveLandscape = ({ results, synthesis }: CompetitiveLandscap
   }, [companies]);
 
   return (
-    <Card>
+    <Card className="mt-6">
       <CardHeader>
         <div className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-primary" />
@@ -146,7 +146,7 @@ export const CompetitiveLandscape = ({ results, synthesis }: CompetitiveLandscap
         </div>
         <CardDescription>Development stages across market players</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 overflow-x-auto">
         {/* Stage Legend */}
         <div className="flex flex-wrap gap-2 pb-4 border-b">
           {STAGES.map((stage, idx) => (
@@ -158,16 +158,16 @@ export const CompetitiveLandscape = ({ results, synthesis }: CompetitiveLandscap
         </div>
 
         {/* Company Timeline */}
-        <div className="space-y-4">
+        <div className="space-y-4 min-w-[600px]">
           {companies.map((company) => (
-            <div key={company.name} className="flex items-center gap-3">
-              <div className="flex items-center gap-2 w-40 flex-shrink-0">
+            <div key={company.name} className="flex items-center gap-4">
+              <div className="flex items-center gap-2 w-44 flex-shrink-0">
                 <img 
                   src={getCompanyLogo(company.name)} 
                   alt={company.name}
-                  className="w-6 h-6 rounded object-contain bg-white"
+                  className="w-8 h-8 rounded object-contain bg-white p-0.5 border"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=random&size=24`;
+                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=random&size=32`;
                   }}
                 />
                 <div className="min-w-0">
@@ -176,11 +176,11 @@ export const CompetitiveLandscape = ({ results, synthesis }: CompetitiveLandscap
                 </div>
               </div>
               
-              <div className="flex-1 relative">
-                <div className="flex items-center h-8">
+              <div className="flex-1 relative min-w-[300px]">
+                <div className="flex items-center h-10">
                   {/* Progress bar background */}
                   <div className="absolute inset-y-0 left-0 right-0 flex items-center">
-                    <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
                       <div 
                         className={`h-full ${STAGES[company.stage].color} transition-all duration-500`}
                         style={{ width: `${((company.stage + 1) / STAGES.length) * 100}%` }}
@@ -193,16 +193,17 @@ export const CompetitiveLandscape = ({ results, synthesis }: CompetitiveLandscap
                     {STAGES.map((stage, idx) => (
                       <div 
                         key={stage.name}
-                        className={`w-3 h-3 rounded-full border-2 border-background z-10 ${
+                        className={`w-4 h-4 rounded-full border-2 border-background z-10 ${
                           idx <= company.stage ? stage.color : 'bg-muted'
                         }`}
+                        title={stage.name}
                       />
                     ))}
                   </div>
                 </div>
               </div>
               
-              <Badge variant="outline" className="ml-2 flex-shrink-0">
+              <Badge variant="outline" className="ml-3 flex-shrink-0 min-w-[90px] justify-center">
                 {company.stageName}
               </Badge>
             </div>

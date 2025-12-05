@@ -5,6 +5,7 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Cart
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Brain, TrendingUp, Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 interface DataVisualizationProps {
   results: SearchResult[];
@@ -157,10 +158,21 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                 <span>Analyzing research landscape and commercial signals...</span>
               </div>
             ) : (
-              <div className="prose prose-sm dark:prose-invert max-w-none">
-                <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+              <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => <h2 className="text-base font-semibold mt-4 mb-2 text-primary">{children}</h2>,
+                    h2: ({ children }) => <h2 className="text-base font-semibold mt-4 mb-2 text-primary">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-sm font-semibold mt-3 mb-1.5 text-foreground">{children}</h3>,
+                    p: ({ children }) => <p className="text-sm text-foreground leading-relaxed mb-2">{children}</p>,
+                    ul: ({ children }) => <ul className="text-sm space-y-1 mb-2 list-disc pl-4">{children}</ul>,
+                    ol: ({ children }) => <ol className="text-sm space-y-1 mb-2 list-decimal pl-4">{children}</ol>,
+                    li: ({ children }) => <li className="text-foreground">{children}</li>,
+                    strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                  }}
+                >
                   {chartAnalysis}
-                </div>
+                </ReactMarkdown>
               </div>
             )}
           </div>
