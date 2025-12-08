@@ -14,7 +14,7 @@ import { DocumentChat } from "@/components/dashboard/DocumentChat";
 import { Button } from "@/components/ui/button";
 import { searchAllSources, synthesizeResults, saveSearch, SearchResult } from "@/lib/searchService";
 import { toast } from "sonner";
-import { History, LogOut } from "lucide-react";
+import { History } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
@@ -144,29 +144,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <SearchHeader 
+        query={query}
+        setQuery={setQuery}
+        onSearch={() => handleSearch()}
+        isSearching={isSearching}
+        user={user}
+        onHistoryClick={() => navigate("/history")}
+        onSignOut={handleSignOut}
+      />
+      
       <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <SearchHeader 
-              query={query}
-              setQuery={setQuery}
-              onSearch={() => handleSearch()}
-              isSearching={isSearching}
-            />
-          </div>
-          {user && (
-            <div className="flex items-center gap-2 ml-4">
-              <Button variant="outline" onClick={() => navigate("/history")} className="gap-2">
-                <History className="h-4 w-4" />
-                History
-              </Button>
-              <Button variant="outline" onClick={handleSignOut} className="gap-2">
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </Button>
-            </div>
-          )}
-        </div>
         
         <SearchFilters 
           sources={sources} 
