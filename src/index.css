@@ -11,23 +11,23 @@ Corporate Energy & Strategy-focused palette:
 
 @layer base {
   :root {
-    --background: 35 15% 96%;
-    --foreground: 220 25% 10%;
+    --background: 35 12% 94%;
+    --foreground: 220 30% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    --card-foreground: 220 30% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 10%;
+    --popover-foreground: 220 30% 12%;
 
     --primary: 22 85% 42%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 12% 92%;
-    --secondary-foreground: 220 25% 15%;
+    --secondary-foreground: 220 30% 15%;
 
-    --muted: 30 10% 94%;
-    --muted-foreground: 220 12% 40%;
+    --muted: 30 8% 90%;
+    --muted-foreground: 220 12% 45%;
 
     --accent: 22 80% 48%;
     --accent-foreground: 0 0% 100%;
@@ -35,8 +35,8 @@ Corporate Energy & Strategy-focused palette:
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 12% 86%;
-    --input: 220 12% 86%;
+    --border: 220 12% 82%;
+    --input: 220 12% 82%;
     --ring: 22 85% 42%;
 
     --radius: 0.5rem;
@@ -47,7 +47,9 @@ Corporate Energy & Strategy-focused palette:
     --warning-amber: 35 95% 52%;
     
     --surface-elevated: 0 0% 100%;
-    --surface-sunken: 35 12% 94%;
+    --surface-sunken: 35 10% 91%;
+    --surface-dark: 220 18% 16%;
+    --surface-command: 220 15% 20%;
 
     --chart-1: 22 85% 42%;
     --chart-2: 160 55% 38%;
@@ -56,42 +58,42 @@ Corporate Energy & Strategy-focused palette:
     --chart-5: 340 65% 48%;
 
     --sidebar-background: 30 10% 97%;
-    --sidebar-foreground: 220 20% 20%;
+    --sidebar-foreground: 220 25% 18%;
     --sidebar-primary: 22 85% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 22 70% 96%;
     --sidebar-accent-foreground: 22 85% 32%;
-    --sidebar-border: 220 12% 88%;
+    --sidebar-border: 220 12% 85%;
     --sidebar-ring: 22 85% 42%;
   }
 
   .dark {
-    --background: 220 22% 9%;
-    --foreground: 35 15% 95%;
+    --background: 220 24% 8%;
+    --foreground: 35 12% 94%;
 
-    --card: 220 20% 12%;
-    --card-foreground: 35 15% 95%;
+    --card: 220 22% 11%;
+    --card-foreground: 35 12% 94%;
 
-    --popover: 220 20% 12%;
-    --popover-foreground: 35 15% 95%;
+    --popover: 220 22% 11%;
+    --popover-foreground: 35 12% 94%;
 
     --primary: 22 90% 52%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 15% 18%;
-    --secondary-foreground: 35 10% 90%;
+    --secondary: 220 18% 16%;
+    --secondary-foreground: 35 10% 88%;
 
-    --muted: 220 18% 16%;
-    --muted-foreground: 220 12% 55%;
+    --muted: 220 20% 14%;
+    --muted-foreground: 220 12% 50%;
 
     --accent: 22 85% 52%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 35 15% 95%;
+    --destructive-foreground: 35 12% 94%;
 
-    --border: 220 18% 18%;
-    --input: 220 18% 18%;
+    --border: 220 20% 16%;
+    --input: 220 20% 16%;
     --ring: 22 90% 52%;
     
     --brand-orange: 22 90% 52%;
@@ -99,8 +101,10 @@ Corporate Energy & Strategy-focused palette:
     --success-green: 145 65% 48%;
     --warning-amber: 35 95% 58%;
     
-    --surface-elevated: 220 18% 14%;
-    --surface-sunken: 220 20% 8%;
+    --surface-elevated: 220 20% 13%;
+    --surface-sunken: 220 22% 7%;
+    --surface-dark: 220 22% 10%;
+    --surface-command: 220 20% 14%;
 
     --chart-1: 22 90% 52%;
     --chart-2: 160 60% 42%;
@@ -108,13 +112,13 @@ Corporate Energy & Strategy-focused palette:
     --chart-4: 220 12% 42%;
     --chart-5: 340 70% 52%;
 
-    --sidebar-background: 220 20% 10%;
-    --sidebar-foreground: 35 12% 92%;
+    --sidebar-background: 220 22% 9%;
+    --sidebar-foreground: 35 10% 90%;
     --sidebar-primary: 22 90% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 18% 15%;
+    --sidebar-accent: 220 20% 13%;
     --sidebar-accent-foreground: 22 90% 58%;
-    --sidebar-border: 220 18% 15%;
+    --sidebar-border: 220 20% 14%;
     --sidebar-ring: 22 90% 52%;
   }
 }

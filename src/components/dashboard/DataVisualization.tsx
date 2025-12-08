@@ -115,16 +115,16 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
 
   if (isLoading) {
     return (
-      <Card className="bg-card border-border/60 shadow-card">
-        <CardHeader className="pb-3 border-b border-border/40">
-          <CardTitle className="text-title text-foreground">Executive Market Overview</CardTitle>
-          <CardDescription className="text-caption text-muted-foreground">Loading intelligence data...</CardDescription>
+      <Card className="bg-card border-border/50 shadow-elevated">
+        <CardHeader className="pb-4 border-b border-border/30">
+          <CardTitle className="text-xl font-bold text-foreground">Executive Market Overview</CardTitle>
+          <CardDescription className="text-sm text-muted-foreground">Loading intelligence data...</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
-          <Skeleton className="h-[300px] w-full rounded-lg" />
+          <Skeleton className="h-[300px] w-full rounded-xl" />
           <div className="grid md:grid-cols-2 gap-6">
-            <Skeleton className="h-[250px] w-full rounded-lg" />
-            <Skeleton className="h-[250px] w-full rounded-lg" />
+            <Skeleton className="h-[280px] w-full rounded-xl" />
+            <Skeleton className="h-[280px] w-full rounded-xl" />
           </div>
         </CardContent>
       </Card>
@@ -136,44 +136,44 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
   }
 
   return (
-    <Card className="bg-card border-border/60 shadow-card">
-      <CardHeader className="pb-3 border-b border-border/40">
-        <CardTitle className="flex items-center gap-2.5 text-title text-foreground">
-          <div className="p-1.5 bg-primary/10 rounded-md">
-            <TrendingUp className="h-4 w-4 text-primary" />
+    <Card className="bg-card border-border/50 shadow-elevated">
+      <CardHeader className="pb-4 border-b border-border/30">
+        <CardTitle className="flex items-center gap-3 text-xl font-bold text-foreground">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <TrendingUp className="h-5 w-5 text-primary" />
           </div>
           Executive Market Overview
         </CardTitle>
-        <CardDescription className="text-caption text-muted-foreground">
+        <CardDescription className="text-sm text-muted-foreground pl-12">
           High-level intelligence across activity, sources, and execution stages
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-8 pt-6">
+      <CardContent className="space-y-8 pt-8">
         {/* AI Chart Analysis */}
         {(isAnalyzing || chartAnalysis) && (
-          <div className="bg-muted/40 rounded-xl p-6 border border-border/40">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="p-1.5 bg-primary/10 rounded-md">
-                <Brain className="h-4 w-4 text-primary" />
+          <div className="bg-surface-sunken rounded-xl p-6 border border-border/40">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Brain className="h-5 w-5 text-primary" />
               </div>
-              <h3 className="text-subtitle text-foreground">Strategic Intelligence Analysis</h3>
+              <h3 className="text-lg font-bold text-foreground">Strategic Intelligence Analysis</h3>
             </div>
             {isAnalyzing ? (
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                <span className="text-body">Analyzing market landscape and competitive signals...</span>
+                <span className="text-sm">Analyzing market landscape and competitive signals...</span>
               </div>
             ) : (
-              <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
+              <div className="prose prose-sm dark:prose-invert max-w-none">
                 <ReactMarkdown
                   components={{
-                    h1: ({ children }) => <h2 className="text-body font-semibold mt-4 mb-2 text-primary">{children}</h2>,
-                    h2: ({ children }) => <h2 className="text-body font-semibold mt-4 mb-2 text-primary">{children}</h2>,
-                    h3: ({ children }) => <h3 className="text-caption font-semibold mt-3 mb-1.5 text-foreground">{children}</h3>,
-                    p: ({ children }) => <p className="text-body text-foreground leading-relaxed mb-2">{children}</p>,
-                    ul: ({ children }) => <ul className="text-body space-y-1 mb-2 list-disc pl-4">{children}</ul>,
-                    ol: ({ children }) => <ol className="text-body space-y-1 mb-2 list-decimal pl-4">{children}</ol>,
-                    li: ({ children }) => <li className="text-foreground">{children}</li>,
+                    h1: ({ children }) => <h2 className="text-sm font-bold mt-4 mb-2 text-primary uppercase tracking-wide">{children}</h2>,
+                    h2: ({ children }) => <h2 className="text-sm font-bold mt-4 mb-2 text-primary uppercase tracking-wide">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-sm font-semibold mt-3 mb-1.5 text-foreground">{children}</h3>,
+                    p: ({ children }) => <p className="text-sm text-foreground/90 leading-relaxed mb-2">{children}</p>,
+                    ul: ({ children }) => <ul className="text-sm space-y-1 mb-2 list-disc pl-4">{children}</ul>,
+                    ol: ({ children }) => <ol className="text-sm space-y-1 mb-2 list-decimal pl-4">{children}</ol>,
+                    li: ({ children }) => <li className="text-foreground/90">{children}</li>,
                     strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
                   }}
                 >
@@ -186,10 +186,11 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
 
         {/* Market Activity Momentum */}
         {publicationTrend.length > 0 && (
-          <div className="bg-muted/30 rounded-xl p-6 border border-border/40">
-            <div className="mb-5">
-              <h3 className="text-subtitle font-semibold text-foreground">Market Activity Momentum</h3>
-              <p className="text-caption text-muted-foreground mt-1">Volume of competitive and innovation signals over time</p>
+          <div className="bg-surface-sunken rounded-xl p-6 border border-border/40">
+            <div className="mb-6">
+              <h3 className="text-lg font-bold text-foreground">Market Activity Momentum</h3>
+              <p className="text-sm text-muted-foreground mt-1">Volume of competitive and innovation signals over time</p>
+              <p className="text-xs text-primary/80 mt-2 italic">"Market signals remained flat for a decade before sharp acceleration post-2022."</p>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={publicationTrend} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
@@ -211,7 +212,7 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                     value: 'Signals', 
                     angle: -90, 
                     position: 'insideLeft',
-                    style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 }
+                    style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12, fontWeight: 600 }
                   }}
                 />
                 <Tooltip 
@@ -221,7 +222,7 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                     borderRadius: '8px',
                     color: 'hsl(var(--foreground))',
                     fontSize: '12px',
-                    boxShadow: '0 4px 12px -2px hsl(220 15% 10% / 0.08)'
+                    boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
                   }}
                   formatter={(value: number) => [value, 'Signals']}
                 />
@@ -235,9 +236,9 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                   type="monotone" 
                   dataKey="publications" 
                   stroke="hsl(var(--primary))" 
-                  strokeWidth={2.5}
-                  dot={{ fill: 'hsl(var(--primary))', r: 4 }}
-                  activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
+                  strokeWidth={3}
+                  dot={{ fill: 'hsl(var(--primary))', r: 5, strokeWidth: 2, stroke: 'hsl(var(--card))' }}
+                  activeDot={{ r: 7, fill: 'hsl(var(--primary))', stroke: 'hsl(var(--card))', strokeWidth: 2 }}
                   name="Market Signals per Year"
                 />
               </LineChart>
@@ -247,10 +248,11 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Intelligence Source Mix */}
-          <div className="bg-muted/30 rounded-xl p-6 border border-border/40">
-            <div className="mb-5">
-              <h3 className="text-subtitle font-semibold text-foreground">Intelligence Source Mix</h3>
-              <p className="text-caption text-muted-foreground mt-1">Where intelligence is being captured from</p>
+          <div className="bg-surface-sunken rounded-xl p-6 border border-border/40">
+            <div className="mb-6">
+              <h3 className="text-lg font-bold text-foreground">Intelligence Source Mix</h3>
+              <p className="text-sm text-muted-foreground mt-1">Where intelligence is being captured from</p>
+              <p className="text-xs text-primary/80 mt-2 italic">"Balanced coverage across research, patents, and market news."</p>
             </div>
             <ResponsiveContainer width="100%" height={280}>
               <PieChart margin={{ top: 10, right: 80, left: 80, bottom: 10 }}>
@@ -275,7 +277,7 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                     borderRadius: '8px',
                     color: 'hsl(var(--foreground))',
                     fontSize: '12px',
-                    boxShadow: '0 4px 12px -2px hsl(220 15% 10% / 0.08)'
+                    boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
                   }}
                   formatter={(value: number, name: string) => [value, name]}
                 />
@@ -285,10 +287,11 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
 
           {/* Execution & Commercialization Stages */}
           {studyTypeDistribution.length > 0 && (
-            <div className="bg-muted/30 rounded-xl p-6 border border-border/40">
-              <div className="mb-5">
-                <h3 className="text-subtitle font-semibold text-foreground">Execution & Commercialization Stages</h3>
-                <p className="text-caption text-muted-foreground mt-1">Maturity distribution of tracked initiatives</p>
+            <div className="bg-surface-sunken rounded-xl p-6 border border-border/40">
+              <div className="mb-6">
+                <h3 className="text-lg font-bold text-foreground">Execution & Commercialization Stages</h3>
+                <p className="text-sm text-muted-foreground mt-1">Maturity distribution of tracked initiatives</p>
+                <p className="text-xs text-primary/80 mt-2 italic">"Most initiatives are in early development phases."</p>
               </div>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={studyTypeDistribution} margin={{ top: 10, right: 30, left: 20, bottom: 80 }}>
@@ -310,7 +313,7 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                       value: 'Count', 
                       angle: -90, 
                       position: 'insideLeft',
-                      style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 }
+                      style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12, fontWeight: 600 }
                     }}
                   />
                   <Tooltip 
@@ -320,14 +323,14 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                       borderRadius: '8px',
                       color: 'hsl(var(--foreground))',
                       fontSize: '12px',
-                      boxShadow: '0 4px 12px -2px hsl(220 15% 10% / 0.08)'
+                      boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
                     }}
                     formatter={(value: number) => [value, 'Initiatives']}
                   />
                   <Bar 
                     dataKey="value" 
                     fill="hsl(var(--primary))" 
-                    radius={[4, 4, 0, 0]}
+                    radius={[6, 6, 0, 0]}
                     name="Number of Initiatives"
                   />
                 </BarChart>
