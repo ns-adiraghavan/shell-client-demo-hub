@@ -1,4 +1,4 @@
-import { Search, Settings, Codepen, History, LogOut } from "lucide-react";
+import { Search, Settings, Layers, History, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -27,11 +27,11 @@ export const SearchHeader = ({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="bg-primary/10 p-2 rounded-lg">
-              <Codepen className="h-6 w-6 text-primary" />
+              <Layers className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Pharma Insights Engine</h1>
-              <p className="text-sm text-muted-foreground">Biomedical Literature Synthesizer</p>
+              <h1 className="text-2xl font-bold text-foreground">Market Insights Engine</h1>
+              <p className="text-sm text-muted-foreground">Unified Market, Startup & Technology Intelligence</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -60,7 +60,7 @@ export const SearchHeader = ({
               value={query} 
               onChange={e => setQuery(e.target.value)} 
               onKeyDown={e => e.key === 'Enter' && onSearch()} 
-              placeholder="Enter research topic or drug-disease query..." 
+              placeholder="Market / Technology / Keyword Search... (e.g., Renewable Energy, Hydrogen Storage, Carbon Capture)" 
               className="pl-10 h-12 text-base" 
             />
           </div>

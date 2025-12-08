@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Beaker, FileSearch, Scale, Newspaper } from "lucide-react";
+import { FileText, Briefcase, FileSearch, Scale, Newspaper } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface StatsCardsProps {
@@ -15,11 +15,11 @@ interface StatsCardsProps {
 
 export const StatsCards = ({ counts, isSearching }: StatsCardsProps) => {
   const stats = [
-    { label: "PubMed Articles", value: counts.pubmed, icon: FileText, color: "text-blue-600" },
-    { label: "Clinical Trials", value: counts.clinical, icon: Beaker, color: "text-green-600" },
-    { label: "Preprints", value: counts.arxiv, icon: FileSearch, color: "text-amber-600" },
-    { label: "Patents", value: counts.patents, icon: Scale, color: "text-purple-600" },
-    { label: "Industry News", value: counts.news, icon: Newspaper, color: "text-rose-600" },
+    { label: "Research Papers", value: counts.pubmed, icon: FileText, color: "text-primary" },
+    { label: "Active Projects", value: counts.clinical, icon: Briefcase, color: "text-chart-2" },
+    { label: "Technical Reports", value: counts.arxiv, icon: FileSearch, color: "text-chart-3" },
+    { label: "Patents", value: counts.patents, icon: Scale, color: "text-chart-4" },
+    { label: "Business News", value: counts.news, icon: Newspaper, color: "text-chart-5" },
   ];
 
   return (

@@ -194,7 +194,7 @@ export const DocumentChat = () => {
 
   const generateMetaAnalysis = async () => {
     if (selectedDocuments.length < 2) {
-      toast.error("Select at least 2 documents for meta-analysis");
+      toast.error("Select at least 2 documents for cross-analysis");
       return;
     }
 
@@ -210,11 +210,11 @@ export const DocumentChat = () => {
       });
 
       if (error) throw error;
-      setMetaAnalysis(data.response || "Could not generate meta-analysis.");
-      toast.success("Meta-analysis report generated");
+      setMetaAnalysis(data.response || "Could not generate cross-analysis.");
+      toast.success("Cross-analysis report generated");
     } catch (error) {
-      console.error('Error generating meta-analysis:', error);
-      toast.error("Failed to generate meta-analysis");
+      console.error('Error generating cross-analysis:', error);
+      toast.error("Failed to generate cross-analysis");
     } finally {
       setIsLoading(false);
     }
@@ -232,10 +232,10 @@ export const DocumentChat = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="h-5 w-5" />
-          Document AI Assistant
+          Document Intelligence
         </CardTitle>
         <CardDescription>
-          Chat, summarize, and analyze your research papers
+          Chat, summarize, and analyze your reports & documents
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
@@ -251,7 +251,7 @@ export const DocumentChat = () => {
             </TabsTrigger>
             <TabsTrigger value="findings" className="flex items-center gap-1">
               <ListChecks className="h-3 w-3" />
-              Findings
+              Insights
             </TabsTrigger>
             <TabsTrigger value="compare" className="flex items-center gap-1">
               <GitCompare className="h-3 w-3" />
@@ -259,7 +259,7 @@ export const DocumentChat = () => {
             </TabsTrigger>
             <TabsTrigger value="meta-analysis" className="flex items-center gap-1">
               <BarChart3 className="h-3 w-3" />
-              Meta-Analysis
+              Cross-Analysis
             </TabsTrigger>
           </TabsList>
 
@@ -284,7 +284,7 @@ export const DocumentChat = () => {
                   <div className="text-center text-muted-foreground py-8">
                     <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
                     <p>Start asking questions about your documents</p>
-                    <p className="text-sm mt-1">I&apos;ll help you understand and analyze the research</p>
+                    <p className="text-sm mt-1">I&apos;ll help you understand and analyze the content</p>
                   </div>
                 )}
                 {messages.map((msg, idx) => (
@@ -307,7 +307,7 @@ export const DocumentChat = () => {
                   <div className="flex justify-start">
                     <div className="bg-muted rounded-lg px-4 py-2 flex items-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Thinking...</span>
+                      <span>Analyzing...</span>
                     </div>
                   </div>
                 )}
@@ -368,7 +368,7 @@ export const DocumentChat = () => {
             {summary && (
               <ScrollArea className="flex-1 pr-4">
                 <div className="bg-muted rounded-lg p-4 prose prose-sm max-w-none dark:prose-invert">
-                  <h4 className="font-semibold mb-2">Summary</h4>
+                  <h4 className="font-semibold mb-2">Executive Summary</h4>
                   <ReactMarkdown
                     components={{
                       h2: ({ children }) => <h2 className="text-base font-semibold mt-4 mb-2 text-primary">{children}</h2>,
@@ -410,7 +410,7 @@ export const DocumentChat = () => {
               ) : (
                 <>
                   <ListChecks className="h-4 w-4 mr-2" />
-                  Extract Key Findings
+                  Extract Key Insights
                 </>
               )}
             </Button>
@@ -418,7 +418,7 @@ export const DocumentChat = () => {
             {keyFindings && (
               <ScrollArea className="flex-1 pr-4">
                 <div className="bg-muted rounded-lg p-4 prose prose-sm max-w-none dark:prose-invert">
-                  <h4 className="font-semibold mb-2">Key Findings</h4>
+                  <h4 className="font-semibold mb-2">Key Insights</h4>
                   <ReactMarkdown
                     components={{
                       h2: ({ children }) => <h2 className="text-base font-semibold mt-4 mb-2 text-primary">{children}</h2>,
@@ -490,7 +490,7 @@ export const DocumentChat = () => {
               ) : (
                 <>
                   <GitCompare className="h-4 w-4 mr-2" />
-                  Compare Selected ({selectedDocuments.length})
+                  Compare Documents ({selectedDocuments.length} selected)
                 </>
               )}
             </Button>
@@ -519,7 +519,7 @@ export const DocumentChat = () => {
           <TabsContent value="meta-analysis" className="flex-1 flex flex-col gap-4 mt-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Select documents for batch analysis:</p>
+                <p className="text-sm text-muted-foreground">Select documents for cross-analysis:</p>
                 <div className="flex gap-2">
                   <Button 
                     variant="outline" 
@@ -565,12 +565,12 @@ export const DocumentChat = () => {
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generating Report...
+                  Analyzing...
                 </>
               ) : (
                 <>
                   <BarChart3 className="h-4 w-4 mr-2" />
-                  Generate Meta-Analysis ({selectedDocuments.length})
+                  Generate Cross-Analysis ({selectedDocuments.length} documents)
                 </>
               )}
             </Button>
@@ -578,7 +578,7 @@ export const DocumentChat = () => {
             {metaAnalysis && (
               <ScrollArea className="flex-1 pr-4">
                 <div className="bg-muted rounded-lg p-4 prose prose-sm max-w-none dark:prose-invert">
-                  <h4 className="font-semibold mb-2">Meta-Analysis Report</h4>
+                  <h4 className="font-semibold mb-2">Cross-Document Analysis</h4>
                   <ReactMarkdown
                     components={{
                       h2: ({ children }) => <h2 className="text-base font-semibold mt-4 mb-2 text-primary">{children}</h2>,
@@ -596,12 +596,6 @@ export const DocumentChat = () => {
             )}
           </TabsContent>
         </Tabs>
-        
-        {documents.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center mt-4">
-            Upload documents first to use AI features
-          </p>
-        )}
       </CardContent>
     </Card>
   );

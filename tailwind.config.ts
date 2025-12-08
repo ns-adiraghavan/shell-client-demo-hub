@@ -47,9 +47,9 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        medical: {
-          blue: "hsl(var(--medical-blue))",
-          light: "hsl(var(--medical-light))",
+        brand: {
+          orange: "hsl(var(--brand-orange))",
+          amber: "hsl(var(--brand-amber))",
         },
         success: {
           DEFAULT: "hsl(var(--success-green))",
