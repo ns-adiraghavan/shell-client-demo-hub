@@ -7,15 +7,17 @@ import { useToast } from "@/hooks/use-toast";
 import { SearchResult } from "@/lib/searchService";
 import { exportToPDF } from "@/lib/exportService";
 import ReactMarkdown from "react-markdown";
+import { cn } from "@/lib/utils";
 
 interface SynthesisPanelProps {
   synthesis: string;
   isSearching: boolean;
   query: string;
   results: SearchResult[];
+  situationRoomMode?: boolean;
 }
 
-const ExecutiveSnapshot = ({ results }: { results: SearchResult[] }) => {
+const ExecutiveSnapshot = ({ results, situationRoomMode = false }: { results: SearchResult[]; situationRoomMode?: boolean }) => {
   const newsCount = results.filter(r => r.source === 'News').length;
   const patentCount = results.filter(r => r.source === 'Patents').length;
   const researchCount = results.filter(r => r.source === 'PubMed' || r.source === 'arXiv').length;
@@ -34,19 +36,28 @@ const ExecutiveSnapshot = ({ results }: { results: SearchResult[] }) => {
   ];
 
   return (
-    <div className="bg-surface-command rounded-xl p-5 mb-6 border border-border/30">
+    <div className={cn(
+      "bg-surface-command rounded-xl mb-6 border border-border/30",
+      situationRoomMode ? "p-8" : "p-5"
+    )}>
       <div className="flex items-center gap-2 mb-4">
-        <Zap className="h-4 w-4 text-primary" />
-        <h4 className="text-sm font-bold text-primary uppercase tracking-wider">Executive Snapshot</h4>
+        <Zap className={cn("text-primary", situationRoomMode ? "h-6 w-6" : "h-4 w-4")} />
+        <h4 className={cn(
+          "font-bold text-primary uppercase tracking-wider",
+          situationRoomMode ? "text-base" : "text-sm"
+        )}>Executive Snapshot</h4>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className={cn("grid grid-cols-2 gap-4", situationRoomMode && "gap-6")}>
         {metrics.map((metric) => (
-          <div key={metric.label} className="bg-surface-elevated rounded-lg p-3 border border-border/20">
+          <div key={metric.label} className={cn(
+            "bg-surface-elevated rounded-lg border border-border/20",
+            situationRoomMode ? "p-5" : "p-3"
+          )}>
             <div className="flex items-center gap-2 mb-1">
-              <metric.icon className="h-4 w-4 text-primary shrink-0" />
-              <span className="text-xs text-muted-foreground font-medium">{metric.label}</span>
+              <metric.icon className={cn("text-primary shrink-0", situationRoomMode ? "h-5 w-5" : "h-4 w-4")} />
+              <span className={cn("text-muted-foreground font-medium", situationRoomMode ? "text-sm" : "text-xs")}>{metric.label}</span>
             </div>
-            <span className={`text-lg font-bold ${metric.color}`}>{metric.value}</span>
+            <span className={cn("font-bold", metric.color, situationRoomMode ? "text-2xl" : "text-lg")}>{metric.value}</span>
           </div>
         ))}
       </div>
@@ -54,7 +65,7 @@ const ExecutiveSnapshot = ({ results }: { results: SearchResult[] }) => {
   );
 };
 
-const ExecutiveSignal = ({ synthesis }: { synthesis: string }) => {
+const ExecutiveSignal = ({ synthesis, situationRoomMode = false }: { synthesis: string; situationRoomMode?: boolean }) => {
   const lines = synthesis.split('\n').filter(line => line.trim());
   const keyInsight = lines.find(line => 
     line.includes('significant') || 
@@ -67,19 +78,31 @@ const ExecutiveSignal = ({ synthesis }: { synthesis: string }) => {
   const cleanInsight = keyInsight.replace(/^[#*\-\s]+/, '').replace(/\*\*/g, '').slice(0, 180);
 
   return (
-    <div className="bg-primary/10 border-l-4 border-primary rounded-r-lg p-5 mb-6">
+    <div className={cn(
+      "bg-primary/10 border-l-4 border-primary rounded-r-lg mb-6",
+      situationRoomMode ? "p-6 animate-pulse-subtle" : "p-5"
+    )}>
       <div className="flex items-start gap-3">
-        <AlertTriangle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+        <AlertTriangle className={cn(
+          "text-primary shrink-0 mt-0.5",
+          situationRoomMode ? "h-6 w-6" : "h-5 w-5"
+        )} />
         <div>
-          <span className="text-xs font-bold text-primary uppercase tracking-wider">Executive Signal</span>
-          <p className="text-sm text-foreground mt-2 leading-relaxed font-medium">{cleanInsight}</p>
+          <span className={cn(
+            "font-bold text-primary uppercase tracking-wider",
+            situationRoomMode ? "text-sm" : "text-xs"
+          )}>Executive Signal</span>
+          <p className={cn(
+            "text-foreground mt-2 leading-relaxed font-medium",
+            situationRoomMode ? "text-base" : "text-sm"
+          )}>{cleanInsight}</p>
         </div>
       </div>
     </div>
   );
 };
 
-export const SynthesisPanel = ({ synthesis, isSearching, query, results }: SynthesisPanelProps) => {
+export const SynthesisPanel = ({ synthesis, isSearching, query, results, situationRoomMode = false }: SynthesisPanelProps) => {
   const { toast } = useToast();
 
   const handleCopy = () => {
@@ -138,8 +161,8 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results }: Synth
         ) : synthesis ? (
           <div className="flex flex-col flex-1 overflow-hidden">
             <ScrollArea className="flex-1 px-6 py-5">
-              <ExecutiveSnapshot results={results} />
-              <ExecutiveSignal synthesis={synthesis} />
+              <ExecutiveSnapshot results={results} situationRoomMode={situationRoomMode} />
+              <ExecutiveSignal synthesis={synthesis} situationRoomMode={situationRoomMode} />
               
               <div className="prose prose-sm max-w-none dark:prose-invert">
                 <ReactMarkdown

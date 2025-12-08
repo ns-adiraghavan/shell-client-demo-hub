@@ -62,6 +62,7 @@ export default {
           sunken: "hsl(var(--surface-sunken))",
           dark: "hsl(var(--surface-dark))",
           command: "hsl(var(--surface-command))",
+          "command-dark": "hsl(var(--surface-command-dark))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
