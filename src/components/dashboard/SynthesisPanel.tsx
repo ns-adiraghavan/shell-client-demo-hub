@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Sparkles, Download, Copy } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { SearchResult } from "@/lib/searchService";
 import { exportToPDF } from "@/lib/exportService";
@@ -42,7 +43,7 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results }: Synth
   };
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col h-[calc(100vh-6rem)]">
       <CardHeader className="shrink-0 pb-2">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="h-5 w-5 text-primary" />
@@ -52,7 +53,7 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results }: Synth
           Comprehensive summary of all sources
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col p-0">
+      <CardContent className="flex-1 flex flex-col overflow-hidden p-0">
         {isSearching ? (
           <div className="space-y-3 p-6">
             <Skeleton className="h-4 w-full" />
@@ -62,25 +63,23 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results }: Synth
             <Skeleton className="h-4 w-5/6" />
           </div>
         ) : synthesis ? (
-          <div className="flex flex-col flex-1">
-            <div className="px-6 py-4">
-              <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
+          <div className="flex flex-col flex-1 overflow-hidden">
+            <ScrollArea className="flex-1 px-6">
+              <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground py-2">
                 <ReactMarkdown
                   components={{
-                    h2: ({ children }) => <h2 className="text-lg font-semibold mt-6 mb-3 text-primary">{children}</h2>,
-                    h3: ({ children }) => <h3 className="text-base font-semibold mt-4 mb-2 text-foreground">{children}</h3>,
-                    p: ({ children }) => <p className="text-sm text-foreground leading-relaxed mb-3">{children}</p>,
-                    ul: ({ children }) => <ul className="text-sm space-y-1.5 mb-3 list-disc pl-5">{children}</ul>,
-                    ol: ({ children }) => <ol className="text-sm space-y-1.5 mb-3 list-decimal pl-5">{children}</ol>,
+                    h2: ({ children }) => <h2 className="text-base font-semibold mt-4 mb-2 text-primary">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-sm font-semibold mt-3 mb-1.5 text-foreground">{children}</h3>,
+                    p: ({ children }) => <p className="text-sm text-foreground leading-relaxed mb-2">{children}</p>,
+                    ul: ({ children }) => <ul className="text-sm space-y-1 mb-2 list-disc pl-4">{children}</ul>,
                     li: ({ children }) => <li className="text-foreground">{children}</li>,
                     strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
-                    em: ({ children }) => <em className="italic">{children}</em>,
                   }}
                 >
                   {synthesis}
                 </ReactMarkdown>
               </div>
-            </div>
+            </ScrollArea>
             
             <div className="shrink-0 px-6 py-4 border-t space-y-3 bg-card">
               <div className="flex gap-2">
