@@ -60,6 +60,8 @@ export default {
         surface: {
           elevated: "hsl(var(--surface-elevated))",
           sunken: "hsl(var(--surface-sunken))",
+          dark: "hsl(var(--surface-dark))",
+          command: "hsl(var(--surface-command))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
@@ -80,9 +82,13 @@ export default {
         },
       },
       boxShadow: {
-        'card': '0 1px 3px 0 hsl(220 15% 10% / 0.04), 0 1px 2px -1px hsl(220 15% 10% / 0.04)',
-        'card-hover': '0 4px 6px -1px hsl(220 15% 10% / 0.06), 0 2px 4px -2px hsl(220 15% 10% / 0.06)',
-        'elevated': '0 4px 12px -2px hsl(220 15% 10% / 0.08), 0 2px 6px -2px hsl(220 15% 10% / 0.05)',
+        'card': '0 1px 3px 0 hsl(220 15% 10% / 0.05), 0 1px 2px -1px hsl(220 15% 10% / 0.05)',
+        'card-hover': '0 6px 12px -2px hsl(220 15% 10% / 0.08), 0 3px 6px -2px hsl(220 15% 10% / 0.06)',
+        'elevated': '0 8px 24px -4px hsl(220 15% 10% / 0.12), 0 4px 8px -2px hsl(220 15% 10% / 0.06)',
+        'command': '0 12px 40px -8px hsl(220 15% 10% / 0.18), 0 6px 16px -4px hsl(220 15% 10% / 0.1)',
+        'beacon': 'inset 4px 0 0 0 hsl(var(--primary))',
+        'beacon-muted': 'inset 4px 0 0 0 hsl(var(--border))',
+        'intel': '0 16px 48px -12px hsl(220 15% 10% / 0.15), 0 8px 20px -6px hsl(220 15% 10% / 0.08)',
       },
       fontSize: {
         'display': ['2.25rem', { lineHeight: '1.2', fontWeight: '700' }],

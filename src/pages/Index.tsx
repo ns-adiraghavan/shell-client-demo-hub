@@ -143,7 +143,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-surface-sunken">
       <SearchHeader 
         query={query}
         setQuery={setQuery}
@@ -156,7 +156,8 @@ const Index = () => {
       
       <div className="container mx-auto px-6 py-8 space-y-8">
         
-        <div className="bg-card rounded-xl border border-border/60 shadow-card p-6">
+        {/* Filters Section */}
+        <div className="bg-card rounded-xl border border-border/50 shadow-card p-6">
           <SearchFilters 
             sources={sources} 
             setSources={setSources} 
@@ -164,7 +165,7 @@ const Index = () => {
             setMaxResults={setMaxResults} 
           />
         </div>
-        <div className="bg-card rounded-xl border border-border/60 shadow-card p-6">
+        <div className="bg-card rounded-xl border border-border/50 shadow-card p-6">
           <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
         </div>
         
