@@ -23,7 +23,7 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState<any>(null);
-  const [query, setQuery] = useState("Renewable Energy Hydrogen Storage");
+  const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -34,7 +34,7 @@ const Index = () => {
     pubmed: true,
     clinical: true,
     arxiv: true,
-    patents: false,
+    patents: true,
     news: true
   });
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilterOptions>({

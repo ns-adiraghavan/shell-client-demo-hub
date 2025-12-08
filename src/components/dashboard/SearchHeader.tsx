@@ -1,4 +1,4 @@
-import { Search, Settings, Layers, History, LogOut, Radar } from "lucide-react";
+import { Search, History, LogOut, Radar } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SituationRoomToggle } from "./SituationRoomToggle";
@@ -76,15 +76,6 @@ export const SearchHeader = ({
                   Sign Out
                 </Button>
               </>
-            )}
-            {!situationRoomMode && (
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="text-muted-foreground hover:text-foreground hover:bg-secondary"
-              >
-                <Settings className="h-5 w-5" />
-              </Button>
             )}
           </div>
         </div>

@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import { Database, FileText, Microscope, Scale, Newspaper } from "lucide-react";
 
 interface SearchFiltersProps {
@@ -30,6 +31,14 @@ export const SearchFilters = ({ sources, setSources, maxResults, setMaxResults }
     setSources((prev: any) => ({ ...prev, [sourceId]: !prev[sourceId] }));
   };
 
+  const handleMaxResultsInput = (value: string) => {
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue)) {
+      const clampedValue = Math.min(100, Math.max(5, numValue));
+      setMaxResults(clampedValue);
+    }
+  };
+
   return (
     <Card className="p-4">
       <div className="flex flex-wrap items-center gap-6">
@@ -55,8 +64,18 @@ export const SearchFilters = ({ sources, setSources, maxResults, setMaxResults }
           })}
         </div>
         
-        <div className="flex-1 min-w-[200px]">
-          <Label className="text-sm font-medium mb-2 block">Max Results: {maxResults}</Label>
+        <div className="flex-1 min-w-[280px]">
+          <div className="flex items-center gap-3 mb-2">
+            <Label className="text-sm font-medium">Max Results:</Label>
+            <Input
+              type="number"
+              min={5}
+              max={100}
+              value={maxResults}
+              onChange={(e) => handleMaxResultsInput(e.target.value)}
+              className="w-20 h-8 text-sm bg-background"
+            />
+          </div>
           <Slider 
             value={[maxResults]} 
             max={100} 
