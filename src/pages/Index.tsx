@@ -11,11 +11,13 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { DocumentUpload } from "@/components/dashboard/DocumentUpload";
 import { DataVisualization } from "@/components/dashboard/DataVisualization";
 import { DocumentChat } from "@/components/dashboard/DocumentChat";
+import { SituationRoomToggle } from "@/components/dashboard/SituationRoomToggle";
 import { Button } from "@/components/ui/button";
 import { searchAllSources, synthesizeResults, saveSearch, SearchResult } from "@/lib/searchService";
 import { toast } from "sonner";
 import { History } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -42,6 +44,7 @@ const Index = () => {
     booleanOperator: "AND",
     minMarketImpact: 0,
   });
+  const [situationRoomMode, setSituationRoomMode] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -143,7 +146,10 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-surface-sunken">
+    <div className={cn(
+      "min-h-screen transition-all duration-500",
+      situationRoomMode ? "bg-surface-command-dark" : "bg-surface-sunken"
+    )}>
       <SearchHeader 
         query={query}
         setQuery={setQuery}
@@ -152,63 +158,115 @@ const Index = () => {
         user={user}
         onHistoryClick={() => navigate("/history")}
         onSignOut={handleSignOut}
+        situationRoomMode={situationRoomMode}
+        onSituationRoomToggle={() => setSituationRoomMode(!situationRoomMode)}
       />
       
-      <div className="container mx-auto px-6 py-8 space-y-8">
+      <div className={cn(
+        "container mx-auto px-6 py-8 space-y-8 transition-all duration-300",
+        situationRoomMode && "py-6 space-y-6"
+      )}>
         
-        {/* Filters Section */}
-        <div className="bg-card rounded-xl border border-border/30 shadow-card p-6">
-          <SearchFilters 
-            sources={sources} 
-            setSources={setSources} 
-            maxResults={maxResults} 
-            setMaxResults={setMaxResults} 
-          />
-        </div>
-        <div className="bg-card rounded-xl border border-border/30 shadow-card p-6">
-          <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
-        </div>
-        
-        {hasSearched && (
+        {/* Filters Section - Hidden in Situation Room */}
+        {!situationRoomMode && (
           <>
-            <StatsCards counts={getCounts()} isSearching={isSearching} />
-            
-            {/* AI Insights & Competitive Landscape Row */}
-            <div className="grid lg:grid-cols-2 gap-8">
-              <div className="max-h-[560px] overflow-y-auto">
-                <SynthesisPanel 
-                  synthesis={synthesis}
-                  isSearching={isSynthesizing}
-                  query={query}
-                  results={results}
-                />
-              </div>
-              {synthesis && results.length > 0 && (
-                <div className="max-h-[560px] overflow-y-auto">
-                  <CompetitiveLandscape results={results} synthesis={synthesis} />
-                </div>
-              )}
+            <div className="bg-card rounded-xl border border-border/30 shadow-card p-6">
+              <SearchFilters 
+                sources={sources} 
+                setSources={setSources} 
+                maxResults={maxResults} 
+                setMaxResults={setMaxResults} 
+              />
             </div>
-            
-            <DataVisualization results={results} isLoading={isSearching} query={query} />
-            
-            {/* Search Results & Document AI Row */}
-            <div className="grid lg:grid-cols-2 gap-8">
-              <div className="max-h-[640px] overflow-y-auto">
-                <ResultsTabs 
-                  results={results} 
-                  isSearching={isSearching}
-                  query={query}
-                />
-              </div>
-              <div className="max-h-[640px] overflow-y-auto">
-                <DocumentChat />
-              </div>
+            <div className="bg-card rounded-xl border border-border/30 shadow-card p-6">
+              <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
             </div>
           </>
         )}
         
-        {!hasSearched && (
+        {hasSearched && (
+          <>
+            {/* KPI Cards - Always visible, enhanced in Situation Room */}
+            <StatsCards 
+              counts={getCounts()} 
+              isSearching={isSearching} 
+              situationRoomMode={situationRoomMode}
+            />
+            
+            {/* Situation Room: Executive Brief takes center stage */}
+            {situationRoomMode ? (
+              <>
+                {/* Executive Intelligence Brief - Hero in Situation Room */}
+                <div className="max-h-[70vh] overflow-y-auto">
+                  <SynthesisPanel 
+                    synthesis={synthesis}
+                    isSearching={isSynthesizing}
+                    query={query}
+                    results={results}
+                    situationRoomMode={situationRoomMode}
+                  />
+                </div>
+                
+                {/* Competitive Landscape - Full Width in Situation Room */}
+                {synthesis && results.length > 0 && (
+                  <div className="max-h-[50vh] overflow-y-auto">
+                    <CompetitiveLandscape 
+                      results={results} 
+                      synthesis={synthesis} 
+                      situationRoomMode={situationRoomMode}
+                    />
+                  </div>
+                )}
+                
+                {/* Data Visualization - Condensed in Situation Room */}
+                <DataVisualization 
+                  results={results} 
+                  isLoading={isSearching} 
+                  query={query}
+                  situationRoomMode={situationRoomMode}
+                />
+              </>
+            ) : (
+              <>
+                {/* Normal Mode Layout */}
+                {/* AI Insights & Competitive Landscape Row */}
+                <div className="grid lg:grid-cols-2 gap-8">
+                  <div className="max-h-[560px] overflow-y-auto">
+                    <SynthesisPanel 
+                      synthesis={synthesis}
+                      isSearching={isSynthesizing}
+                      query={query}
+                      results={results}
+                    />
+                  </div>
+                  {synthesis && results.length > 0 && (
+                    <div className="max-h-[560px] overflow-y-auto">
+                      <CompetitiveLandscape results={results} synthesis={synthesis} />
+                    </div>
+                  )}
+                </div>
+                
+                <DataVisualization results={results} isLoading={isSearching} query={query} />
+                
+                {/* Search Results & Document AI Row */}
+                <div className="grid lg:grid-cols-2 gap-8">
+                  <div className="max-h-[640px] overflow-y-auto">
+                    <ResultsTabs 
+                      results={results} 
+                      isSearching={isSearching}
+                      query={query}
+                    />
+                  </div>
+                  <div className="max-h-[640px] overflow-y-auto">
+                    <DocumentChat />
+                  </div>
+                </div>
+              </>
+            )}
+          </>
+        )}
+        
+        {!hasSearched && !situationRoomMode && (
           <div className="space-y-10">
             <div className="text-center py-16">
               <div className="max-w-2xl mx-auto space-y-5">
@@ -250,6 +308,24 @@ const Index = () => {
                 <DocumentUpload />
               </TabsContent>
             </Tabs>
+          </div>
+        )}
+
+        {/* Situation Room - No search state message */}
+        {!hasSearched && situationRoomMode && (
+          <div className="text-center py-20">
+            <div className="max-w-lg mx-auto space-y-4">
+              <h2 className="text-2xl font-bold text-foreground">No Active Intelligence</h2>
+              <p className="text-muted-foreground">
+                Run a search to populate the Situation Room with live market intelligence.
+              </p>
+              <button 
+                onClick={() => setSituationRoomMode(false)}
+                className="mt-4 px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              >
+                Exit Situation Room
+              </button>
+            </div>
           </div>
         )}
       </div>

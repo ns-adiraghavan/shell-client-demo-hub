@@ -3,10 +3,12 @@ import { Badge } from "@/components/ui/badge";
 import { SearchResult } from "@/lib/searchService";
 import { Building2, Globe, FlaskConical, Lightbulb, Factory, Handshake, ShoppingCart, FileText, Rocket, Zap } from "lucide-react";
 import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 
 interface CompetitiveLandscapeProps {
   results: SearchResult[];
   synthesis: string;
+  situationRoomMode?: boolean;
 }
 
 interface CompanyStage {
@@ -124,7 +126,7 @@ function extractCompanyContext(text: string, company: string): string {
   return text.slice(start, end);
 }
 
-export const CompetitiveLandscape = ({ results, synthesis }: CompetitiveLandscapeProps) => {
+export const CompetitiveLandscape = ({ results, synthesis, situationRoomMode = false }: CompetitiveLandscapeProps) => {
   const companies = useMemo(() => extractCompanies(results, synthesis), [results, synthesis]);
   
   if (companies.length === 0) {
@@ -142,64 +144,67 @@ export const CompetitiveLandscape = ({ results, synthesis }: CompetitiveLandscap
   }, [companies]);
 
   return (
-    <Card className="mt-6">
-      <CardHeader>
+    <Card className={cn("mt-6", situationRoomMode && "bg-surface-dark border-border/40 shadow-intel")}>
+      <CardHeader className={cn(situationRoomMode && "pb-6")}>
         <div className="flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-primary" />
-          <CardTitle className="text-lg">Competitive Landscape</CardTitle>
+          <Building2 className={cn("text-primary", situationRoomMode ? "h-6 w-6" : "h-5 w-5")} />
+          <CardTitle className={cn(situationRoomMode ? "text-xl" : "text-lg")}>Competitive Landscape</CardTitle>
         </div>
-        <CardDescription>Innovation stages across market players</CardDescription>
+        <CardDescription className={cn(situationRoomMode && "text-base")}>Innovation stages across market players</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 overflow-x-auto">
         {/* Stage Legend */}
-        <div className="flex flex-wrap gap-2 pb-4 border-b">
+        <div className={cn("flex flex-wrap gap-2 pb-4 border-b border-border/30", situationRoomMode && "gap-3")}>
           {STAGES.map((stage, idx) => (
-            <div key={stage.name} className="flex items-center gap-1 text-xs">
-              <div className={`w-3 h-3 rounded-full ${stage.color}`} />
+            <div key={stage.name} className={cn("flex items-center gap-1", situationRoomMode ? "text-sm" : "text-xs")}>
+              <div className={cn("rounded-full", stage.color, situationRoomMode ? "w-4 h-4" : "w-3 h-3")} />
               <span className="text-muted-foreground">{stage.name}</span>
             </div>
           ))}
         </div>
 
         {/* Company Timeline */}
-        <div className="space-y-4 min-w-[600px]">
+        <div className={cn("space-y-4 min-w-[600px]", situationRoomMode && "space-y-6")}>
           {companies.map((company) => (
-            <div key={company.name} className="flex items-center gap-4">
-              <div className="flex items-center gap-2 w-44 flex-shrink-0">
+            <div key={company.name} className={cn("flex items-center gap-4", situationRoomMode && "gap-6")}>
+              <div className={cn("flex items-center gap-2 flex-shrink-0", situationRoomMode ? "w-56 gap-3" : "w-44")}>
                 <img 
                   src={getCompanyLogo(company.name)} 
                   alt={company.name}
-                  className="w-8 h-8 rounded object-contain bg-white p-0.5 border"
+                  className={cn(
+                    "rounded object-contain bg-white p-0.5 border",
+                    situationRoomMode ? "w-12 h-12" : "w-8 h-8"
+                  )}
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=random&size=32`;
                   }}
                 />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{company.name}</p>
-                  <p className="text-xs text-muted-foreground">{company.geography}</p>
+                  <p className={cn("font-medium truncate", situationRoomMode ? "text-base" : "text-sm")}>{company.name}</p>
+                  <p className={cn("text-muted-foreground", situationRoomMode ? "text-sm" : "text-xs")}>{company.geography}</p>
                 </div>
               </div>
               
               <div className="flex-1 relative min-w-[300px]">
-                <div className="flex items-center h-10">
-                  {/* Progress bar background */}
+                <div className={cn("flex items-center", situationRoomMode ? "h-14" : "h-10")}>
                   <div className="absolute inset-y-0 left-0 right-0 flex items-center">
-                    <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
+                    <div className={cn("w-full bg-muted rounded-full overflow-hidden", situationRoomMode ? "h-5" : "h-3")}>
                       <div 
-                        className={`h-full ${STAGES[company.stage].color} transition-all duration-500`}
+                        className={cn("h-full transition-all duration-500", STAGES[company.stage].color)}
                         style={{ width: `${((company.stage + 1) / STAGES.length) * 100}%` }}
                       />
                     </div>
                   </div>
                   
-                  {/* Stage markers */}
                   <div className="absolute inset-0 flex justify-between items-center px-1">
                     {STAGES.map((stage, idx) => (
                       <div 
                         key={stage.name}
-                        className={`w-4 h-4 rounded-full border-2 border-background z-10 ${
-                          idx <= company.stage ? stage.color : 'bg-muted'
-                        }`}
+                        className={cn(
+                          "rounded-full border-2 border-background z-10",
+                          idx <= company.stage ? stage.color : 'bg-muted',
+                          situationRoomMode ? "w-6 h-6" : "w-4 h-4"
+                        )}
                         title={stage.name}
                       />
                     ))}
@@ -207,7 +212,10 @@ export const CompetitiveLandscape = ({ results, synthesis }: CompetitiveLandscap
                 </div>
               </div>
               
-              <Badge variant="outline" className="ml-3 flex-shrink-0 min-w-[90px] justify-center">
+              <Badge variant="outline" className={cn(
+                "ml-3 flex-shrink-0 justify-center",
+                situationRoomMode ? "min-w-[110px] text-sm py-1.5" : "min-w-[90px]"
+              )}>
                 {company.stageName}
               </Badge>
             </div>
@@ -215,14 +223,14 @@ export const CompetitiveLandscape = ({ results, synthesis }: CompetitiveLandscap
         </div>
 
         {/* Geographic Distribution */}
-        <div className="pt-4 border-t">
+        <div className="pt-4 border-t border-border/30">
           <div className="flex items-center gap-2 mb-3">
-            <Globe className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Geographic Distribution</span>
+            <Globe className={cn("text-muted-foreground", situationRoomMode ? "h-5 w-5" : "h-4 w-4")} />
+            <span className={cn("font-medium", situationRoomMode ? "text-base" : "text-sm")}>Geographic Distribution</span>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className={cn("flex flex-wrap gap-2", situationRoomMode && "gap-3")}>
             {Array.from(geographies.entries()).map(([geo, geoCompanies]) => (
-              <Badge key={geo} variant="secondary" className="flex items-center gap-1">
+              <Badge key={geo} variant="secondary" className={cn("flex items-center gap-1", situationRoomMode && "text-sm py-1")}>
                 {geo}
                 <span className="bg-primary/20 text-primary px-1.5 rounded-full text-xs">
                   {geoCompanies.length}
