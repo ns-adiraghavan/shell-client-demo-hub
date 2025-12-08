@@ -138,11 +138,11 @@ export const CompetitiveLandscape = ({ results, synthesis }: CompetitiveLandscap
   }, [companies]);
 
   return (
-    <Card className="mt-6">
-      <CardHeader>
+    <Card>
+      <CardHeader className="pb-4">
         <div className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-primary" />
-          <CardTitle className="text-lg">Competitive Landscape</CardTitle>
+          <CardTitle className="text-lg">Development Pipeline</CardTitle>
         </div>
         <CardDescription>Development stages across market players</CardDescription>
       </CardHeader>

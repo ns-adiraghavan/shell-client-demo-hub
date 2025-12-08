@@ -6,10 +6,21 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, FileText, Loader2, Sparkles, ListChecks, GitCompare, BarChart3 } from "lucide-react";
+import { Send, FileText, Loader2, Sparkles, ListChecks, GitCompare, BarChart3, Trash2, RefreshCw } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import ReactMarkdown from "react-markdown";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -19,12 +30,14 @@ interface Message {
 interface Document {
   id: string;
   filename: string;
+  storage_path?: string;
 }
 
 export const DocumentChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedDocument, setSelectedDocument] = useState<string>("all");
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
@@ -47,7 +60,7 @@ export const DocumentChat = () => {
   const loadDocuments = async () => {
     const { data, error } = await supabase
       .from('uploaded_documents')
-      .select('id, filename')
+      .select('id, filename, storage_path')
       .eq('status', 'uploaded')
       .order('created_at', { ascending: false });
 
@@ -57,6 +70,44 @@ export const DocumentChat = () => {
     }
 
     setDocuments(data || []);
+  };
+
+  const deleteDocument = async (docId: string, storagePath?: string) => {
+    setIsDeleting(true);
+    try {
+      // Delete from storage if path exists
+      if (storagePath) {
+        const { error: storageError } = await supabase.storage
+          .from('research-documents')
+          .remove([storagePath]);
+        
+        if (storageError) {
+          console.error('Storage deletion error:', storageError);
+        }
+      }
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('uploaded_documents')
+        .delete()
+        .eq('id', docId);
+
+      if (dbError) throw dbError;
+
+      // Update local state
+      setDocuments(prev => prev.filter(d => d.id !== docId));
+      setSelectedDocuments(prev => prev.filter(id => id !== docId));
+      if (selectedDocument === docId) {
+        setSelectedDocument("all");
+      }
+      
+      toast.success("Document deleted successfully");
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast.error("Failed to delete document");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const sendMessage = async () => {
@@ -228,15 +279,77 @@ export const DocumentChat = () => {
   };
 
   return (
-    <Card className="h-[600px] flex flex-col">
+    <Card className="flex flex-col">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          Document AI Assistant
-        </CardTitle>
-        <CardDescription>
-          Chat, summarize, and analyze your research papers
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Document AI Assistant
+            </CardTitle>
+            <CardDescription>
+              Chat, summarize, and analyze your research papers
+            </CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadDocuments}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
+            {documents.length > 0 && (
+              <span className="text-sm text-muted-foreground">
+                {documents.length} document{documents.length !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+        </div>
+        
+        {/* Document Management Section */}
+        {documents.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <p className="text-sm font-medium">Uploaded Documents:</p>
+            <div className="max-h-32 overflow-y-auto space-y-1 border rounded-md p-2 bg-muted/30">
+              {documents.map(doc => (
+                <div key={doc.id} className="flex items-center justify-between gap-2 py-1 px-2 rounded hover:bg-muted/50">
+                  <span className="text-sm truncate flex-1">{doc.filename}</span>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                        disabled={isDeleting}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Document</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{doc.filename}"? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteDocument(doc.id, doc.storage_path)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         <Tabs defaultValue="chat" className="flex-1 flex flex-col">
