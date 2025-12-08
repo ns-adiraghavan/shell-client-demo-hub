@@ -38,9 +38,9 @@ const Index = () => {
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilterOptions>({
     dateFrom: "",
     dateTo: "",
-    studyTypes: [],
+    insightCategories: [],
     booleanOperator: "AND",
-    minImpactFactor: 0,
+    minMarketImpact: 0,
   });
 
   useEffect(() => {
