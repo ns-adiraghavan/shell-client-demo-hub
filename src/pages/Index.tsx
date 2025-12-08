@@ -21,7 +21,7 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState<any>(null);
-  const [query, setQuery] = useState("semaglutide Parkinson's disease");
+  const [query, setQuery] = useState("Renewable Energy Hydrogen Storage");
   const [isSearching, setIsSearching] = useState(false);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -209,37 +209,36 @@ const Index = () => {
             <div className="text-center py-12">
               <div className="max-w-2xl mx-auto space-y-4">
                 <h2 className="text-3xl font-bold text-foreground">
-                  Welcome to PharmaAI Research Dashboard
+                  Welcome to Market Insights Engine
                 </h2>
                 <p className="text-lg text-muted-foreground">
-                  Search across PubMed, ClinicalTrials.gov, arXiv, and patent databases. 
-                  Get AI-powered synthesis of biomedical literature.
+                  Track business updates, innovation, investments, partnerships, research, and patents across global markets in one intelligent workspace.
                 </p>
                 <div className="pt-6">
                   <button 
                     onClick={() => handleSearch()}
                     className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
                   >
-                    Start Your Search
+                    Start Intelligence Scan
                   </button>
                 </div>
               </div>
             </div>
 
             <Tabs defaultValue="search" className="max-w-4xl mx-auto">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-2 bg-secondary/30">
                 <TabsTrigger value="search">Quick Start</TabsTrigger>
                 <TabsTrigger value="upload">Upload Documents</TabsTrigger>
               </TabsList>
               <TabsContent value="search" className="space-y-4 pt-4">
-                <div className="text-center p-8 bg-card rounded-lg border">
-                  <h3 className="text-xl font-semibold mb-3">How to Use</h3>
-                  <ol className="text-left max-w-md mx-auto space-y-2 text-muted-foreground">
-                    <li>1. Enter your research topic or drug-disease query above</li>
-                    <li>2. Select which databases to search</li>
-                    <li>3. Click Search to get results from multiple sources</li>
-                    <li>4. Review the AI-generated synthesis and detailed results</li>
-                    <li>5. Export your findings as PDF or CSV</li>
+                <div className="text-center p-8 bg-card rounded-lg border border-border/50">
+                  <h3 className="text-xl font-semibold mb-3 text-foreground">How to Use</h3>
+                  <ol className="text-left max-w-lg mx-auto space-y-2 text-muted-foreground">
+                    <li>1. Enter your market, technology, or competitive keyword above</li>
+                    <li>2. Select intelligence sources (Research, Projects, Patents, News)</li>
+                    <li>3. Click Search to aggregate insights across multiple sources</li>
+                    <li>4. Review AI-generated strategic synthesis and competitive landscape</li>
+                    <li>5. Export executive reports as PDF or raw data as CSV</li>
                   </ol>
                 </div>
               </TabsContent>
