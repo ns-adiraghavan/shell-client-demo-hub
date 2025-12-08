@@ -11,7 +11,7 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { DocumentUpload } from "@/components/dashboard/DocumentUpload";
 import { DataVisualization } from "@/components/dashboard/DataVisualization";
 import { DocumentChat } from "@/components/dashboard/DocumentChat";
-import { SituationRoomToggle } from "@/components/dashboard/SituationRoomToggle";
+import { SectionNavigation } from "@/components/dashboard/SectionNavigation";
 import { Button } from "@/components/ui/button";
 import { searchAllSources, synthesizeResults, saveSearch, SearchResult } from "@/lib/searchService";
 import { toast } from "sonner";
@@ -186,12 +186,19 @@ const Index = () => {
         
         {hasSearched && (
           <>
+            {/* Jump-to Navigation */}
+            {!situationRoomMode && (
+              <SectionNavigation hasResults={hasSearched} hasSynthesis={!!synthesis} />
+            )}
+            
             {/* KPI Cards - Always visible, enhanced in Situation Room */}
-            <StatsCards 
-              counts={getCounts()} 
-              isSearching={isSearching} 
-              situationRoomMode={situationRoomMode}
-            />
+            <div id="stats">
+              <StatsCards 
+                counts={getCounts()} 
+                isSearching={isSearching} 
+                situationRoomMode={situationRoomMode}
+              />
+            </div>
             
             {/* Situation Room: Executive Brief takes center stage */}
             {situationRoomMode ? (
@@ -229,35 +236,37 @@ const Index = () => {
             ) : (
               <>
                 {/* Normal Mode Layout */}
-                {/* AI Insights & Competitive Landscape Row */}
-                <div className="grid lg:grid-cols-2 gap-8">
-                  <div className="max-h-[560px] overflow-y-auto">
-                    <SynthesisPanel 
-                      synthesis={synthesis}
-                      isSearching={isSynthesizing}
-                      query={query}
-                      results={results}
-                    />
-                  </div>
-                  {synthesis && results.length > 0 && (
-                    <div className="max-h-[560px] overflow-y-auto">
-                      <CompetitiveLandscape results={results} synthesis={synthesis} />
-                    </div>
-                  )}
+                {/* Executive Intelligence Brief - Full Width */}
+                <div id="synthesis" className="max-h-[560px] overflow-y-auto">
+                  <SynthesisPanel 
+                    synthesis={synthesis}
+                    isSearching={isSynthesizing}
+                    query={query}
+                    results={results}
+                  />
                 </div>
                 
-                <DataVisualization results={results} isLoading={isSearching} query={query} />
+                {/* Competitive Landscape - Full Width */}
+                {synthesis && results.length > 0 && (
+                  <div id="landscape" className="max-h-[560px] overflow-y-auto">
+                    <CompetitiveLandscape results={results} synthesis={synthesis} />
+                  </div>
+                )}
+                
+                <div id="visualization">
+                  <DataVisualization results={results} isLoading={isSearching} query={query} />
+                </div>
                 
                 {/* Search Results & Document AI Row */}
                 <div className="grid lg:grid-cols-2 gap-8">
-                  <div className="max-h-[640px] overflow-y-auto">
+                  <div id="results" className="max-h-[640px] overflow-y-auto">
                     <ResultsTabs 
                       results={results} 
                       isSearching={isSearching}
                       query={query}
                     />
                   </div>
-                  <div className="max-h-[640px] overflow-y-auto">
+                  <div id="documents" className="max-h-[640px] overflow-y-auto">
                     <DocumentChat />
                   </div>
                 </div>
@@ -268,22 +277,15 @@ const Index = () => {
         
         {!hasSearched && !situationRoomMode && (
           <div className="space-y-10">
-            <div className="text-center py-16">
-              <div className="max-w-2xl mx-auto space-y-5">
+            {/* Welcome Message - Above Search */}
+            <div className="text-center pt-8 pb-4">
+              <div className="max-w-2xl mx-auto space-y-3">
                 <h2 className="text-display text-foreground">
                   Welcome to Market Insights Engine
                 </h2>
                 <p className="text-subtitle text-muted-foreground">
                   Track business updates, innovation, investments, partnerships, research, and patents across global markets in one intelligent workspace.
                 </p>
-                <div className="pt-8">
-                  <button 
-                    onClick={() => handleSearch()}
-                    className="px-10 py-3.5 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors shadow-elevated"
-                  >
-                    Start Intelligence Scan
-                  </button>
-                </div>
               </div>
             </div>
 

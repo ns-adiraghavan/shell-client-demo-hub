@@ -14,6 +14,7 @@ interface SearchHeaderProps {
   onSignOut?: () => void;
   situationRoomMode?: boolean;
   onSituationRoomToggle?: () => void;
+  showWelcome?: boolean;
 }
 
 export const SearchHeader = ({
@@ -25,7 +26,8 @@ export const SearchHeader = ({
   onHistoryClick,
   onSignOut,
   situationRoomMode = false,
-  onSituationRoomToggle
+  onSituationRoomToggle,
+  showWelcome = false
 }: SearchHeaderProps) => {
   return (
     <header className={cn(

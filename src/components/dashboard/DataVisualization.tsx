@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SearchResult } from "@/lib/searchService";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Brain, TrendingUp, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { format, parseISO } from "date-fns";
 
 interface DataVisualizationProps {
   results: SearchResult[];
@@ -40,20 +41,32 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
   const [chartAnalysis, setChartAnalysis] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Process publication dates over time
-  const dateData = results
-    .filter(r => r.date)
-    .reduce((acc, result) => {
-      const year = new Date(result.date!).getFullYear();
-      if (!isNaN(year) && year > 1990) {
-        acc[year] = (acc[year] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<number, number>);
+  // Process publication dates over time - grouped by month
+  const publicationTrend = useMemo(() => {
+    const dateData = results
+      .filter(r => r.date)
+      .reduce((acc, result) => {
+        try {
+          const date = new Date(result.date!);
+          if (!isNaN(date.getTime()) && date.getFullYear() > 1990) {
+            // Group by month-year
+            const monthYear = format(date, "MMM yy");
+            const sortKey = format(date, "yyyy-MM");
+            if (!acc[sortKey]) {
+              acc[sortKey] = { monthYear, count: 0, sortKey };
+            }
+            acc[sortKey].count += 1;
+          }
+        } catch (e) {
+          // Skip invalid dates
+        }
+        return acc;
+      }, {} as Record<string, { monthYear: string; count: number; sortKey: string }>);
 
-  const publicationTrend = Object.entries(dateData)
-    .map(([year, count]) => ({ year: year.toString(), publications: count }))
-    .sort((a, b) => parseInt(a.year) - parseInt(b.year));
+    return Object.values(dateData)
+      .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
+      .map(({ monthYear, count }) => ({ monthYear, publications: count }));
+  }, [results]);
 
   // Process source breakdown
   const sourceData = results.reduce((acc, result) => {
@@ -194,26 +207,31 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
               <p className="text-xs text-secondary-foreground mt-2 italic">"Market signals remained flat for a decade before sharp acceleration post-2022."</p>
             </div>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={publicationTrend} margin={{ top: 20, right: 30, left: 20, bottom: 60 }} style={{ background: 'transparent' }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 12% 25%)" strokeOpacity={0.5} />
+              <BarChart data={publicationTrend} margin={{ top: 20, right: 30, left: 50, bottom: 60 }} style={{ background: 'transparent' }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 12% 25%)" strokeOpacity={0.5} vertical={false} />
                 <XAxis 
-                  dataKey="year" 
+                  dataKey="monthYear" 
                   stroke="hsl(var(--muted-foreground))"
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
                   angle={-45}
                   textAnchor="end"
                   height={60}
                   interval={0}
+                  axisLine={{ stroke: 'hsl(220 12% 25%)' }}
+                  tickLine={{ stroke: 'hsl(220 12% 25%)' }}
                 />
                 <YAxis 
                   stroke="hsl(var(--muted-foreground))"
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-                  width={40}
+                  width={50}
+                  axisLine={{ stroke: 'hsl(220 12% 25%)' }}
+                  tickLine={{ stroke: 'hsl(220 12% 25%)' }}
                   label={{ 
-                    value: 'Signals', 
+                    value: 'Publications', 
                     angle: -90, 
                     position: 'insideLeft',
-                    style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12, fontWeight: 600 }
+                    style: { fill: 'hsl(var(--muted-foreground))', fontSize: 11, fontWeight: 500 },
+                    dx: -10
                   }}
                 />
                 <Tooltip 
@@ -225,7 +243,7 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
                     fontSize: '12px',
                     boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
                   }}
-                  formatter={(value: number) => [value, 'Signals']}
+                  formatter={(value: number) => [value, 'Publications']}
                 />
                 <Legend 
                   wrapperStyle={{ 
@@ -233,16 +251,14 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
                     paddingTop: '20px'
                   }} 
                 />
-                <Line 
-                  type="monotone" 
+                <Bar 
                   dataKey="publications" 
-                  stroke="hsl(var(--primary))" 
-                  strokeWidth={3}
-                  dot={{ fill: 'hsl(var(--primary))', r: 5, strokeWidth: 2, stroke: 'hsl(var(--card))' }}
-                  activeDot={{ r: 7, fill: 'hsl(var(--primary))', stroke: 'hsl(var(--card))', strokeWidth: 2 }}
-                  name="Market Signals per Year"
+                  fill="hsl(210 100% 50%)" 
+                  radius={[2, 2, 0, 0]}
+                  name="Publications"
+                  maxBarSize={30}
                 />
-              </LineChart>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         )}
@@ -255,35 +271,67 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
               <p className="text-sm text-muted-foreground mt-1">Where intelligence is being captured from</p>
               <p className="text-xs text-secondary-foreground mt-2 italic">"Balanced coverage across research, patents, and market news."</p>
             </div>
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart margin={{ top: 10, right: 80, left: 80, bottom: 10 }} style={{ background: 'transparent' }}>
-                <Pie
-                  data={sourceBreakdown}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={true}
-                  label={CustomLabel}
-                  outerRadius={70}
-                  fill="hsl(var(--primary))"
-                  dataKey="value"
-                >
-                  {sourceBreakdown.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    color: 'hsl(var(--foreground))',
-                    fontSize: '12px',
-                    boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
-                  }}
-                  formatter={(value: number, name: string) => [value, name]}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="flex items-start gap-6">
+              <ResponsiveContainer width="55%" height={220}>
+                <PieChart style={{ background: 'transparent' }}>
+                  <Pie
+                    data={sourceBreakdown}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="hsl(var(--primary))"
+                    dataKey="value"
+                  >
+                    {sourceBreakdown.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      color: 'hsl(var(--foreground))',
+                      fontSize: '12px',
+                      boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
+                    }}
+                    formatter={(value: number, name: string) => [value, name]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              {/* Legend Table */}
+              <div className="flex-1">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border/30">
+                      <th className="text-left py-2 text-muted-foreground font-medium">Source</th>
+                      <th className="text-right py-2 text-muted-foreground font-medium">Count</th>
+                      <th className="text-right py-2 text-muted-foreground font-medium">%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sourceBreakdown.map((entry, index) => {
+                      const total = sourceBreakdown.reduce((acc, e) => acc + e.value, 0);
+                      const percentage = total > 0 ? ((entry.value / total) * 100).toFixed(0) : 0;
+                      return (
+                        <tr key={entry.name} className="border-b border-border/20">
+                          <td className="py-2 flex items-center gap-2">
+                            <div 
+                              className="w-3 h-3 rounded-sm" 
+                              style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                            />
+                            <span className="text-foreground">{entry.name}</span>
+                          </td>
+                          <td className="text-right py-2 text-foreground font-medium">{entry.value}</td>
+                          <td className="text-right py-2 text-muted-foreground">{percentage}%</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           {/* Execution & Commercialization Stages */}
