@@ -169,29 +169,36 @@ const Index = () => {
           <>
             <StatsCards counts={getCounts()} isSearching={isSearching} />
             
+            {/* AI Insights & Competitive Landscape Row */}
+            <div className="grid lg:grid-cols-2 gap-6">
+              <div className="max-h-[500px] overflow-y-auto">
+                <SynthesisPanel 
+                  synthesis={synthesis}
+                  isSearching={isSynthesizing}
+                  query={query}
+                  results={results}
+                />
+              </div>
+              {synthesis && results.length > 0 && (
+                <div className="max-h-[500px] overflow-y-auto">
+                  <CompetitiveLandscape results={results} synthesis={synthesis} />
+                </div>
+              )}
+            </div>
+            
             <DataVisualization results={results} isLoading={isSearching} query={query} />
             
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
+            {/* Search Results & Document AI Row */}
+            <div className="grid lg:grid-cols-2 gap-6">
+              <div className="max-h-[600px] overflow-y-auto">
                 <ResultsTabs 
                   results={results} 
                   isSearching={isSearching}
                   query={query}
                 />
-                <DocumentChat />
               </div>
-              <div className="lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-hidden flex flex-col space-y-4">
-                <div className="flex-1 overflow-y-auto">
-                  <SynthesisPanel 
-                    synthesis={synthesis}
-                    isSearching={isSynthesizing}
-                    query={query}
-                    results={results}
-                  />
-                </div>
-                {synthesis && results.length > 0 && (
-                  <CompetitiveLandscape results={results} synthesis={synthesis} />
-                )}
+              <div className="max-h-[600px] overflow-y-auto">
+                <DocumentChat />
               </div>
             </div>
           </>
