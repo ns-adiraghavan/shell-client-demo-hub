@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Send, FileText, Loader2, Sparkles, ListChecks, GitCompare, BarChart3 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -366,9 +367,20 @@ export const DocumentChat = () => {
 
             {summary && (
               <ScrollArea className="flex-1 pr-4">
-                <div className="bg-muted rounded-lg p-4">
+                <div className="bg-muted rounded-lg p-4 prose prose-sm max-w-none dark:prose-invert">
                   <h4 className="font-semibold mb-2">Summary</h4>
-                  <p className="whitespace-pre-wrap text-sm">{summary}</p>
+                  <ReactMarkdown
+                    components={{
+                      h2: ({ children }) => <h2 className="text-base font-semibold mt-4 mb-2 text-primary">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-sm font-semibold mt-3 mb-1.5">{children}</h3>,
+                      p: ({ children }) => <p className="text-sm leading-relaxed mb-2">{children}</p>,
+                      ul: ({ children }) => <ul className="text-sm space-y-1 mb-2 list-disc pl-4">{children}</ul>,
+                      li: ({ children }) => <li>{children}</li>,
+                      strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                    }}
+                  >
+                    {summary}
+                  </ReactMarkdown>
                 </div>
               </ScrollArea>
             )}
@@ -405,9 +417,20 @@ export const DocumentChat = () => {
 
             {keyFindings && (
               <ScrollArea className="flex-1 pr-4">
-                <div className="bg-muted rounded-lg p-4">
+                <div className="bg-muted rounded-lg p-4 prose prose-sm max-w-none dark:prose-invert">
                   <h4 className="font-semibold mb-2">Key Findings</h4>
-                  <p className="whitespace-pre-wrap text-sm">{keyFindings}</p>
+                  <ReactMarkdown
+                    components={{
+                      h2: ({ children }) => <h2 className="text-base font-semibold mt-4 mb-2 text-primary">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-sm font-semibold mt-3 mb-1.5">{children}</h3>,
+                      p: ({ children }) => <p className="text-sm leading-relaxed mb-2">{children}</p>,
+                      ul: ({ children }) => <ul className="text-sm space-y-1 mb-2 list-disc pl-4">{children}</ul>,
+                      li: ({ children }) => <li>{children}</li>,
+                      strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                    }}
+                  >
+                    {keyFindings}
+                  </ReactMarkdown>
                 </div>
               </ScrollArea>
             )}
@@ -474,9 +497,20 @@ export const DocumentChat = () => {
 
             {comparison && (
               <ScrollArea className="flex-1 pr-4">
-                <div className="bg-muted rounded-lg p-4">
+                <div className="bg-muted rounded-lg p-4 prose prose-sm max-w-none dark:prose-invert">
                   <h4 className="font-semibold mb-2">Comparative Analysis</h4>
-                  <p className="whitespace-pre-wrap text-sm">{comparison}</p>
+                  <ReactMarkdown
+                    components={{
+                      h2: ({ children }) => <h2 className="text-base font-semibold mt-4 mb-2 text-primary">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-sm font-semibold mt-3 mb-1.5">{children}</h3>,
+                      p: ({ children }) => <p className="text-sm leading-relaxed mb-2">{children}</p>,
+                      ul: ({ children }) => <ul className="text-sm space-y-1 mb-2 list-disc pl-4">{children}</ul>,
+                      li: ({ children }) => <li>{children}</li>,
+                      strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                    }}
+                  >
+                    {comparison}
+                  </ReactMarkdown>
                 </div>
               </ScrollArea>
             )}
@@ -543,9 +577,20 @@ export const DocumentChat = () => {
 
             {metaAnalysis && (
               <ScrollArea className="flex-1 pr-4">
-                <div className="bg-muted rounded-lg p-4">
+                <div className="bg-muted rounded-lg p-4 prose prose-sm max-w-none dark:prose-invert">
                   <h4 className="font-semibold mb-2">Meta-Analysis Report</h4>
-                  <p className="whitespace-pre-wrap text-sm">{metaAnalysis}</p>
+                  <ReactMarkdown
+                    components={{
+                      h2: ({ children }) => <h2 className="text-base font-semibold mt-4 mb-2 text-primary">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-sm font-semibold mt-3 mb-1.5">{children}</h3>,
+                      p: ({ children }) => <p className="text-sm leading-relaxed mb-2">{children}</p>,
+                      ul: ({ children }) => <ul className="text-sm space-y-1 mb-2 list-disc pl-4">{children}</ul>,
+                      li: ({ children }) => <li>{children}</li>,
+                      strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                    }}
+                  >
+                    {metaAnalysis}
+                  </ReactMarkdown>
                 </div>
               </ScrollArea>
             )}

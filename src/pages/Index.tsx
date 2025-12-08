@@ -192,13 +192,15 @@ const Index = () => {
                 />
                 <DocumentChat />
               </div>
-              <div className="space-y-4">
-                <SynthesisPanel 
-                  synthesis={synthesis}
-                  isSearching={isSynthesizing}
-                  query={query}
-                  results={results}
-                />
+              <div className="lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-hidden flex flex-col space-y-4">
+                <div className="flex-1 overflow-y-auto">
+                  <SynthesisPanel 
+                    synthesis={synthesis}
+                    isSearching={isSynthesizing}
+                    query={query}
+                    results={results}
+                  />
+                </div>
                 {synthesis && results.length > 0 && (
                   <CompetitiveLandscape results={results} synthesis={synthesis} />
                 )}

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,44 +20,119 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
+    // Initialize Supabase client to fetch document info
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Fetch document details for context
+    let documentContext = '';
+    let documentNames: string[] = [];
+    
+    if (documentIds && documentIds.length > 0) {
+      const { data: docs } = await supabase
+        .from('uploaded_documents')
+        .select('id, filename')
+        .in('id', documentIds);
+      
+      if (docs && docs.length > 0) {
+        documentNames = docs.map(d => d.filename);
+        documentContext = `\n\nDocuments being analyzed:\n${documentNames.map((name, i) => `${i + 1}. ${name}`).join('\n')}`;
+      }
+    } else if (documentId && documentId !== 'all') {
+      const { data: doc } = await supabase
+        .from('uploaded_documents')
+        .select('id, filename')
+        .eq('id', documentId)
+        .single();
+      
+      if (doc) {
+        documentNames = [doc.filename];
+        documentContext = `\n\nDocument being analyzed: ${doc.filename}`;
+      }
+    }
+
     let systemPrompt = '';
     let userPrompt = '';
 
     // Configure prompts based on mode
     switch (mode) {
       case 'summarize':
-        systemPrompt = documentId && documentId !== 'all'
-          ? 'You are a research assistant. Provide a comprehensive summary of the research document, including: 1) Main objectives, 2) Methodology, 3) Key findings, 4) Conclusions, 5) Implications. Be detailed but concise.'
-          : 'You are a research assistant. Provide a comprehensive summary synthesizing all uploaded research documents. Identify common themes, methodologies, and key findings across the papers.';
-        userPrompt = 'Please provide a detailed summary of the document(s).';
+        systemPrompt = `You are a research assistant specializing in biomedical and pharmaceutical research analysis. Provide a comprehensive, well-structured summary using clear markdown formatting.${documentContext}
+
+Format your response using:
+- Clear section headers (##)
+- Bullet points for key items
+- Bold text for emphasis on important terms
+- Numbered lists for sequential information`;
+        
+        userPrompt = documentId && documentId !== 'all'
+          ? `Please provide a detailed summary of the document "${documentNames[0] || 'selected document'}". Include: main objectives, methodology, key findings, conclusions, and implications.`
+          : 'Please provide a comprehensive summary synthesizing all uploaded research documents. Identify common themes, methodologies, and key findings across the papers.';
         break;
 
       case 'key-findings':
-        systemPrompt = documentId && documentId !== 'all'
-          ? 'You are a research assistant. Extract and list the key findings from the research document. Focus on: 1) Main discoveries, 2) Statistical significance, 3) Novel contributions, 4) Practical implications. Use bullet points for clarity.'
-          : 'You are a research assistant. Extract and synthesize key findings across all research documents. Identify patterns, contradictions, and consensus findings.';
-        userPrompt = 'Please extract the key findings from the document(s).';
+        systemPrompt = `You are a research assistant specializing in extracting and synthesizing key findings from biomedical research. Present findings in a clear, structured format using markdown.${documentContext}
+
+Format your response using:
+- Numbered or bullet lists for findings
+- Bold text for key discoveries
+- Clear categorization of findings by type`;
+        
+        userPrompt = documentId && documentId !== 'all'
+          ? `Extract and list the key findings from "${documentNames[0] || 'the selected document'}". Focus on: main discoveries, statistical significance, novel contributions, and practical implications.`
+          : 'Extract and synthesize key findings across all research documents. Identify patterns, contradictions, and consensus findings.';
         break;
 
       case 'compare':
         if (!documentIds || documentIds.length < 2) {
           throw new Error('At least 2 documents required for comparison');
         }
-        systemPrompt = 'You are a research assistant performing comparative analysis. Compare the selected research documents focusing on: 1) Research objectives and questions, 2) Methodologies used, 3) Key findings and results, 4) Conclusions and implications, 5) Strengths and limitations. Highlight similarities, differences, and complementary insights.';
-        userPrompt = `Please provide a detailed comparative analysis of ${documentIds.length} research documents.`;
+        systemPrompt = `You are a research analyst performing comparative analysis of biomedical research papers. Provide detailed, structured comparisons using clear markdown formatting.${documentContext}
+
+Structure your analysis with clear sections:
+## Research Objectives Comparison
+## Methodology Comparison  
+## Key Findings Comparison
+## Conclusions & Implications
+## Strengths & Limitations
+
+Use tables where appropriate, bullet points for clarity, and bold text for emphasis.`;
+        
+        userPrompt = `Perform a detailed comparative analysis of these ${documentNames.length} research documents: ${documentNames.join(', ')}. 
+
+Compare their:
+1. Research objectives and hypotheses
+2. Methodological approaches and study designs
+3. Key findings and results
+4. Conclusions and implications
+5. Relative strengths and limitations
+
+Highlight key similarities, differences, and complementary insights.`;
         break;
 
       case 'meta-analysis':
         if (!documentIds || documentIds.length < 2) {
           throw new Error('At least 2 documents required for meta-analysis');
         }
-        systemPrompt = `You are a research meta-analyst. Analyze the ${documentIds.length} selected documents as a cohesive body of research and generate a comprehensive meta-analysis report with the following structure:
+        systemPrompt = `You are a senior research meta-analyst specializing in biomedical and pharmaceutical research synthesis. Generate comprehensive meta-analysis reports with proper academic structure and formatting.${documentContext}
+
+Use proper markdown formatting throughout:
+- ## for main sections
+- ### for subsections
+- Bullet points and numbered lists
+- Bold and italic for emphasis
+- Tables where data comparison is needed`;
+        
+        userPrompt = `Generate a comprehensive meta-analysis report for these ${documentNames.length} research documents: ${documentNames.join(', ')}.
+
+Structure the report as follows:
 
 ## Executive Summary
-Provide a high-level overview of the collective research
+High-level overview of the collective research body
 
 ## Research Overview
-- Total number of studies analyzed
+- Number of studies analyzed
 - Research timeframe and contexts
 - Primary research domains and themes
 
@@ -72,12 +148,12 @@ Provide a high-level overview of the collective research
 - Effect sizes and outcomes
 
 ## Trends and Patterns
-- Temporal trends in the research
+- Temporal trends
 - Geographical or contextual patterns
-- Evolution of findings over time
+- Evolution of findings
 
 ## Limitations and Gaps
-- Common limitations across studies
+- Common limitations
 - Research gaps identified
 - Areas requiring further investigation
 
@@ -87,8 +163,7 @@ Provide a high-level overview of the collective research
 - Policy implications
 
 ## Conclusion
-Synthesize the overall contribution of this body of research`;
-        userPrompt = `Please generate a comprehensive meta-analysis report for these ${documentIds.length} research documents.`;
+Overall contribution of this body of research`;
         break;
 
       case 'chat':
@@ -96,9 +171,7 @@ Synthesize the overall contribution of this body of research`;
         if (!message) {
           throw new Error('Message is required for chat mode');
         }
-        systemPrompt = documentId && documentId !== 'all'
-          ? 'You are a helpful research assistant. Answer questions about the specific research document the user is asking about. Be precise and cite relevant sections when possible.'
-          : 'You are a helpful research assistant. Answer questions by synthesizing information across all uploaded research documents. Provide comprehensive answers and cite which documents you are referencing when relevant.';
+        systemPrompt = `You are a helpful research assistant specializing in biomedical and pharmaceutical research. Answer questions clearly and cite relevant information when possible. Use markdown formatting for clarity.${documentContext}`;
         userPrompt = message;
         break;
     }
@@ -124,7 +197,7 @@ Synthesize the overall contribution of this body of research`;
         model: 'google/gemini-2.5-flash',
         messages,
         temperature: 0.7,
-        max_tokens: 2000
+        max_tokens: 3000
       }),
     });
 

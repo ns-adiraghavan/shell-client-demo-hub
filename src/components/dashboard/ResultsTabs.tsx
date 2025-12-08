@@ -20,6 +20,13 @@ interface ResultsTabsProps {
   query: string;
 }
 
+// Decode HTML entities properly
+const decodeHtmlEntities = (text: string): string => {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = text;
+  return textarea.value;
+};
+
 export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) => {
   const pubmedResults = results.filter(r => r.source === 'PubMed');
   const clinicalResults = results.filter(r => r.source === 'ClinicalTrials');
@@ -58,7 +65,7 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
               <div className="flex items-start gap-3">
                 <Badge variant="secondary" className="shrink-0 mt-1">#{index + 1}</Badge>
                 <div className="flex-1">
-                  <CardTitle className="text-lg mb-2 leading-tight">{result.title}</CardTitle>
+                  <CardTitle className="text-lg mb-2 leading-tight">{decodeHtmlEntities(result.title)}</CardTitle>
                   <CardDescription className="text-sm">
                     {result.authors && `${result.authors} • `}
                     {result.date}
@@ -76,9 +83,9 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
           </div>
         </CardHeader>
         <CardContent>
-          {result.abstract && (
+        {result.abstract && (
             <p className="text-sm text-muted-foreground mb-3 line-clamp-4">
-              {result.abstract.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').trim()}
+              {decodeHtmlEntities(result.abstract.replace(/<[^>]*>/g, ''))}
             </p>
           )}
           {result.enrollment && <p className="text-sm text-muted-foreground mb-3">{result.enrollment}</p>}
