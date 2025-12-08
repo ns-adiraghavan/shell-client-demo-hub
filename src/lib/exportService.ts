@@ -1,23 +1,53 @@
 import { SearchResult } from "./searchService";
 
+// Decode HTML entities properly for export
+const decodeHtmlEntities = (text: string): string => {
+  if (typeof document !== 'undefined') {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
+  }
+  // Fallback for common entities
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, code) => String.fromCharCode(parseInt(code, 16)));
+};
+
+// Clean text for bibliographic formats
+const cleanForExport = (text: string): string => {
+  return decodeHtmlEntities(text)
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/\s+/g, ' ')    // Normalize whitespace
+    .trim();
+};
+
 export const exportToBibTeX = (results: SearchResult[], query: string) => {
   const bibEntries = results.map((result, index) => {
     const key = `${result.source.toLowerCase()}${index + 1}`;
     const year = result.date ? new Date(result.date).getFullYear() : 'n.d.';
-    const authors = result.authors || 'Anonymous';
+    const authors = cleanForExport(result.authors || 'Anonymous');
+    const title = cleanForExport(result.title);
+    const abstract = result.abstract ? cleanForExport(result.abstract) : '';
     
     let entry = '';
     if (result.source === 'PubMed' || result.source === 'arXiv') {
       entry = `@article{${key},\n`;
       entry += `  author = {${authors}},\n`;
-      entry += `  title = {${result.title}},\n`;
+      entry += `  title = {${title}},\n`;
       entry += `  year = {${year}},\n`;
-      if (result.abstract) entry += `  abstract = {${result.abstract.substring(0, 200)}...},\n`;
+      if (abstract) entry += `  abstract = {${abstract.substring(0, 200)}...},\n`;
       entry += `  url = {${result.url}}\n`;
       entry += `}`;
     } else if (result.source === 'ClinicalTrials') {
       entry = `@misc{${key},\n`;
-      entry += `  title = {${result.title}},\n`;
+      entry += `  title = {${title}},\n`;
       entry += `  year = {${year}},\n`;
       if (result.phase) entry += `  note = {Phase: ${result.phase}},\n`;
       entry += `  howpublished = {ClinicalTrials.gov},\n`;
@@ -26,7 +56,7 @@ export const exportToBibTeX = (results: SearchResult[], query: string) => {
     } else if (result.source === 'Patents') {
       entry = `@patent{${key},\n`;
       entry += `  author = {${authors}},\n`;
-      entry += `  title = {${result.title}},\n`;
+      entry += `  title = {${title}},\n`;
       entry += `  year = {${year}},\n`;
       entry += `  url = {${result.url}}\n`;
       entry += `}`;
@@ -42,7 +72,10 @@ export const exportToBibTeX = (results: SearchResult[], query: string) => {
 export const exportToRIS = (results: SearchResult[], query: string) => {
   const risEntries = results.map(result => {
     const year = result.date ? new Date(result.date).getFullYear() : '';
-    const authors = (result.authors || 'Anonymous').split(',').map(a => a.trim());
+    const rawAuthors = cleanForExport(result.authors || 'Anonymous');
+    const authors = rawAuthors.split(',').map(a => a.trim());
+    const title = cleanForExport(result.title);
+    const abstract = result.abstract ? cleanForExport(result.abstract) : '';
     
     let entry = '';
     if (result.source === 'PubMed' || result.source === 'arXiv') {
@@ -56,9 +89,9 @@ export const exportToRIS = (results: SearchResult[], query: string) => {
     authors.forEach(author => {
       entry += `AU  - ${author}\n`;
     });
-    entry += `TI  - ${result.title}\n`;
+    entry += `TI  - ${title}\n`;
     if (year) entry += `PY  - ${year}\n`;
-    if (result.abstract) entry += `AB  - ${result.abstract}\n`;
+    if (abstract) entry += `AB  - ${abstract}\n`;
     entry += `UR  - ${result.url}\n`;
     if (result.phase) entry += `N1  - Phase: ${result.phase}\n`;
     entry += 'ER  - \n';
@@ -73,7 +106,10 @@ export const exportToRIS = (results: SearchResult[], query: string) => {
 export const exportToEndNote = (results: SearchResult[], query: string) => {
   const endNoteEntries = results.map(result => {
     const year = result.date ? new Date(result.date).getFullYear() : '';
-    const authors = (result.authors || 'Anonymous').split(',').map(a => a.trim());
+    const rawAuthors = cleanForExport(result.authors || 'Anonymous');
+    const authors = rawAuthors.split(',').map(a => a.trim());
+    const title = cleanForExport(result.title);
+    const abstract = result.abstract ? cleanForExport(result.abstract) : '';
     
     let entry = '';
     if (result.source === 'PubMed' || result.source === 'arXiv') {
@@ -87,9 +123,9 @@ export const exportToEndNote = (results: SearchResult[], query: string) => {
     authors.forEach(author => {
       entry += `%A ${author}\n`;
     });
-    entry += `%T ${result.title}\n`;
+    entry += `%T ${title}\n`;
     if (year) entry += `%D ${year}\n`;
-    if (result.abstract) entry += `%X ${result.abstract}\n`;
+    if (abstract) entry += `%X ${abstract}\n`;
     entry += `%U ${result.url}\n`;
     if (result.phase) entry += `%Z Phase: ${result.phase}\n`;
     

@@ -11,10 +11,11 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { DocumentUpload } from "@/components/dashboard/DocumentUpload";
 import { DataVisualization } from "@/components/dashboard/DataVisualization";
 import { DocumentChat } from "@/components/dashboard/DocumentChat";
+import { SectionNavigation, SectionHeader } from "@/components/dashboard/SectionNavigation";
 import { Button } from "@/components/ui/button";
 import { searchAllSources, synthesizeResults, saveSearch, SearchResult } from "@/lib/searchService";
 import { toast } from "sonner";
-import { History, LogOut } from "lucide-react";
+import { History, LogOut, BarChart3, Sparkles, Building2, FileText, Search, MessageSquare } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
@@ -42,6 +43,16 @@ const Index = () => {
     booleanOperator: "AND",
     minImpactFactor: 0,
   });
+
+  // Define sections for navigation
+  const sections = [
+    { id: "stats", label: "Stats", icon: <BarChart3 className="h-3 w-3" /> },
+    { id: "visualizations", label: "Charts", icon: <BarChart3 className="h-3 w-3" /> },
+    { id: "synthesis", label: "AI Synthesis", icon: <Sparkles className="h-3 w-3" /> },
+    { id: "landscape", label: "Competitive", icon: <Building2 className="h-3 w-3" /> },
+    { id: "results", label: "Results", icon: <Search className="h-3 w-3" /> },
+    { id: "documents", label: "Documents", icon: <FileText className="h-3 w-3" /> },
+  ];
 
   useEffect(() => {
     const checkUser = async () => {
@@ -144,68 +155,133 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <SearchHeader 
-              query={query}
-              setQuery={setQuery}
-              onSearch={() => handleSearch()}
-              isSearching={isSearching}
-            />
-          </div>
-          {user && (
-            <div className="flex items-center gap-2 ml-4">
-              <Button variant="outline" onClick={() => navigate("/history")} className="gap-2">
-                <History className="h-4 w-4" />
-                History
-              </Button>
-              <Button variant="outline" onClick={handleSignOut} className="gap-2">
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </Button>
+      {/* Fixed Header Section */}
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+        <div className="container mx-auto p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <SearchHeader 
+                query={query}
+                setQuery={setQuery}
+                onSearch={() => handleSearch()}
+                isSearching={isSearching}
+              />
             </div>
-          )}
+            {user && (
+              <div className="flex items-center gap-2 ml-4">
+                <Button variant="outline" onClick={() => navigate("/history")} className="gap-2">
+                  <History className="h-4 w-4" />
+                  History
+                </Button>
+                <Button variant="outline" onClick={handleSignOut} className="gap-2">
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </Button>
+              </div>
+            )}
+          </div>
+          
+          <SearchFilters 
+            sources={sources} 
+            setSources={setSources} 
+            maxResults={maxResults} 
+            setMaxResults={setMaxResults} 
+          />
+          
+          <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
         </div>
-        
-        <SearchFilters 
-          sources={sources} 
-          setSources={setSources} 
-          maxResults={maxResults} 
-          setMaxResults={setMaxResults} 
-        />
-        
-        <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
-        
+      </div>
+
+      {/* Quick Navigation - Only show when there are results */}
+      {hasSearched && (
+        <SectionNavigation sections={sections} />
+      )}
+      
+      {/* Main Content */}
+      <div className="container mx-auto p-6 space-y-8">
         {hasSearched && (
           <>
-            <StatsCards counts={getCounts()} isSearching={isSearching} />
+            {/* Stats Section */}
+            <section>
+              <SectionHeader 
+                id="stats" 
+                title="Search Statistics" 
+                sections={sections} 
+                currentIndex={0} 
+              />
+              <StatsCards counts={getCounts()} isSearching={isSearching} />
+            </section>
             
-            <DataVisualization results={results} isLoading={isSearching} query={query} />
+            {/* Visualizations Section */}
+            <section>
+              <SectionHeader 
+                id="visualizations" 
+                title="Data Visualizations" 
+                sections={sections} 
+                currentIndex={1} 
+              />
+              <DataVisualization results={results} isLoading={isSearching} query={query} />
+            </section>
             
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <ResultsTabs 
-                  results={results} 
-                  isSearching={isSearching}
+            {/* AI Synthesis Section */}
+            <section>
+              <SectionHeader 
+                id="synthesis" 
+                title="AI Strategic Intelligence Analysis" 
+                sections={sections} 
+                currentIndex={2} 
+              />
+              <div className="max-w-none">
+                <SynthesisPanel 
+                  synthesis={synthesis}
+                  isSearching={isSynthesizing}
                   query={query}
+                  results={results}
                 />
+              </div>
+            </section>
+            
+            {/* Competitive Landscape Section */}
+            {synthesis && results.length > 0 && (
+              <section>
+                <SectionHeader 
+                  id="landscape" 
+                  title="Competitive Landscape" 
+                  sections={sections} 
+                  currentIndex={3} 
+                />
+                <CompetitiveLandscape results={results} synthesis={synthesis} />
+              </section>
+            )}
+            
+            {/* Results Section */}
+            <section>
+              <SectionHeader 
+                id="results" 
+                title="Search Results" 
+                sections={sections} 
+                currentIndex={4} 
+              />
+              <ResultsTabs 
+                results={results} 
+                isSearching={isSearching}
+                query={query}
+              />
+            </section>
+            
+            {/* Documents Section */}
+            <section>
+              <SectionHeader 
+                id="documents" 
+                title="Document Analysis" 
+                sections={sections} 
+                currentIndex={5} 
+              />
+              <div className="grid lg:grid-cols-2 gap-6">
+                <DocumentUpload />
                 <DocumentChat />
               </div>
-              <div className="lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-hidden flex flex-col space-y-4">
-                <div className="flex-1 overflow-y-auto">
-                  <SynthesisPanel 
-                    synthesis={synthesis}
-                    isSearching={isSynthesizing}
-                    query={query}
-                    results={results}
-                  />
-                </div>
-                {synthesis && results.length > 0 && (
-                  <CompetitiveLandscape results={results} synthesis={synthesis} />
-                )}
-              </div>
-            </div>
+            </section>
           </>
         )}
         
