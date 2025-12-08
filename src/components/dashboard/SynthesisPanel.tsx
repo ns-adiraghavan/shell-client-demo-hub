@@ -22,7 +22,7 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results }: Synth
     navigator.clipboard.writeText(synthesis);
     toast({
       title: "Copied to clipboard",
-      description: "AI synthesis has been copied to your clipboard.",
+      description: "Strategic intelligence brief has been copied to your clipboard.",
     });
   };
 
@@ -47,10 +47,10 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results }: Synth
       <CardHeader className="shrink-0 pb-2">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="h-5 w-5 text-primary" />
-          <CardTitle>AI Synthesis</CardTitle>
+          <CardTitle>Strategic Intelligence</CardTitle>
         </div>
         <CardDescription>
-          Comprehensive summary of all sources
+          Comprehensive market & competitive analysis
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col overflow-hidden p-0">
@@ -111,7 +111,7 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results }: Synth
         ) : (
           <div className="text-center py-8 text-muted-foreground px-6">
             <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">AI synthesis will appear here after search</p>
+            <p className="text-sm">Strategic intelligence will appear here after search</p>
           </div>
         )}
       </CardContent>

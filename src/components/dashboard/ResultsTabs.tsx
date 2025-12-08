@@ -105,7 +105,7 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Results</h2>
+        <h2 className="text-2xl font-bold">Intelligence Results</h2>
         {results.length > 0 && !isSearching && (
           <div className="flex gap-2">
             <DropdownMenu>
@@ -151,9 +151,9 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="all">All ({results.length})</TabsTrigger>
-          <TabsTrigger value="pubmed">PubMed ({pubmedResults.length})</TabsTrigger>
-          <TabsTrigger value="clinical">Clinical ({clinicalResults.length})</TabsTrigger>
-          <TabsTrigger value="arxiv">arXiv ({arxivResults.length})</TabsTrigger>
+          <TabsTrigger value="pubmed">Research ({pubmedResults.length})</TabsTrigger>
+          <TabsTrigger value="clinical">Projects ({clinicalResults.length})</TabsTrigger>
+          <TabsTrigger value="arxiv">Reports ({arxivResults.length})</TabsTrigger>
           <TabsTrigger value="patents">Patents ({patentResults.length})</TabsTrigger>
           <TabsTrigger value="news">News ({newsResults.length})</TabsTrigger>
         </TabsList>

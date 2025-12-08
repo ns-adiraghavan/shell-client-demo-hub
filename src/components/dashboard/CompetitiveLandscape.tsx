@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SearchResult } from "@/lib/searchService";
-import { Building2, Globe, FlaskConical, Pill, Factory, Handshake, ShoppingCart, FileText } from "lucide-react";
+import { Building2, Globe, FlaskConical, Lightbulb, Factory, Handshake, ShoppingCart, FileText, Rocket, Zap } from "lucide-react";
 import { useMemo } from "react";
 
 interface CompetitiveLandscapeProps {
@@ -19,44 +19,48 @@ interface CompanyStage {
 
 const STAGES = [
   { name: "Research", icon: FlaskConical, color: "bg-chart-1" },
-  { name: "Preclinical", icon: FlaskConical, color: "bg-chart-2" },
-  { name: "Phase I", icon: Pill, color: "bg-chart-3" },
-  { name: "Phase II", icon: Pill, color: "bg-chart-4" },
-  { name: "Phase III", icon: Pill, color: "bg-chart-5" },
+  { name: "Development", icon: Lightbulb, color: "bg-chart-2" },
+  { name: "Pilot", icon: Rocket, color: "bg-chart-3" },
+  { name: "Production", icon: Factory, color: "bg-chart-4" },
+  { name: "Scaling", icon: Zap, color: "bg-chart-5" },
   { name: "Regulatory", icon: FileText, color: "bg-primary" },
   { name: "Partnership", icon: Handshake, color: "bg-accent" },
-  { name: "Commercial", icon: ShoppingCart, color: "bg-green-500" },
+  { name: "Commercial", icon: ShoppingCart, color: "bg-success" },
 ];
 
-// Known pharma companies with their typical focus areas
+// Known energy and infrastructure companies with their typical focus areas
 const KNOWN_COMPANIES: Record<string, { geography: string; type: string }> = {
-  "novo nordisk": { geography: "Denmark/EU", type: "Pharma" },
-  "eli lilly": { geography: "USA", type: "Pharma" },
-  "pfizer": { geography: "USA", type: "Pharma" },
-  "roche": { geography: "Switzerland/EU", type: "Pharma" },
-  "novartis": { geography: "Switzerland/EU", type: "Pharma" },
-  "astrazeneca": { geography: "UK/EU", type: "Pharma" },
-  "merck": { geography: "USA", type: "Pharma" },
-  "johnson & johnson": { geography: "USA", type: "Pharma" },
-  "sanofi": { geography: "France/EU", type: "Pharma" },
-  "gsk": { geography: "UK/EU", type: "Pharma" },
-  "glaxosmithkline": { geography: "UK/EU", type: "Pharma" },
-  "abbvie": { geography: "USA", type: "Pharma" },
-  "bayer": { geography: "Germany/EU", type: "Pharma" },
-  "takeda": { geography: "Japan/Asia", type: "Pharma" },
-  "amgen": { geography: "USA", type: "Biotech" },
-  "gilead": { geography: "USA", type: "Biotech" },
-  "biogen": { geography: "USA", type: "Biotech" },
-  "regeneron": { geography: "USA", type: "Biotech" },
-  "moderna": { geography: "USA", type: "Biotech" },
-  "biontech": { geography: "Germany/EU", type: "Biotech" },
-  "sun pharma": { geography: "India/Asia", type: "Pharma" },
-  "cipla": { geography: "India/Asia", type: "Pharma" },
-  "dr. reddy's": { geography: "India/Asia", type: "Pharma" },
-  "natco": { geography: "India/Asia", type: "Pharma" },
-  "biocon": { geography: "India/Asia", type: "Biotech" },
-  "zydus": { geography: "India/Asia", type: "Pharma" },
-  "torrent": { geography: "India/Asia", type: "Pharma" },
+  "shell": { geography: "Netherlands/EU", type: "Energy" },
+  "bp": { geography: "UK/EU", type: "Energy" },
+  "exxonmobil": { geography: "USA", type: "Energy" },
+  "chevron": { geography: "USA", type: "Energy" },
+  "totalenergies": { geography: "France/EU", type: "Energy" },
+  "ongc": { geography: "India/Asia", type: "Energy" },
+  "reliance": { geography: "India/Asia", type: "Energy" },
+  "petronas": { geography: "Malaysia/Asia", type: "Energy" },
+  "saudi aramco": { geography: "Saudi Arabia/ME", type: "Energy" },
+  "equinor": { geography: "Norway/EU", type: "Energy" },
+  "eni": { geography: "Italy/EU", type: "Energy" },
+  "siemens": { geography: "Germany/EU", type: "Industrial" },
+  "ge": { geography: "USA", type: "Industrial" },
+  "schneider electric": { geography: "France/EU", type: "Industrial" },
+  "abb": { geography: "Switzerland/EU", type: "Industrial" },
+  "honeywell": { geography: "USA", type: "Industrial" },
+  "tesla": { geography: "USA", type: "EV/Clean Energy" },
+  "vestas": { geography: "Denmark/EU", type: "Renewable" },
+  "orsted": { geography: "Denmark/EU", type: "Renewable" },
+  "iberdrola": { geography: "Spain/EU", type: "Utility" },
+  "enel": { geography: "Italy/EU", type: "Utility" },
+  "nexterra": { geography: "USA", type: "Renewable" },
+  "bloom energy": { geography: "USA", type: "Clean Energy" },
+  "plug power": { geography: "USA", type: "Hydrogen" },
+  "nel asa": { geography: "Norway/EU", type: "Hydrogen" },
+  "air liquide": { geography: "France/EU", type: "Industrial Gas" },
+  "linde": { geography: "Germany/EU", type: "Industrial Gas" },
+  "catl": { geography: "China/Asia", type: "Battery" },
+  "lg energy": { geography: "South Korea/Asia", type: "Battery" },
+  "panasonic": { geography: "Japan/Asia", type: "Battery" },
+  "byd": { geography: "China/Asia", type: "EV/Battery" },
 };
 
 function getCompanyLogo(companyName: string): string {
@@ -91,23 +95,23 @@ function determineStage(text: string, company: string): { index: number; name: s
   if (companyContext.includes('commercial') || companyContext.includes('market') || companyContext.includes('sales') || companyContext.includes('revenue')) {
     return { index: 7, name: "Commercial" };
   }
-  if (companyContext.includes('partnership') || companyContext.includes('license') || companyContext.includes('collaboration') || companyContext.includes('deal')) {
+  if (companyContext.includes('partnership') || companyContext.includes('license') || companyContext.includes('collaboration') || companyContext.includes('deal') || companyContext.includes('joint venture')) {
     return { index: 6, name: "Partnership" };
   }
-  if (companyContext.includes('approv') || companyContext.includes('fda') || companyContext.includes('ema') || companyContext.includes('regulatory')) {
+  if (companyContext.includes('approv') || companyContext.includes('regulatory') || companyContext.includes('permit') || companyContext.includes('compliance')) {
     return { index: 5, name: "Regulatory" };
   }
-  if (companyContext.includes('phase 3') || companyContext.includes('phase iii') || companyContext.includes('pivotal')) {
-    return { index: 4, name: "Phase III" };
+  if (companyContext.includes('scaling') || companyContext.includes('expansion') || companyContext.includes('growth') || companyContext.includes('capacity')) {
+    return { index: 4, name: "Scaling" };
   }
-  if (companyContext.includes('phase 2') || companyContext.includes('phase ii')) {
-    return { index: 3, name: "Phase II" };
+  if (companyContext.includes('production') || companyContext.includes('manufacturing') || companyContext.includes('plant') || companyContext.includes('facility')) {
+    return { index: 3, name: "Production" };
   }
-  if (companyContext.includes('phase 1') || companyContext.includes('phase i') || companyContext.includes('first-in-human')) {
-    return { index: 2, name: "Phase I" };
+  if (companyContext.includes('pilot') || companyContext.includes('demonstration') || companyContext.includes('prototype') || companyContext.includes('testing')) {
+    return { index: 2, name: "Pilot" };
   }
-  if (companyContext.includes('preclinical') || companyContext.includes('animal') || companyContext.includes('toxicology')) {
-    return { index: 1, name: "Preclinical" };
+  if (companyContext.includes('develop') || companyContext.includes('engineering') || companyContext.includes('design')) {
+    return { index: 1, name: "Development" };
   }
   return { index: 0, name: "Research" };
 }
@@ -144,7 +148,7 @@ export const CompetitiveLandscape = ({ results, synthesis }: CompetitiveLandscap
           <Building2 className="h-5 w-5 text-primary" />
           <CardTitle className="text-lg">Competitive Landscape</CardTitle>
         </div>
-        <CardDescription>Development stages across market players</CardDescription>
+        <CardDescription>Innovation stages across market players</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 overflow-x-auto">
         {/* Stage Legend */}

@@ -65,7 +65,7 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
     value: count
   }));
 
-  // Process study type distribution (for clinical trials)
+  // Process project stage distribution
   const studyTypeData = results
     .filter(r => r.phase)
     .reduce((acc, result) => {
@@ -117,7 +117,7 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Research Analytics</CardTitle>
+          <CardTitle>Market Analytics</CardTitle>
           <CardDescription>Loading visualizations...</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -140,9 +140,9 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
-          Research Analytics
+          Market Analytics
         </CardTitle>
-        <CardDescription>Visual insights from {results.length} search results</CardDescription>
+        <CardDescription>Visual insights from {results.length} intelligence sources</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
         {/* AI Chart Analysis */}
@@ -155,7 +155,7 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
             {isAnalyzing ? (
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Analyzing research landscape and commercial signals...</span>
+                <span>Analyzing market landscape and competitive signals...</span>
               </div>
             ) : (
               <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
@@ -181,7 +181,7 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
         {/* Publication Trend Over Time */}
         {publicationTrend.length > 0 && (
           <div>
-            <h3 className="text-lg font-semibold mb-4">Publication Timeline</h3>
+            <h3 className="text-lg font-semibold mb-4">Activity Timeline</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={publicationTrend} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -199,7 +199,7 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                   width={40}
                   label={{ 
-                    value: 'Publications', 
+                    value: 'Activity', 
                     angle: -90, 
                     position: 'insideLeft',
                     style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 }
@@ -213,7 +213,7 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                     color: 'hsl(var(--foreground))',
                     fontSize: '12px'
                   }}
-                  formatter={(value: number) => [value, 'Publications']}
+                  formatter={(value: number) => [value, 'Activities']}
                 />
                 <Legend 
                   wrapperStyle={{ 
@@ -228,7 +228,7 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                   strokeWidth={2}
                   dot={{ fill: 'hsl(var(--primary))', r: 4 }}
                   activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
-                  name="Publications per Year"
+                  name="Activities per Year"
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -269,10 +269,10 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
             </ResponsiveContainer>
           </div>
 
-          {/* Study Type Distribution */}
+          {/* Project Stage Distribution */}
           {studyTypeDistribution.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-4">Clinical Trial Phases</h3>
+              <h3 className="text-lg font-semibold mb-4">Project Stages</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={studyTypeDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -304,13 +304,13 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                       color: 'hsl(var(--foreground))',
                       fontSize: '12px'
                     }}
-                    formatter={(value: number) => [value, 'Trials']}
+                    formatter={(value: number) => [value, 'Projects']}
                   />
                   <Bar 
                     dataKey="value" 
                     fill="hsl(var(--primary))" 
                     radius={[4, 4, 0, 0]}
-                    name="Number of Trials"
+                    name="Number of Projects"
                   />
                 </BarChart>
               </ResponsiveContainer>
