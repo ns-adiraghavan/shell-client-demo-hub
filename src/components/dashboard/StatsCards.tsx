@@ -15,31 +15,44 @@ interface StatsCardsProps {
 
 export const StatsCards = ({ counts, isSearching }: StatsCardsProps) => {
   const stats = [
-    { label: "Research Papers", value: counts.pubmed, icon: FileText, color: "text-primary" },
-    { label: "Active Projects", value: counts.clinical, icon: Briefcase, color: "text-chart-2" },
-    { label: "Technical Reports", value: counts.arxiv, icon: FileSearch, color: "text-chart-3" },
-    { label: "Patents", value: counts.patents, icon: Scale, color: "text-chart-4" },
-    { label: "Business News", value: counts.news, icon: Newspaper, color: "text-chart-5" },
+    { label: "Research Papers", value: counts.pubmed, icon: FileText },
+    { label: "Active Projects", value: counts.clinical, icon: Briefcase },
+    { label: "Technical Reports", value: counts.arxiv, icon: FileSearch },
+    { label: "Patents", value: counts.patents, icon: Scale },
+    { label: "Business News", value: counts.news, icon: Newspaper },
   ];
+
+  const maxValue = Math.max(...stats.map(s => s.value));
+  const activeIndex = stats.findIndex(s => s.value === maxValue && s.value > 0);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-      {stats.map((stat) => {
+      {stats.map((stat, index) => {
         const Icon = stat.icon;
+        const isActive = index === activeIndex && stat.value > 0;
         return (
-          <Card key={stat.label}>
-            <CardContent className="p-6">
+          <Card 
+            key={stat.label} 
+            className={`bg-card transition-all ${
+              isActive 
+                ? 'border-primary border-2 shadow-md' 
+                : 'border-border/50 hover:border-border'
+            }`}
+          >
+            <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                  <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase">
+                    {stat.label}
+                  </p>
                   {isSearching ? (
-                    <Skeleton className="h-8 w-16 mt-2" />
+                    <Skeleton className="h-9 w-16 mt-2" />
                   ) : (
-                    <p className="text-3xl font-bold text-foreground mt-2">{stat.value}</p>
+                    <p className="text-3xl font-bold text-primary mt-2">{stat.value}</p>
                   )}
                 </div>
-                <div className={`p-3 rounded-lg bg-muted ${stat.color}`}>
-                  <Icon className="h-6 w-6" />
+                <div className="p-3 rounded-lg bg-secondary/50">
+                  <Icon className="h-5 w-5 text-muted-foreground" />
                 </div>
               </div>
             </CardContent>

@@ -115,10 +115,10 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Market Analytics</CardTitle>
-          <CardDescription>Loading visualizations...</CardDescription>
+      <Card className="bg-card border-border/50">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl font-semibold text-foreground">Executive Market Overview</CardTitle>
+          <CardDescription className="text-muted-foreground">Loading intelligence data...</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <Skeleton className="h-[300px] w-full" />
@@ -136,25 +136,27 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" />
-          Market Analytics
+    <Card className="bg-card border-border/50">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-xl font-semibold text-foreground">
+          <TrendingUp className="h-5 w-5 text-primary" />
+          Executive Market Overview
         </CardTitle>
-        <CardDescription>Visual insights from {results.length} intelligence sources</CardDescription>
+        <CardDescription className="text-muted-foreground">
+          High-level intelligence across activity, sources, and execution stages
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
         {/* AI Chart Analysis */}
         {(isAnalyzing || chartAnalysis) && (
-          <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-lg p-6 border border-primary/20">
+          <div className="bg-secondary/30 rounded-lg p-6 border border-border">
             <div className="flex items-center gap-2 mb-4">
               <Brain className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-semibold text-primary">Strategic Intelligence Analysis</h3>
+              <h3 className="text-lg font-semibold text-foreground">Strategic Intelligence Analysis</h3>
             </div>
             {isAnalyzing ? (
               <div className="flex items-center gap-3 text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 <span>Analyzing market landscape and competitive signals...</span>
               </div>
             ) : (
@@ -178,16 +180,19 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
           </div>
         )}
 
-        {/* Publication Trend Over Time */}
+        {/* Market Activity Momentum */}
         {publicationTrend.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Activity Timeline</h3>
+          <div className="bg-secondary/20 rounded-lg p-5 border border-border/50">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Market Activity Momentum</h3>
+              <p className="text-sm text-muted-foreground">Volume of competitive and innovation signals over time</p>
+            </div>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={publicationTrend} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis 
                   dataKey="year" 
-                  stroke="hsl(var(--foreground))"
+                  stroke="hsl(var(--muted-foreground))"
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                   angle={-45}
                   textAnchor="end"
@@ -195,11 +200,11 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                   interval={0}
                 />
                 <YAxis 
-                  stroke="hsl(var(--foreground))"
+                  stroke="hsl(var(--muted-foreground))"
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                   width={40}
                   label={{ 
-                    value: 'Activity', 
+                    value: 'Signals', 
                     angle: -90, 
                     position: 'insideLeft',
                     style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 }
@@ -213,7 +218,7 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                     color: 'hsl(var(--foreground))',
                     fontSize: '12px'
                   }}
-                  formatter={(value: number) => [value, 'Activities']}
+                  formatter={(value: number) => [value, 'Signals']}
                 />
                 <Legend 
                   wrapperStyle={{ 
@@ -228,19 +233,22 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                   strokeWidth={2}
                   dot={{ fill: 'hsl(var(--primary))', r: 4 }}
                   activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
-                  name="Activities per Year"
+                  name="Market Signals per Year"
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Source Breakdown */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Source Distribution</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart margin={{ top: 20, right: 80, left: 80, bottom: 20 }}>
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Intelligence Source Mix */}
+          <div className="bg-secondary/20 rounded-lg p-5 border border-border/50">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Intelligence Source Mix</h3>
+              <p className="text-sm text-muted-foreground">Where intelligence is being captured from</p>
+            </div>
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart margin={{ top: 10, right: 80, left: 80, bottom: 10 }}>
                 <Pie
                   data={sourceBreakdown}
                   cx="50%"
@@ -269,16 +277,19 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
             </ResponsiveContainer>
           </div>
 
-          {/* Project Stage Distribution */}
+          {/* Execution & Commercialization Stages */}
           {studyTypeDistribution.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Project Stages</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={studyTypeDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+            <div className="bg-secondary/20 rounded-lg p-5 border border-border/50">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-foreground">Execution & Commercialization Stages</h3>
+                <p className="text-sm text-muted-foreground">Maturity distribution of tracked initiatives</p>
+              </div>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={studyTypeDistribution} margin={{ top: 10, right: 30, left: 20, bottom: 80 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis 
                     dataKey="name" 
-                    stroke="hsl(var(--foreground))"
+                    stroke="hsl(var(--muted-foreground))"
                     tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
                     angle={-45}
                     textAnchor="end"
@@ -286,7 +297,7 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                     interval={0}
                   />
                   <YAxis 
-                    stroke="hsl(var(--foreground))"
+                    stroke="hsl(var(--muted-foreground))"
                     tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                     width={40}
                     label={{ 
@@ -304,13 +315,13 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
                       color: 'hsl(var(--foreground))',
                       fontSize: '12px'
                     }}
-                    formatter={(value: number) => [value, 'Projects']}
+                    formatter={(value: number) => [value, 'Initiatives']}
                   />
                   <Bar 
                     dataKey="value" 
                     fill="hsl(var(--primary))" 
                     radius={[4, 4, 0, 0]}
-                    name="Number of Projects"
+                    name="Number of Initiatives"
                   />
                 </BarChart>
               </ResponsiveContainer>
