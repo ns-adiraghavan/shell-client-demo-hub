@@ -57,6 +57,10 @@ export default {
         warning: {
           DEFAULT: "hsl(var(--warning-amber))",
         },
+        surface: {
+          elevated: "hsl(var(--surface-elevated))",
+          sunken: "hsl(var(--surface-sunken))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -74,6 +78,18 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+      },
+      boxShadow: {
+        'card': '0 1px 3px 0 hsl(220 15% 10% / 0.04), 0 1px 2px -1px hsl(220 15% 10% / 0.04)',
+        'card-hover': '0 4px 6px -1px hsl(220 15% 10% / 0.06), 0 2px 4px -2px hsl(220 15% 10% / 0.06)',
+        'elevated': '0 4px 12px -2px hsl(220 15% 10% / 0.08), 0 2px 6px -2px hsl(220 15% 10% / 0.05)',
+      },
+      fontSize: {
+        'display': ['2.25rem', { lineHeight: '1.2', fontWeight: '700' }],
+        'title': ['1.5rem', { lineHeight: '1.3', fontWeight: '600' }],
+        'subtitle': ['1.125rem', { lineHeight: '1.4', fontWeight: '500' }],
+        'body': ['0.9375rem', { lineHeight: '1.6' }],
+        'caption': ['0.8125rem', { lineHeight: '1.5' }],
       },
       borderRadius: {
         lg: "var(--radius)",

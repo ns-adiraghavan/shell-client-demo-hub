@@ -143,7 +143,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="min-h-screen bg-background">
       <SearchHeader 
         query={query}
         setQuery={setQuery}
@@ -154,24 +154,27 @@ const Index = () => {
         onSignOut={handleSignOut}
       />
       
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="container mx-auto px-6 py-8 space-y-8">
         
-        <SearchFilters 
-          sources={sources} 
-          setSources={setSources} 
-          maxResults={maxResults} 
-          setMaxResults={setMaxResults} 
-        />
-        
-        <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
+        <div className="bg-card rounded-xl border border-border/60 shadow-card p-6">
+          <SearchFilters 
+            sources={sources} 
+            setSources={setSources} 
+            maxResults={maxResults} 
+            setMaxResults={setMaxResults} 
+          />
+        </div>
+        <div className="bg-card rounded-xl border border-border/60 shadow-card p-6">
+          <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
+        </div>
         
         {hasSearched && (
           <>
             <StatsCards counts={getCounts()} isSearching={isSearching} />
             
             {/* AI Insights & Competitive Landscape Row */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              <div className="max-h-[500px] overflow-y-auto">
+            <div className="grid lg:grid-cols-2 gap-8">
+              <div className="max-h-[560px] overflow-y-auto">
                 <SynthesisPanel 
                   synthesis={synthesis}
                   isSearching={isSynthesizing}
@@ -180,7 +183,7 @@ const Index = () => {
                 />
               </div>
               {synthesis && results.length > 0 && (
-                <div className="max-h-[500px] overflow-y-auto">
+                <div className="max-h-[560px] overflow-y-auto">
                   <CompetitiveLandscape results={results} synthesis={synthesis} />
                 </div>
               )}
@@ -189,15 +192,15 @@ const Index = () => {
             <DataVisualization results={results} isLoading={isSearching} query={query} />
             
             {/* Search Results & Document AI Row */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              <div className="max-h-[600px] overflow-y-auto">
+            <div className="grid lg:grid-cols-2 gap-8">
+              <div className="max-h-[640px] overflow-y-auto">
                 <ResultsTabs 
                   results={results} 
                   isSearching={isSearching}
                   query={query}
                 />
               </div>
-              <div className="max-h-[600px] overflow-y-auto">
+              <div className="max-h-[640px] overflow-y-auto">
                 <DocumentChat />
               </div>
             </div>
@@ -205,19 +208,19 @@ const Index = () => {
         )}
         
         {!hasSearched && (
-          <div className="space-y-8">
-            <div className="text-center py-12">
-              <div className="max-w-2xl mx-auto space-y-4">
-                <h2 className="text-3xl font-bold text-foreground">
+          <div className="space-y-10">
+            <div className="text-center py-16">
+              <div className="max-w-2xl mx-auto space-y-5">
+                <h2 className="text-display text-foreground">
                   Welcome to Market Insights Engine
                 </h2>
-                <p className="text-lg text-muted-foreground">
+                <p className="text-subtitle text-muted-foreground">
                   Track business updates, innovation, investments, partnerships, research, and patents across global markets in one intelligent workspace.
                 </p>
-                <div className="pt-6">
+                <div className="pt-8">
                   <button 
                     onClick={() => handleSearch()}
-                    className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+                    className="px-10 py-3.5 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors shadow-elevated"
                   >
                     Start Intelligence Scan
                   </button>
@@ -226,23 +229,23 @@ const Index = () => {
             </div>
 
             <Tabs defaultValue="search" className="max-w-4xl mx-auto">
-              <TabsList className="grid w-full grid-cols-2 bg-secondary/30">
-                <TabsTrigger value="search">Quick Start</TabsTrigger>
-                <TabsTrigger value="upload">Upload Documents</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 bg-muted/60 p-1 rounded-lg">
+                <TabsTrigger value="search" className="rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card">Quick Start</TabsTrigger>
+                <TabsTrigger value="upload" className="rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card">Upload Documents</TabsTrigger>
               </TabsList>
-              <TabsContent value="search" className="space-y-4 pt-4">
-                <div className="text-center p-8 bg-card rounded-lg border border-border/50">
-                  <h3 className="text-xl font-semibold mb-3 text-foreground">How to Use</h3>
-                  <ol className="text-left max-w-lg mx-auto space-y-2 text-muted-foreground">
-                    <li>1. Enter your market, technology, or competitive keyword above</li>
-                    <li>2. Select intelligence sources (Research, Projects, Patents, News)</li>
-                    <li>3. Click Search to aggregate insights across multiple sources</li>
-                    <li>4. Review AI-generated strategic synthesis and competitive landscape</li>
-                    <li>5. Export executive reports as PDF or raw data as CSV</li>
+              <TabsContent value="search" className="space-y-4 pt-6">
+                <div className="text-center p-8 bg-card rounded-xl border border-border/60 shadow-card">
+                  <h3 className="text-title mb-4 text-foreground">How to Use</h3>
+                  <ol className="text-left max-w-lg mx-auto space-y-3 text-body text-muted-foreground">
+                    <li className="flex gap-3"><span className="text-primary font-semibold">1.</span> Enter your market, technology, or competitive keyword above</li>
+                    <li className="flex gap-3"><span className="text-primary font-semibold">2.</span> Select intelligence sources (Research, Projects, Patents, News)</li>
+                    <li className="flex gap-3"><span className="text-primary font-semibold">3.</span> Click Search to aggregate insights across multiple sources</li>
+                    <li className="flex gap-3"><span className="text-primary font-semibold">4.</span> Review AI-generated strategic synthesis and competitive landscape</li>
+                    <li className="flex gap-3"><span className="text-primary font-semibold">5.</span> Export executive reports as PDF or raw data as CSV</li>
                   </ol>
                 </div>
               </TabsContent>
-              <TabsContent value="upload" className="pt-4">
+              <TabsContent value="upload" className="pt-6">
                 <DocumentUpload />
               </TabsContent>
             </Tabs>
