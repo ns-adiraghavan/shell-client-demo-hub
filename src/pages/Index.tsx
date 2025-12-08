@@ -157,7 +157,7 @@ const Index = () => {
       <div className="container mx-auto px-6 py-8 space-y-8">
         
         {/* Filters Section */}
-        <div className="bg-card rounded-xl border border-border/50 shadow-card p-6">
+        <div className="bg-card rounded-xl border border-border/30 shadow-card p-6">
           <SearchFilters 
             sources={sources} 
             setSources={setSources} 
@@ -165,7 +165,7 @@ const Index = () => {
             setMaxResults={setMaxResults} 
           />
         </div>
-        <div className="bg-card rounded-xl border border-border/50 shadow-card p-6">
+        <div className="bg-card rounded-xl border border-border/30 shadow-card p-6">
           <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
         </div>
         
@@ -230,12 +230,12 @@ const Index = () => {
             </div>
 
             <Tabs defaultValue="search" className="max-w-4xl mx-auto">
-              <TabsList className="grid w-full grid-cols-2 bg-muted/60 p-1 rounded-lg">
+              <TabsList className="grid w-full grid-cols-2 bg-secondary p-1 rounded-lg">
                 <TabsTrigger value="search" className="rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card">Quick Start</TabsTrigger>
                 <TabsTrigger value="upload" className="rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card">Upload Documents</TabsTrigger>
               </TabsList>
               <TabsContent value="search" className="space-y-4 pt-6">
-                <div className="text-center p-8 bg-card rounded-xl border border-border/60 shadow-card">
+                <div className="text-center p-8 bg-card rounded-xl border border-border/30 shadow-card">
                   <h3 className="text-title mb-4 text-foreground">How to Use</h3>
                   <ol className="text-left max-w-lg mx-auto space-y-3 text-body text-muted-foreground">
                     <li className="flex gap-3"><span className="text-primary font-semibold">1.</span> Enter your market, technology, or competitive keyword above</li>

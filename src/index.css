@@ -11,115 +11,117 @@ Corporate Energy & Strategy-focused palette:
 
 @layer base {
   :root {
-    --background: 35 12% 94%;
-    --foreground: 220 30% 12%;
+    /* Charcoal Intelligence Terminal - Unified Dark Theme */
+    --background: 220 18% 13%;
+    --foreground: 35 10% 88%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 30% 12%;
+    --card: 220 16% 16%;
+    --card-foreground: 35 10% 88%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 30% 12%;
+    --popover: 220 16% 16%;
+    --popover-foreground: 35 10% 88%;
 
-    --primary: 22 85% 42%;
+    --primary: 22 85% 48%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 12% 92%;
-    --secondary-foreground: 220 30% 15%;
+    --secondary: 220 14% 20%;
+    --secondary-foreground: 35 8% 75%;
 
-    --muted: 30 8% 90%;
-    --muted-foreground: 220 12% 45%;
+    --muted: 220 14% 18%;
+    --muted-foreground: 220 10% 55%;
 
-    --accent: 22 80% 48%;
+    --accent: 22 80% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 35 10% 92%;
 
-    --border: 220 12% 82%;
-    --input: 220 12% 82%;
-    --ring: 22 85% 42%;
+    --border: 220 12% 22%;
+    --input: 220 14% 20%;
+    --ring: 22 85% 48%;
 
     --radius: 0.5rem;
     
-    --brand-orange: 22 85% 42%;
-    --brand-amber: 30 90% 48%;
-    --success-green: 145 65% 42%;
-    --warning-amber: 35 95% 52%;
+    --brand-orange: 22 85% 48%;
+    --brand-amber: 30 80% 52%;
+    --success-green: 145 50% 42%;
+    --warning-amber: 35 80% 52%;
     
-    --surface-elevated: 0 0% 100%;
-    --surface-sunken: 35 10% 91%;
-    --surface-dark: 220 18% 16%;
-    --surface-command: 220 15% 20%;
+    --surface-elevated: 220 15% 18%;
+    --surface-sunken: 220 18% 11%;
+    --surface-dark: 220 18% 14%;
+    --surface-command: 220 16% 10%;
 
-    --chart-1: 22 85% 42%;
-    --chart-2: 160 55% 38%;
-    --chart-3: 30 90% 48%;
-    --chart-4: 220 15% 32%;
-    --chart-5: 340 65% 48%;
+    --chart-1: 22 85% 48%;
+    --chart-2: 220 10% 50%;
+    --chart-3: 35 40% 55%;
+    --chart-4: 220 8% 40%;
+    --chart-5: 200 15% 45%;
 
-    --sidebar-background: 30 10% 97%;
-    --sidebar-foreground: 220 25% 18%;
-    --sidebar-primary: 22 85% 42%;
+    --sidebar-background: 220 18% 11%;
+    --sidebar-foreground: 35 8% 80%;
+    --sidebar-primary: 22 85% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 22 70% 96%;
-    --sidebar-accent-foreground: 22 85% 32%;
-    --sidebar-border: 220 12% 85%;
-    --sidebar-ring: 22 85% 42%;
+    --sidebar-accent: 220 14% 18%;
+    --sidebar-accent-foreground: 22 75% 55%;
+    --sidebar-border: 220 12% 20%;
+    --sidebar-ring: 22 85% 48%;
   }
 
   .dark {
-    --background: 220 24% 8%;
-    --foreground: 35 12% 94%;
+    /* Dark mode inherits same charcoal system */
+    --background: 220 20% 10%;
+    --foreground: 35 10% 90%;
 
-    --card: 220 22% 11%;
-    --card-foreground: 35 12% 94%;
+    --card: 220 18% 14%;
+    --card-foreground: 35 10% 90%;
 
-    --popover: 220 22% 11%;
-    --popover-foreground: 35 12% 94%;
+    --popover: 220 18% 14%;
+    --popover-foreground: 35 10% 90%;
 
-    --primary: 22 90% 52%;
+    --primary: 22 88% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 18% 16%;
-    --secondary-foreground: 35 10% 88%;
+    --secondary: 220 16% 18%;
+    --secondary-foreground: 35 8% 78%;
 
-    --muted: 220 20% 14%;
-    --muted-foreground: 220 12% 50%;
+    --muted: 220 16% 16%;
+    --muted-foreground: 220 10% 52%;
 
-    --accent: 22 85% 52%;
+    --accent: 22 82% 52%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 35 12% 94%;
+    --destructive: 0 65% 52%;
+    --destructive-foreground: 35 10% 94%;
 
-    --border: 220 20% 16%;
-    --input: 220 20% 16%;
-    --ring: 22 90% 52%;
+    --border: 220 14% 20%;
+    --input: 220 16% 18%;
+    --ring: 22 88% 50%;
     
-    --brand-orange: 22 90% 52%;
-    --brand-amber: 30 90% 52%;
-    --success-green: 145 65% 48%;
-    --warning-amber: 35 95% 58%;
+    --brand-orange: 22 88% 50%;
+    --brand-amber: 30 82% 54%;
+    --success-green: 145 52% 44%;
+    --warning-amber: 35 82% 54%;
     
-    --surface-elevated: 220 20% 13%;
-    --surface-sunken: 220 22% 7%;
-    --surface-dark: 220 22% 10%;
-    --surface-command: 220 20% 14%;
+    --surface-elevated: 220 17% 16%;
+    --surface-sunken: 220 20% 9%;
+    --surface-dark: 220 18% 12%;
+    --surface-command: 220 18% 8%;
 
-    --chart-1: 22 90% 52%;
-    --chart-2: 160 60% 42%;
-    --chart-3: 30 90% 52%;
-    --chart-4: 220 12% 42%;
-    --chart-5: 340 70% 52%;
+    --chart-1: 22 88% 50%;
+    --chart-2: 220 10% 52%;
+    --chart-3: 35 42% 56%;
+    --chart-4: 220 8% 42%;
+    --chart-5: 200 16% 46%;
 
-    --sidebar-background: 220 22% 9%;
-    --sidebar-foreground: 35 10% 90%;
-    --sidebar-primary: 22 90% 52%;
+    --sidebar-background: 220 20% 9%;
+    --sidebar-foreground: 35 8% 82%;
+    --sidebar-primary: 22 88% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 20% 13%;
-    --sidebar-accent-foreground: 22 90% 58%;
-    --sidebar-border: 220 20% 14%;
-    --sidebar-ring: 22 90% 52%;
+    --sidebar-accent: 220 16% 16%;
+    --sidebar-accent-foreground: 22 78% 56%;
+    --sidebar-border: 220 14% 18%;
+    --sidebar-ring: 22 88% 50%;
   }
 }
 

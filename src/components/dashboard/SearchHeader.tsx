@@ -22,7 +22,7 @@ export const SearchHeader = ({
   onSignOut
 }: SearchHeaderProps) => {
   return (
-    <header className="sticky top-0 z-10 bg-surface-command border-b border-border/30">
+    <header className="sticky top-0 z-10 bg-surface-command border-b border-border/40">
       <div className="container mx-auto px-6 py-5">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-4">
@@ -30,8 +30,8 @@ export const SearchHeader = ({
               <Radar className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-primary-foreground tracking-tight">Market Insights Engine</h1>
-              <p className="text-sm text-primary-foreground/60">Unified Market, Startup & Technology Intelligence</p>
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">Market Insights Engine</h1>
+              <p className="text-sm text-muted-foreground">Unified Market, Startup & Technology Intelligence</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -40,7 +40,7 @@ export const SearchHeader = ({
                 <Button 
                   variant="ghost" 
                   onClick={onHistoryClick} 
-                  className="gap-2 text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                  className="gap-2 text-muted-foreground hover:text-foreground hover:bg-secondary"
                 >
                   <History className="h-4 w-4" />
                   History
@@ -48,7 +48,7 @@ export const SearchHeader = ({
                 <Button 
                   variant="ghost" 
                   onClick={onSignOut} 
-                  className="gap-2 text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                  className="gap-2 text-muted-foreground hover:text-foreground hover:bg-secondary"
                 >
                   <LogOut className="h-4 w-4" />
                   Sign Out
@@ -58,7 +58,7 @@ export const SearchHeader = ({
             <Button 
               variant="ghost" 
               size="icon"
-              className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+              className="text-muted-foreground hover:text-foreground hover:bg-secondary"
             >
               <Settings className="h-5 w-5" />
             </Button>
@@ -66,7 +66,7 @@ export const SearchHeader = ({
         </div>
         
         {/* Command Center Search */}
-        <div className="bg-surface-dark/60 rounded-xl p-4 shadow-command border border-border/20">
+        <div className="bg-surface-dark rounded-xl p-4 shadow-command border border-border/30">
           <div className="flex gap-3">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -75,13 +75,13 @@ export const SearchHeader = ({
                 onChange={e => setQuery(e.target.value)} 
                 onKeyDown={e => e.key === 'Enter' && onSearch()} 
                 placeholder="Market / Technology / Keyword Search... (e.g., Renewable Energy, Hydrogen Storage, Carbon Capture)" 
-                className="pl-12 h-14 text-base bg-card border-border/40 text-foreground placeholder:text-muted-foreground shadow-card focus:shadow-elevated focus:border-primary/50 transition-all" 
+                className="pl-12 h-14 text-base bg-surface-elevated border-border/40 text-foreground placeholder:text-muted-foreground focus:border-primary/50 transition-all" 
               />
             </div>
             <Button 
               onClick={onSearch} 
               disabled={isSearching} 
-              className="px-10 h-14 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-elevated hover:shadow-command transition-all"
+              className="px-10 h-14 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-elevated transition-all"
             >
               {isSearching ? "Scanning..." : "Search Intelligence"}
             </Button>
