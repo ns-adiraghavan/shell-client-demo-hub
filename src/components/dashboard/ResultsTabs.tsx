@@ -52,7 +52,7 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
     if (sourceResults.length === 0) {
       return (
         <div className="text-center py-16 text-muted-foreground">
-          <div className="p-4 bg-surface-sunken rounded-full w-fit mx-auto mb-4">
+          <div className="p-4 bg-secondary rounded-full w-fit mx-auto mb-4">
             <Search className="h-6 w-6 opacity-50" />
           </div>
           <p className="text-base font-medium">No results found in this category</p>
@@ -63,12 +63,12 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
     return sourceResults.map((result, index) => (
       <div 
         key={result.id} 
-        className="bg-card hover:bg-card/80 transition-all rounded-xl border border-border/40 hover:border-border/60 shadow-card hover:shadow-card-hover overflow-hidden"
+        className="bg-surface-elevated hover:bg-secondary transition-all rounded-xl border border-border/30 hover:border-border/50 shadow-card hover:shadow-card-hover overflow-hidden"
       >
         <div className="p-5">
           <div className="flex items-start gap-4">
             {/* Index Number */}
-            <div className="shrink-0 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+            <div className="shrink-0 w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center">
               <span className="text-sm font-bold text-primary">#{index + 1}</span>
             </div>
             
@@ -80,7 +80,7 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
               
               {/* Metadata Row */}
               <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-                <Badge variant="outline" className="text-xs border-border/60 bg-surface-sunken font-medium">
+                <Badge variant="outline" className="text-xs border-border/40 bg-secondary font-medium">
                   {result.source}
                 </Badge>
                 {result.date && (
@@ -97,7 +97,7 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
               {/* Phase/Status Badges */}
               {result.phase && (
                 <div className="flex flex-wrap gap-2 mb-3">
-                  <Badge className="bg-primary/10 text-primary border-0 text-xs font-semibold">{result.phase}</Badge>
+                  <Badge className="bg-primary/15 text-primary border-0 text-xs font-semibold">{result.phase}</Badge>
                   {result.status && <Badge className="bg-success text-white text-xs">{result.status}</Badge>}
                 </div>
               )}
@@ -127,11 +127,11 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
   };
 
   return (
-    <Card className="border-border/50 shadow-elevated bg-card">
+    <Card className="border-border/30 shadow-elevated bg-card">
       <CardHeader className="pb-4 border-b border-border/30">
         <div className="flex justify-between items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
+            <div className="p-2 bg-primary/15 rounded-lg">
               <Radio className="h-5 w-5 text-primary" />
             </div>
             <div>
@@ -143,7 +143,7 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
             <div className="flex gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="bg-card hover:bg-surface-sunken border-border/50">
+                  <Button variant="outline" size="sm" className="bg-secondary hover:bg-muted border-border/40">
                     <BookOpen className="h-4 w-4 mr-2" />
                     Citations
                   </Button>
@@ -184,7 +184,7 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
       <CardContent className="p-0">
         <Tabs defaultValue="all" className="w-full">
           <div className="px-6 pt-5 pb-4 border-b border-border/20">
-            <TabsList className="grid w-full grid-cols-6 bg-surface-sunken p-1.5 rounded-lg h-auto">
+            <TabsList className="grid w-full grid-cols-6 bg-secondary p-1.5 rounded-lg h-auto">
               <TabsTrigger value="all" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">All ({results.length})</TabsTrigger>
               <TabsTrigger value="pubmed" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Research ({pubmedResults.length})</TabsTrigger>
               <TabsTrigger value="clinical" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Projects ({clinicalResults.length})</TabsTrigger>

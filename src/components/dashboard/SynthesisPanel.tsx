@@ -34,14 +34,14 @@ const ExecutiveSnapshot = ({ results }: { results: SearchResult[] }) => {
   ];
 
   return (
-    <div className="bg-surface-dark rounded-xl p-5 mb-6 border border-border/30">
+    <div className="bg-surface-command rounded-xl p-5 mb-6 border border-border/30">
       <div className="flex items-center gap-2 mb-4">
         <Zap className="h-4 w-4 text-primary" />
         <h4 className="text-sm font-bold text-primary uppercase tracking-wider">Executive Snapshot</h4>
       </div>
       <div className="grid grid-cols-2 gap-4">
         {metrics.map((metric) => (
-          <div key={metric.label} className="bg-card/60 rounded-lg p-3 border border-border/20">
+          <div key={metric.label} className="bg-surface-elevated rounded-lg p-3 border border-border/20">
             <div className="flex items-center gap-2 mb-1">
               <metric.icon className="h-4 w-4 text-primary shrink-0" />
               <span className="text-xs text-muted-foreground font-medium">{metric.label}</span>
@@ -108,9 +108,9 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results }: Synth
 
   return (
     <Card className="flex flex-col h-[calc(100vh-6rem)] shadow-intel bg-surface-dark border-border/30">
-      <CardHeader className="shrink-0 pb-4 border-b border-border/20 bg-surface-command/50">
+      <CardHeader className="shrink-0 pb-4 border-b border-border/30 bg-surface-command/60">
         <div className="flex items-center gap-3 mb-1">
-          <div className="p-2 bg-primary rounded-lg shadow-card">
+          <div className="p-2 bg-primary rounded-lg">
             <Sparkles className="h-5 w-5 text-primary-foreground" />
           </div>
           <CardTitle className="text-xl font-bold text-foreground">Executive Intelligence Brief</CardTitle>

@@ -13,7 +13,7 @@ interface DataVisualizationProps {
   query?: string;
 }
 
-const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, name, percent }: any) => {
   const RADIAN = Math.PI / 180;
@@ -115,16 +115,16 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
 
   if (isLoading) {
     return (
-      <Card className="bg-card border-border/50 shadow-elevated">
+      <Card className="bg-card border-border/30 shadow-elevated">
         <CardHeader className="pb-4 border-b border-border/30">
           <CardTitle className="text-xl font-bold text-foreground">Executive Market Overview</CardTitle>
           <CardDescription className="text-sm text-muted-foreground">Loading intelligence data...</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
-          <Skeleton className="h-[300px] w-full rounded-xl" />
+          <Skeleton className="h-[300px] w-full rounded-xl bg-muted/20" />
           <div className="grid md:grid-cols-2 gap-6">
-            <Skeleton className="h-[280px] w-full rounded-xl" />
-            <Skeleton className="h-[280px] w-full rounded-xl" />
+            <Skeleton className="h-[280px] w-full rounded-xl bg-muted/20" />
+            <Skeleton className="h-[280px] w-full rounded-xl bg-muted/20" />
           </div>
         </CardContent>
       </Card>
@@ -136,10 +136,10 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
   }
 
   return (
-    <Card className="bg-card border-border/50 shadow-elevated">
+    <Card className="bg-card border-border/30 shadow-elevated">
       <CardHeader className="pb-4 border-b border-border/30">
         <CardTitle className="flex items-center gap-3 text-xl font-bold text-foreground">
-          <div className="p-2 bg-primary/10 rounded-lg">
+          <div className="p-2 bg-primary/15 rounded-lg">
             <TrendingUp className="h-5 w-5 text-primary" />
           </div>
           Executive Market Overview
@@ -151,9 +151,9 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
       <CardContent className="space-y-8 pt-8">
         {/* AI Chart Analysis */}
         {(isAnalyzing || chartAnalysis) && (
-          <div className="bg-surface-sunken rounded-xl p-6 border border-border/40">
+          <div className="bg-surface-elevated rounded-xl p-6 border border-border/30">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-primary/10 rounded-lg">
+              <div className="p-2 bg-primary/15 rounded-lg">
                 <Brain className="h-5 w-5 text-primary" />
               </div>
               <h3 className="text-lg font-bold text-foreground">Strategic Intelligence Analysis</h3>
@@ -186,15 +186,15 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
 
         {/* Market Activity Momentum */}
         {publicationTrend.length > 0 && (
-          <div className="bg-surface-sunken rounded-xl p-6 border border-border/40">
+          <div className="bg-surface-elevated rounded-xl p-6 border border-border/30">
             <div className="mb-6">
               <h3 className="text-lg font-bold text-foreground">Market Activity Momentum</h3>
               <p className="text-sm text-muted-foreground mt-1">Volume of competitive and innovation signals over time</p>
-              <p className="text-xs text-primary/80 mt-2 italic">"Market signals remained flat for a decade before sharp acceleration post-2022."</p>
+              <p className="text-xs text-secondary-foreground mt-2 italic">"Market signals remained flat for a decade before sharp acceleration post-2022."</p>
             </div>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={publicationTrend} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <LineChart data={publicationTrend} margin={{ top: 20, right: 30, left: 20, bottom: 60 }} style={{ background: 'transparent' }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 12% 25%)" strokeOpacity={0.5} />
                 <XAxis 
                   dataKey="year" 
                   stroke="hsl(var(--muted-foreground))"
@@ -248,14 +248,14 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Intelligence Source Mix */}
-          <div className="bg-surface-sunken rounded-xl p-6 border border-border/40">
+          <div className="bg-surface-elevated rounded-xl p-6 border border-border/30">
             <div className="mb-6">
               <h3 className="text-lg font-bold text-foreground">Intelligence Source Mix</h3>
               <p className="text-sm text-muted-foreground mt-1">Where intelligence is being captured from</p>
-              <p className="text-xs text-primary/80 mt-2 italic">"Balanced coverage across research, patents, and market news."</p>
+              <p className="text-xs text-secondary-foreground mt-2 italic">"Balanced coverage across research, patents, and market news."</p>
             </div>
             <ResponsiveContainer width="100%" height={280}>
-              <PieChart margin={{ top: 10, right: 80, left: 80, bottom: 10 }}>
+              <PieChart margin={{ top: 10, right: 80, left: 80, bottom: 10 }} style={{ background: 'transparent' }}>
                 <Pie
                   data={sourceBreakdown}
                   cx="50%"
@@ -287,15 +287,15 @@ export const DataVisualization = ({ results, isLoading, query }: DataVisualizati
 
           {/* Execution & Commercialization Stages */}
           {studyTypeDistribution.length > 0 && (
-            <div className="bg-surface-sunken rounded-xl p-6 border border-border/40">
+            <div className="bg-surface-elevated rounded-xl p-6 border border-border/30">
               <div className="mb-6">
                 <h3 className="text-lg font-bold text-foreground">Execution & Commercialization Stages</h3>
                 <p className="text-sm text-muted-foreground mt-1">Maturity distribution of tracked initiatives</p>
-                <p className="text-xs text-primary/80 mt-2 italic">"Most initiatives are in early development phases."</p>
+                <p className="text-xs text-secondary-foreground mt-2 italic">"Most initiatives are in early development phases."</p>
               </div>
               <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={studyTypeDistribution} margin={{ top: 10, right: 30, left: 20, bottom: 80 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <BarChart data={studyTypeDistribution} margin={{ top: 10, right: 30, left: 20, bottom: 80 }} style={{ background: 'transparent' }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 12% 25%)" strokeOpacity={0.5} />
                   <XAxis 
                     dataKey="name" 
                     stroke="hsl(var(--muted-foreground))"

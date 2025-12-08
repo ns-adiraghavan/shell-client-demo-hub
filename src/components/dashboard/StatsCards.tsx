@@ -33,10 +33,10 @@ export const StatsCards = ({ counts, isSearching }: StatsCardsProps) => {
         return (
           <Card 
             key={stat.label} 
-            className={`transition-all overflow-hidden ${
+            className={`transition-all overflow-hidden border-border/30 ${
               isActive 
-                ? 'bg-card shadow-beacon shadow-elevated border-transparent' 
-                : 'bg-surface-sunken shadow-beacon-muted hover:shadow-card-hover border-transparent'
+                ? 'bg-surface-elevated shadow-beacon shadow-elevated' 
+                : 'bg-card shadow-beacon-muted hover:bg-surface-elevated'
             }`}
           >
             <CardContent className="p-5">
@@ -46,14 +46,14 @@ export const StatsCards = ({ counts, isSearching }: StatsCardsProps) => {
                     {stat.label}
                   </p>
                   {isSearching ? (
-                    <Skeleton className="h-12 w-20" />
+                    <Skeleton className="h-12 w-20 bg-muted/30" />
                   ) : (
-                    <p className={`text-4xl font-bold tracking-tight ${isActive ? 'text-primary' : 'text-foreground/70'}`}>
+                    <p className={`text-4xl font-bold tracking-tight ${isActive ? 'text-primary' : 'text-foreground'}`}>
                       {stat.value}
                     </p>
                   )}
                 </div>
-                <div className={`p-3 rounded-lg shrink-0 ${isActive ? 'bg-primary/10' : 'bg-muted/40'}`}>
+                <div className={`p-3 rounded-lg shrink-0 ${isActive ? 'bg-primary/15' : 'bg-secondary'}`}>
                   <Icon className={`h-5 w-5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                 </div>
               </div>
