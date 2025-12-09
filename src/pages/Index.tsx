@@ -150,23 +150,7 @@ const Index = () => {
       "min-h-screen transition-all duration-500",
       situationRoomMode ? "bg-surface-command-dark" : "bg-surface-sunken"
     )}>
-      {/* Welcome Message - Above Search Header */}
-      {!hasSearched && !situationRoomMode && (
-        <div className="container mx-auto px-6 pt-8 pb-4">
-          <div className="text-center">
-            <div className="max-w-2xl mx-auto space-y-3">
-              <h2 className="text-display text-foreground">
-                Welcome to Innovation Insights Engine
-              </h2>
-              <p className="text-subtitle text-muted-foreground">
-                Track business updates, innovation, investments, partnerships, research, and patents across global markets in one intelligent workspace.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      <SearchHeader 
+      <SearchHeader
         query={query}
         setQuery={setQuery}
         onSearch={() => handleSearch()}
@@ -310,6 +294,9 @@ const Index = () => {
             <TabsContent value="search" className="space-y-4 pt-6">
               <div className="text-center p-8 bg-card rounded-xl border border-border/30 shadow-card">
                 <h3 className="text-title mb-4 text-foreground">How to Use</h3>
+                <p className="text-body text-muted-foreground mb-6">
+                  Search across business news, startups, patents, scientific research, suppliers, and partnerships. Get AI-powered synthesis of both external market intelligence and your internal knowledge base.
+                </p>
                 <ol className="text-left max-w-lg mx-auto space-y-3 text-body text-muted-foreground">
                   <li className="flex gap-3"><span className="text-primary font-semibold">1.</span> Enter your market, technology, or competitive keyword above</li>
                   <li className="flex gap-3"><span className="text-primary font-semibold">2.</span> Select intelligence sources (Research, Projects, Patents, News)</li>

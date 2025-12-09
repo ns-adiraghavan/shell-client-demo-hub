@@ -36,7 +36,7 @@ export const SearchHeader = ({
     <header 
       id="search-section"
       className={cn(
-        "border-b border-border/40 transition-all duration-300",
+        "border-b border-border/40 transition-all duration-300 sticky top-0 z-40",
         situationRoomMode 
           ? "bg-[hsl(220,15%,12%)]" 
           : "bg-[hsl(220,16%,10%)]"
@@ -52,15 +52,15 @@ export const SearchHeader = ({
               <Radar className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">
                 {situationRoomMode ? "Situation Room" : "Innovation Insights Engine"}
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground">
                 {situationRoomMode ? "Executive Command Center • Live Intelligence" : "Unified Market, Startup & Technology Intelligence"}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-2">
             {onSituationRoomToggle && (
               <SituationRoomToggle 
                 isActive={situationRoomMode} 
