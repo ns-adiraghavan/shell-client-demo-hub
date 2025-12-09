@@ -31,11 +31,11 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Searching news for: ${query}, maxResults: ${maxResults}`);
+    console.log(`Searching business news for: ${query}, maxResults: ${maxResults}`);
 
-    // Use Google News RSS feed (free, no API key required)
-    // Include global results and patent/legal terms
-    const encodedQuery = encodeURIComponent(`${query} (biotech OR pharma OR healthcare OR clinical OR FDA OR patent OR licensing OR court OR lawsuit OR regulatory)`);
+    // Business News sources: Reuters, Bloomberg, NYT, Financial Times, CNBC, WSJ, ET EnergyWorld
+    const businessSources = 'site:reuters.com OR site:bloomberg.com OR site:nytimes.com OR site:ft.com OR site:cnbc.com OR site:wsj.com OR site:economictimes.indiatimes.com/industry/energy';
+    const encodedQuery = encodeURIComponent(`${query} (${businessSources})`);
     const rssUrl = `https://news.google.com/rss/search?q=${encodedQuery}&hl=en&gl=US&ceid=US:en`;
     
     console.log('Fetching from Google News RSS:', rssUrl);
@@ -117,10 +117,10 @@ serve(async (req) => {
         }
 
         results.push({
-          source: 'News',
-          id: `news-${count + 1}-${Date.now()}`,
+          source: 'BusinessNews',
+          id: `business-news-${count + 1}-${Date.now()}`,
           title: cleanTitle,
-          abstract: description || `Latest news from ${publisher}`,
+          abstract: description || `Latest business news from ${publisher}`,
           authors: publisher,
           date: formattedDate,
           url: link,
