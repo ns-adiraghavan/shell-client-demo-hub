@@ -281,7 +281,7 @@ const Index = () => {
             <div className="text-center pt-8 pb-4">
               <div className="max-w-2xl mx-auto space-y-3">
                 <h2 className="text-display text-foreground">
-                  Welcome to Market Insights Engine
+                  Welcome to Innovation Insights Engine
                 </h2>
                 <p className="text-subtitle text-muted-foreground">
                   Track business updates, innovation, investments, partnerships, research, and patents across global markets in one intelligent workspace.
