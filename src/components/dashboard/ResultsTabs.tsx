@@ -97,14 +97,17 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
                 <Badge variant="outline" className="text-xs border-border/40 bg-secondary font-medium">
                   {result.source}
                 </Badge>
-                {result.insightCategory && (
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs font-medium ${getCategoryColor(result.insightCategory)}`}
-                  >
-                    <Tag className="h-3 w-3 mr-1" />
-                    {result.insightCategory}
-                  </Badge>
+                {result.insightCategories && result.insightCategories.length > 0 && (
+                  result.insightCategories.map((category, catIndex) => (
+                    <Badge 
+                      key={catIndex}
+                      variant="outline" 
+                      className={`text-xs font-medium ${getCategoryColor(category)}`}
+                    >
+                      <Tag className="h-3 w-3 mr-1" />
+                      {category}
+                    </Badge>
+                  ))
                 )}
                 {result.date && (
                   <span className="flex items-center gap-1">
@@ -209,9 +212,9 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
           <div className="px-6 pt-5 pb-4 border-b border-border/20">
             <TabsList className="grid w-full grid-cols-6 bg-secondary p-1.5 rounded-lg h-auto">
               <TabsTrigger value="all" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">All ({results.length})</TabsTrigger>
-              <TabsTrigger value="ieee" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">IEEE ({ieeeResults.length})</TabsTrigger>
+              <TabsTrigger value="ieee" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Technical ({ieeeResults.length})</TabsTrigger>
               <TabsTrigger value="industryNews" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Industry ({industryNewsResults.length})</TabsTrigger>
-              <TabsTrigger value="scholar" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Scholar ({scholarResults.length})</TabsTrigger>
+              <TabsTrigger value="scholar" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Scholarly ({scholarResults.length})</TabsTrigger>
               <TabsTrigger value="patents" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Patents ({patentResults.length})</TabsTrigger>
               <TabsTrigger value="businessNews" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Business ({businessNewsResults.length})</TabsTrigger>
             </TabsList>

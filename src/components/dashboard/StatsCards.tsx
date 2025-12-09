@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 interface StatsCardsProps {
   counts: {
     ieee: number;
-    clinical: number;
+    industryNews: number;
     googleScholar: number;
     patents: number;
-    news: number;
+    businessNews: number;
   };
   isSearching: boolean;
   situationRoomMode?: boolean;
@@ -17,11 +17,11 @@ interface StatsCardsProps {
 
 export const StatsCards = ({ counts, isSearching, situationRoomMode = false }: StatsCardsProps) => {
   const stats = [
-    { label: "IEEE Papers", value: counts.ieee, icon: FileText },
-    { label: "Active Projects", value: counts.clinical, icon: Briefcase },
-    { label: "Scholar Articles", value: counts.googleScholar, icon: GraduationCap },
+    { label: "Technical Literature", value: counts.ieee, icon: FileText },
+    { label: "Industry News", value: counts.industryNews, icon: Briefcase },
+    { label: "Scholarly Literature", value: counts.googleScholar, icon: GraduationCap },
     { label: "Patents", value: counts.patents, icon: Scale },
-    { label: "Business News", value: counts.news, icon: Newspaper },
+    { label: "Business News", value: counts.businessNews, icon: Newspaper },
   ];
 
   const maxValue = Math.max(...stats.map(s => s.value));

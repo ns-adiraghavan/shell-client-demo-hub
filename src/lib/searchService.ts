@@ -21,7 +21,7 @@ export interface SearchResult {
   phase?: string;
   enrollment?: string;
   url: string;
-  insightCategory?: InsightCategory;
+  insightCategories?: InsightCategory[];
 }
 
 export interface SearchOptions {
@@ -36,30 +36,31 @@ export interface SearchOptions {
   };
 }
 
-// Local categorization function to tag results
-function categorizeResult(result: SearchResult): InsightCategory {
+// Local categorization function to tag results with multiple categories
+function categorizeResult(result: SearchResult): InsightCategory[] {
   const text = `${result.title} ${result.abstract || ''}`.toLowerCase();
+  const categories: InsightCategory[] = [];
   
   // Patent & IP Activity
   if (result.source === 'EPO' || result.source === 'Patents' || 
       text.includes('patent') || text.includes('intellectual property') || 
       text.includes('ip rights') || text.includes('licensing agreement')) {
-    return "Patent & IP Activity";
+    categories.push("Patent & IP Activity");
   }
   
   // Academic Research & Tie-ups
-  if (result.source === 'IEEE' || result.source === 'GoogleScholar' ||
+  if (result.source === 'IEEE' || result.source === 'Google Scholar' ||
       text.includes('research') || text.includes('study') || 
       text.includes('university') || text.includes('journal') ||
       text.includes('scientific') || text.includes('academic')) {
-    return "Academic Research & Tie-ups";
+    categories.push("Academic Research & Tie-ups");
   }
   
   // Partnerships & Collaborations
   if (text.includes('partnership') || text.includes('collaboration') ||
       text.includes('joint venture') || text.includes('mou') ||
       text.includes('alliance') || text.includes('partners with')) {
-    return "Partnerships & Collaborations";
+    categories.push("Partnerships & Collaborations");
   }
   
   // Investments & Funding
@@ -67,14 +68,14 @@ function categorizeResult(result: SearchResult): InsightCategory {
       text.includes('acquisition') || text.includes('merger') ||
       text.includes('raised') || text.includes('series') || 
       text.includes('ipo') || text.includes('venture capital')) {
-    return "Investments & Funding";
+    categories.push("Investments & Funding");
   }
   
   // Startup & Innovation News
   if (text.includes('startup') || text.includes('start-up') ||
       text.includes('incubator') || text.includes('accelerator') ||
       text.includes('disruptive') || text.includes('emerging')) {
-    return "Startup & Innovation News";
+    categories.push("Startup & Innovation News");
   }
   
   // Product / Project Announcements
@@ -82,7 +83,7 @@ function categorizeResult(result: SearchResult): InsightCategory {
       text.includes('new product') || text.includes('project') ||
       text.includes('milestone') || text.includes('facility') ||
       text.includes('unveils') || text.includes('introduces')) {
-    return "Product / Project Announcements";
+    categories.push("Product / Project Announcements");
   }
   
   // Suppliers, Logistics & Raw Materials
@@ -90,11 +91,15 @@ function categorizeResult(result: SearchResult): InsightCategory {
       text.includes('logistics') || text.includes('raw material') ||
       text.includes('commodity') || text.includes('procurement') ||
       text.includes('manufacturing') || text.includes('sourcing')) {
-    return "Suppliers, Logistics & Raw Materials";
+    categories.push("Suppliers, Logistics & Raw Materials");
   }
   
-  // Default to Business Updates
-  return "Business Updates";
+  // Default to Business Updates if no other category matched
+  if (categories.length === 0) {
+    categories.push("Business Updates");
+  }
+  
+  return categories;
 }
 
 export const searchAllSources = async (options: SearchOptions): Promise<SearchResult[]> => {
@@ -159,10 +164,10 @@ export const searchAllSources = async (options: SearchOptions): Promise<SearchRe
       }
     });
 
-    // Categorize all results with insight categories
+    // Categorize all results with insight categories (multiple per result)
     const categorizedResults = allResults.map(result => ({
       ...result,
-      insightCategory: result.insightCategory || categorizeResult(result)
+      insightCategories: result.insightCategories || categorizeResult(result)
     }));
 
     return categorizedResults;

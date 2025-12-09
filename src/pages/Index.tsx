@@ -138,10 +138,10 @@ const Index = () => {
   const getCounts = () => {
     return {
       ieee: results.filter(r => r.source === 'IEEE').length,
-      clinical: results.filter(r => r.source === 'ClinicalTrials').length,
+      industryNews: results.filter(r => r.source === 'IndustryNews').length,
       googleScholar: results.filter(r => r.source === 'Google Scholar').length,
       patents: results.filter(r => r.source === 'Patents').length,
-      news: results.filter(r => r.source === 'News').length,
+      businessNews: results.filter(r => r.source === 'BusinessNews').length,
     };
   };
 
@@ -194,9 +194,17 @@ const Index = () => {
                 setMaxResults={setMaxResults} 
               />
             </div>
-            <div className="bg-card rounded-xl border border-border/30 shadow-card p-6">
-              <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
-            </div>
+            <details className="group bg-card rounded-xl border border-border/30 shadow-card">
+              <summary className="p-4 cursor-pointer flex items-center justify-between font-medium text-foreground hover:bg-muted/50 rounded-xl transition-colors">
+                <span className="flex items-center gap-2">
+                  <span>Advanced Filters</span>
+                </span>
+                <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <div className="px-6 pb-6">
+                <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
+              </div>
+            </details>
           </>
         )}
         
