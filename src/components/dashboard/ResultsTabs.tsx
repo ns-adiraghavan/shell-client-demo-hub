@@ -4,17 +4,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ExternalLink, Download, FileText, BookOpen, Search, Radio, Clock, Tag, Filter, X } from "lucide-react";
+import { ExternalLink, Download, FileText, BookOpen, Search, Radio, Clock, Tag, Filter, X, Languages, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SearchResult, InsightCategory } from "@/lib/searchService";
 import { exportToCSV, exportToBibTeX, exportToRIS, exportToEndNote } from "@/lib/exportService";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface ResultsTabsProps {
   results: SearchResult[];
@@ -121,6 +127,72 @@ const cleanAbstract = (abstract: string): string => {
 export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) => {
   const [selectedCategories, setSelectedCategories] = useState<InsightCategory[]>([]);
   const [keywordFilter, setKeywordFilter] = useState("");
+  const [translations, setTranslations] = useState<Record<string, { title?: string; abstract?: string; isLoading: boolean; error?: string }>>({});
+  const [expandedTranslations, setExpandedTranslations] = useState<Set<string>>(new Set());
+
+  // Translation function
+  const handleTranslate = async (resultId: string, title: string, abstract?: string) => {
+    if (translations[resultId]?.title && !translations[resultId]?.isLoading) {
+      // Already translated, just toggle visibility
+      setExpandedTranslations(prev => {
+        const next = new Set(prev);
+        if (next.has(resultId)) {
+          next.delete(resultId);
+        } else {
+          next.add(resultId);
+        }
+        return next;
+      });
+      return;
+    }
+
+    // Start loading
+    setTranslations(prev => ({
+      ...prev,
+      [resultId]: { isLoading: true }
+    }));
+    setExpandedTranslations(prev => new Set(prev).add(resultId));
+
+    try {
+      const textToTranslate = abstract ? `TITLE: ${title}\n\nABSTRACT: ${abstract}` : title;
+      
+      const { data, error } = await supabase.functions.invoke('translate-text', {
+        body: { text: textToTranslate, targetLanguage: 'English' }
+      });
+
+      if (error) throw error;
+
+      const translation = data.translation || '';
+      
+      // Parse title and abstract from response
+      let translatedTitle = translation;
+      let translatedAbstract: string | undefined;
+      
+      if (abstract && translation.includes('TITLE:') && translation.includes('ABSTRACT:')) {
+        const titleMatch = translation.match(/TITLE:\s*(.+?)(?=\n\nABSTRACT:|$)/s);
+        const abstractMatch = translation.match(/ABSTRACT:\s*(.+)$/s);
+        translatedTitle = titleMatch?.[1]?.trim() || translation;
+        translatedAbstract = abstractMatch?.[1]?.trim();
+      }
+
+      setTranslations(prev => ({
+        ...prev,
+        [resultId]: { 
+          title: translatedTitle, 
+          abstract: translatedAbstract,
+          isLoading: false 
+        }
+      }));
+    } catch (error) {
+      console.error('Translation error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Translation failed';
+      setTranslations(prev => ({
+        ...prev,
+        [resultId]: { isLoading: false, error: errorMessage }
+      }));
+      toast.error(errorMessage);
+    }
+  };
 
   // Filter results based on selected categories and keyword
   const filteredResults = useMemo(() => {
@@ -192,92 +264,135 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
       );
     }
 
-    return sourceResults.map((result, index) => (
-      <div 
-        key={result.id} 
-        className="bg-surface-elevated hover:bg-secondary transition-all rounded-xl border border-border/30 hover:border-border/50 shadow-card hover:shadow-card-hover overflow-hidden"
-      >
-        <div className="p-5">
-          <div className="flex items-start gap-4">
-            {/* Index Number */}
-            <div className="shrink-0 w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center">
-              <span className="text-sm font-bold text-primary">#{index + 1}</span>
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              {/* Title - Editorial Style with translation tooltip for non-English */}
-              {isNonEnglish(result.title) ? (
-                <h3 
-                  className="text-base font-bold text-foreground leading-snug mb-2 hover:text-primary transition-colors cursor-help"
-                  title="Non-English text detected - hover for translation coming soon"
-                >
-                  {decodeHtmlEntities(result.title)}
-                  <span className="ml-2 text-xs text-muted-foreground font-normal">(Non-English)</span>
-                </h3>
-              ) : (
-                <h3 className="text-base font-bold text-foreground leading-snug mb-2 hover:text-primary transition-colors">
-                  {decodeHtmlEntities(result.title)}
-                </h3>
-              )}
-              
-              {/* Metadata Row */}
-              <div className="flex items-center flex-wrap gap-2 text-xs text-muted-foreground mb-3">
-                <Badge variant="outline" className="text-xs border-border/40 bg-secondary font-medium">
-                  {result.source}
-                </Badge>
-                {result.insightCategories && result.insightCategories.length > 0 && (
-                  result.insightCategories.map((category, catIndex) => (
-                    <Badge 
-                      key={catIndex}
-                      variant="outline" 
-                      className={`text-xs font-medium ${getCategoryColor(category)}`}
-                    >
-                      <Tag className="h-3 w-3 mr-1" />
-                      {category}
-                    </Badge>
-                  ))
-                )}
-                {result.date && result.date !== 'Unknown' && result.date !== '' && (
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {result.date}
-                  </span>
-                )}
-                {result.authors && result.authors !== 'Unknown' && result.authors !== '' && (
-                  <span className="truncate max-w-[200px]">{result.authors}</span>
-                )}
+    return sourceResults.map((result, index) => {
+      const isNonEng = isNonEnglish(result.title) || (result.abstract && isNonEnglish(result.abstract));
+      const translation = translations[result.id];
+      const isExpanded = expandedTranslations.has(result.id);
+
+      return (
+        <div 
+          key={result.id} 
+          className="bg-surface-elevated hover:bg-secondary transition-all rounded-xl border border-border/30 hover:border-border/50 shadow-card hover:shadow-card-hover overflow-hidden"
+        >
+          <div className="p-5">
+            <div className="flex items-start gap-4">
+              {/* Index Number */}
+              <div className="shrink-0 w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center">
+                <span className="text-sm font-bold text-primary">#{index + 1}</span>
               </div>
               
-              {/* Phase/Status Badges */}
-              {result.phase && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <Badge className="bg-primary/15 text-primary border-0 text-xs font-semibold">{result.phase}</Badge>
-                  {result.status && <Badge className="bg-success text-white text-xs">{result.status}</Badge>}
+              <div className="flex-1 min-w-0">
+                {/* Title - Editorial Style with translation indicator for non-English */}
+                <div className="flex items-start gap-2 mb-2">
+                  <h3 className="text-base font-bold text-foreground leading-snug hover:text-primary transition-colors flex-1">
+                    {decodeHtmlEntities(result.title)}
+                    {isNonEng && (
+                      <span className="ml-2 text-xs text-muted-foreground font-normal">(Non-English)</span>
+                    )}
+                  </h3>
+                  {isNonEng && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleTranslate(result.id, result.title, result.abstract)}
+                      disabled={translation?.isLoading}
+                      className="shrink-0 h-7 px-2 text-xs text-primary hover:bg-primary/10"
+                    >
+                      {translation?.isLoading ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <>
+                          <Languages className="h-3.5 w-3.5 mr-1" />
+                          {translation?.title ? (isExpanded ? 'Hide' : 'Show') : 'Translate'}
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
-              )}
-              
-              {/* Abstract - De-emphasized */}
-              {result.abstract && !isPlaceholderAbstract(result.abstract) && (
-                <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed mb-3">
-                  {decodeHtmlEntities(cleanAbstract(result.abstract))}
-                </p>
-              )}
-              {result.enrollment && <p className="text-sm text-muted-foreground mb-3">{result.enrollment}</p>}
-              
-              {/* View Source Link */}
-              <a 
-                href={result.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-primary hover:underline inline-flex items-center gap-1.5 font-semibold"
-              >
-                View Source <ExternalLink className="h-3.5 w-3.5" />
-              </a>
+                
+                {/* Translation Panel - Collapsible */}
+                {isNonEng && translation?.title && isExpanded && (
+                  <div className="mb-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Languages className="h-4 w-4 text-primary" />
+                      <span className="text-xs font-semibold text-primary uppercase tracking-wide">English Translation</span>
+                    </div>
+                    <p className="text-sm font-medium text-foreground mb-1">
+                      {translation.title}
+                    </p>
+                    {translation.abstract && (
+                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4">
+                        {translation.abstract}
+                      </p>
+                    )}
+                  </div>
+                )}
+                
+                {translation?.error && isExpanded && (
+                  <div className="mb-3 p-2 bg-destructive/10 rounded-lg border border-destructive/20">
+                    <p className="text-xs text-destructive">{translation.error}</p>
+                  </div>
+                )}
+                
+                {/* Metadata Row */}
+                <div className="flex items-center flex-wrap gap-2 text-xs text-muted-foreground mb-3">
+                  <Badge variant="outline" className="text-xs border-border/40 bg-secondary font-medium">
+                    {result.source}
+                  </Badge>
+                  {result.insightCategories && result.insightCategories.length > 0 && (
+                    result.insightCategories.map((category, catIndex) => (
+                      <Badge 
+                        key={catIndex}
+                        variant="outline" 
+                        className={`text-xs font-medium ${getCategoryColor(category)}`}
+                      >
+                        <Tag className="h-3 w-3 mr-1" />
+                        {category}
+                      </Badge>
+                    ))
+                  )}
+                  {result.date && result.date !== 'Unknown' && result.date !== '' && (
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {result.date}
+                    </span>
+                  )}
+                  {result.authors && result.authors !== 'Unknown' && result.authors !== '' && (
+                    <span className="truncate max-w-[200px]">{result.authors}</span>
+                  )}
+                </div>
+                
+                {/* Phase/Status Badges */}
+                {result.phase && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <Badge className="bg-primary/15 text-primary border-0 text-xs font-semibold">{result.phase}</Badge>
+                    {result.status && <Badge className="bg-success text-white text-xs">{result.status}</Badge>}
+                  </div>
+                )}
+                
+                {/* Abstract - De-emphasized */}
+                {result.abstract && !isPlaceholderAbstract(result.abstract) && (
+                  <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed mb-3">
+                    {decodeHtmlEntities(cleanAbstract(result.abstract))}
+                  </p>
+                )}
+                {result.enrollment && <p className="text-sm text-muted-foreground mb-3">{result.enrollment}</p>}
+                
+                {/* View Source Link */}
+                <a 
+                  href={result.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline inline-flex items-center gap-1.5 font-semibold"
+                >
+                  View Source <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    ));
+      );
+    });
   };
 
   return (
