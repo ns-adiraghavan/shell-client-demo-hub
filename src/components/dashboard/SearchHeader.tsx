@@ -33,30 +33,39 @@ export const SearchHeader = ({
   hasResults = false
 }: SearchHeaderProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const [manuallyExpanded, setManuallyExpanded] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      // Only auto-collapse if we have results and scrolling down past 100px
-      if (hasResults && !isSearching && currentScrollY > 100 && currentScrollY > lastScrollY) {
+      // Only auto-collapse if we have results, not manually expanded, and scrolling down past 100px
+      if (hasResults && !isSearching && !manuallyExpanded && currentScrollY > 100) {
         setIsCollapsed(true);
       }
-      
-      setLastScrollY(currentScrollY);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [hasResults, isSearching, lastScrollY]);
+  }, [hasResults, isSearching, manuallyExpanded]);
 
   // Expand when searching starts
   useEffect(() => {
     if (isSearching) {
       setIsCollapsed(false);
+      setManuallyExpanded(false);
     }
   }, [isSearching]);
+
+  const handleExpand = () => {
+    setIsCollapsed(false);
+    setManuallyExpanded(true);
+  };
+
+  const handleCollapse = () => {
+    setIsCollapsed(true);
+    setManuallyExpanded(false);
+  };
 
   return (
     <header className={cn(
@@ -118,7 +127,7 @@ export const SearchHeader = ({
             {hasResults && isCollapsed && (
               <Button
                 variant="outline"
-                onClick={() => setIsCollapsed(false)}
+                onClick={handleExpand}
                 className="w-full flex items-center justify-center gap-2 h-12 bg-surface-dark border-border/40 hover:bg-surface-elevated"
               >
                 <Search className="h-4 w-4 text-muted-foreground" />
@@ -155,7 +164,7 @@ export const SearchHeader = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setIsCollapsed(true)}
+                  onClick={handleCollapse}
                   className="mt-2 w-full text-muted-foreground hover:text-foreground"
                 >
                   <ChevronUp className="h-4 w-4 mr-1" />
