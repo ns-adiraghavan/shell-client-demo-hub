@@ -37,7 +37,7 @@ const insightCategoryOptions = [
   { id: "academic-research", label: "Academic Research & Tie-ups", icon: GraduationCap },
   { id: "patent-ip", label: "Patent & IP Activity", icon: FileText },
   { id: "startup-innovation", label: "Startup & Innovation News", icon: Lightbulb },
-  { id: "suppliers-logistics", label: "Suppliers and Logistics", icon: Truck },
+  { id: "suppliers-logistics", label: "Suppliers, Logistics & Raw Materials", icon: Truck },
 ];
 
 export const AdvancedFilters = ({ filters, setFilters }: AdvancedFiltersProps) => {

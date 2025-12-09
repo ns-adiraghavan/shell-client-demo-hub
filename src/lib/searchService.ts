@@ -1,5 +1,15 @@
 import { supabase } from "@/integrations/supabase/client";
 
+export type InsightCategory = 
+  | "Business Updates"
+  | "Product / Project Announcements"
+  | "Partnerships & Collaborations"
+  | "Investments & Funding"
+  | "Academic Research & Tie-ups"
+  | "Patent & IP Activity"
+  | "Startup & Innovation News"
+  | "Suppliers, Logistics & Raw Materials";
+
 export interface SearchResult {
   source: string;
   id: string;
@@ -11,6 +21,7 @@ export interface SearchResult {
   phase?: string;
   enrollment?: string;
   url: string;
+  insightCategory?: InsightCategory;
 }
 
 export interface SearchOptions {
@@ -23,6 +34,67 @@ export interface SearchOptions {
     patents: boolean;
     news: boolean;
   };
+}
+
+// Local categorization function to tag results
+function categorizeResult(result: SearchResult): InsightCategory {
+  const text = `${result.title} ${result.abstract || ''}`.toLowerCase();
+  
+  // Patent & IP Activity
+  if (result.source === 'EPO' || result.source === 'Patents' || 
+      text.includes('patent') || text.includes('intellectual property') || 
+      text.includes('ip rights') || text.includes('licensing agreement')) {
+    return "Patent & IP Activity";
+  }
+  
+  // Academic Research & Tie-ups
+  if (result.source === 'IEEE' || result.source === 'GoogleScholar' ||
+      text.includes('research') || text.includes('study') || 
+      text.includes('university') || text.includes('journal') ||
+      text.includes('scientific') || text.includes('academic')) {
+    return "Academic Research & Tie-ups";
+  }
+  
+  // Partnerships & Collaborations
+  if (text.includes('partnership') || text.includes('collaboration') ||
+      text.includes('joint venture') || text.includes('mou') ||
+      text.includes('alliance') || text.includes('partners with')) {
+    return "Partnerships & Collaborations";
+  }
+  
+  // Investments & Funding
+  if (text.includes('investment') || text.includes('funding') ||
+      text.includes('acquisition') || text.includes('merger') ||
+      text.includes('raised') || text.includes('series') || 
+      text.includes('ipo') || text.includes('venture capital')) {
+    return "Investments & Funding";
+  }
+  
+  // Startup & Innovation News
+  if (text.includes('startup') || text.includes('start-up') ||
+      text.includes('incubator') || text.includes('accelerator') ||
+      text.includes('disruptive') || text.includes('emerging')) {
+    return "Startup & Innovation News";
+  }
+  
+  // Product / Project Announcements
+  if (text.includes('launch') || text.includes('announces') ||
+      text.includes('new product') || text.includes('project') ||
+      text.includes('milestone') || text.includes('facility') ||
+      text.includes('unveils') || text.includes('introduces')) {
+    return "Product / Project Announcements";
+  }
+  
+  // Suppliers, Logistics & Raw Materials
+  if (text.includes('supply chain') || text.includes('supplier') ||
+      text.includes('logistics') || text.includes('raw material') ||
+      text.includes('commodity') || text.includes('procurement') ||
+      text.includes('manufacturing') || text.includes('sourcing')) {
+    return "Suppliers, Logistics & Raw Materials";
+  }
+  
+  // Default to Business Updates
+  return "Business Updates";
 }
 
 export const searchAllSources = async (options: SearchOptions): Promise<SearchResult[]> => {
@@ -87,7 +159,13 @@ export const searchAllSources = async (options: SearchOptions): Promise<SearchRe
       }
     });
 
-    return allResults;
+    // Categorize all results with insight categories
+    const categorizedResults = allResults.map(result => ({
+      ...result,
+      insightCategory: result.insightCategory || categorizeResult(result)
+    }));
+
+    return categorizedResults;
   } catch (error) {
     console.error('Error searching sources:', error);
     throw error;

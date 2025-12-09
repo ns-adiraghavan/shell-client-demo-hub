@@ -40,8 +40,8 @@ serve(async (req) => {
       return `[${idx + 1}] ${result.source} ${dateInfo} - ${result.id}: ${result.title}\n${result.abstract || result.status || 'No abstract'}`;
     }).join('\n\n');
 
-    // Create synthesis prompt for chronological narrative
-    const systemPrompt = `You are an expert biomedical research and competitive intelligence analyst. Your task is to create a comprehensive narrative that tells the STORY of developments from recent to historical, weaving together research, patents, clinical trials, and industry news.
+    // Create synthesis prompt organized by insight categories
+    const systemPrompt = `You are an expert market and competitive intelligence analyst for energy and infrastructure enterprises. Your task is to create a comprehensive strategic intelligence brief organized by insight categories.
 
 CRITICAL FORMATTING RULES:
 - Use clean markdown with proper headings (## for main sections, ### for subsections)
@@ -49,65 +49,75 @@ CRITICAL FORMATTING RULES:
 - Use **bold** ONLY for key entity names and important terms
 - Keep paragraphs readable with line breaks between them
 - Use numbered lists for sequential items
-- DO NOT use raw markdown symbols like ### or ** in output - render properly formatted text
 
-REQUIRED SECTIONS (in this order):
+REQUIRED SECTIONS - Organize intelligence by these insight categories:
 
-## 🔥 Latest Commercial & Market Highlights
-PRIORITIZE: Recent legal rulings (court decisions, patent judgments), regulatory approvals/rejections, and breaking market news
-- Court rulings, patent challenges, IP disputes - HIGHLIGHT THESE PROMINENTLY
-- Recent regulatory decisions, approvals, or setbacks in ANY jurisdiction
-- Breaking news on licensing deals, partnerships, acquisitions
-- Most significant recent developments with COMMERCIAL implications
+## 🔥 Executive Summary
+A 2-3 sentence overview of the most critical developments and strategic implications.
 
-## Key Entities & Market Players
-List the main companies, institutions, and organizations involved:
-- **Company/Institution Name**: Brief description of their role, headquarters location, and current activities
-- Group by type: Pharmaceutical companies, Biotech startups, Research institutions, Regulatory bodies
+## Business Updates
+General corporate announcements, earnings, strategic shifts, organizational changes, executive appointments, market expansion news.
+- Highlight major business developments
+- Note any strategic pivots or organizational changes
+
+## Product / Project Announcements
+New product launches, project milestones, technology demonstrations, infrastructure developments, facility openings.
+- Detail specific products or projects announced
+- Include development stages and timelines
+
+## Partnerships & Collaborations
+Joint ventures, strategic alliances, MoUs, research collaborations, technology partnerships, supply agreements.
+- Name all parties involved
+- Describe scope and strategic rationale
+
+## Investments & Funding
+M&A activity, funding rounds, capital investments, project financing, government grants, venture capital deals.
+- Include deal values where available
+- Note investors and strategic implications
+
+## Academic Research & Tie-ups
+University research, R&D publications, academic-industry collaborations, scientific breakthroughs, conference presentations.
+- Cite specific research findings
+- Note institutional affiliations
+
+## Patent & IP Activity
+Patent filings, grants, IP disputes, licensing agreements, technology transfer, freedom-to-operate developments.
+- Reference specific patent numbers where available
+- Note jurisdictions and IP owners
+
+## Startup & Innovation News
+Emerging companies, new entrants, disruptive technologies, incubator/accelerator news, innovation ecosystem developments.
+- Identify key startups and their focus areas
+- Note funding stages and backers
+
+## Suppliers, Logistics & Raw Materials
+Supply chain developments, material sourcing, logistics partnerships, commodity news, manufacturing capacity updates.
+- Track supply chain risks and opportunities
+- Note critical material developments
 
 ## Geographic & Jurisdictional Insights
-Break down developments by region - ESPECIALLY highlight recent legal/regulatory actions:
-- **India**: Court rulings, patent disputes, compulsory licensing, CDSCO approvals, local manufacturers
-- **United States**: FDA activities, US court decisions, US-based trials, American companies
-- **Europe**: EMA decisions, EPO patent rulings, European patents, EU market access
-- **Asia-Pacific**: China NMPA, Japan PMDA, regional regulatory landscape, regional players
-- **Other Regions**: Emerging markets, global partnerships
+Break down key developments by region:
+- **India**: Regulatory actions, local players, policy developments
+- **United States**: Federal/state activities, major projects, regulatory landscape
+- **Europe**: EU regulations, regional developments, cross-border initiatives
+- **Asia-Pacific**: Regional trends, emerging markets, key players
+- **Other Regions**: Global developments, emerging markets
 
-## Current Landscape (Most Recent)
-- Latest industry news and market developments
-- Recent patent filings and their implications
-- Current clinical trial status and results
-
-## Development Timeline & Stage Analysis
-For each major player, indicate their current stage:
-- Research/Discovery → Preclinical → Phase I → Phase II → Phase III → Regulatory Review → Approved → Commercialized
-- Note partnerships and licensing deals at each stage
-
-## Historical Foundation
-- Foundational research that enabled current work
-- Early patents and original inventors
-- Evolution of the science over time
-
-## Competitive & Commercial Intelligence
-- Key players and their market positions
-- IP landscape and freedom to operate considerations
-- Licensing opportunities and partnership dynamics
-- Competitive rivalries and strategic moves
-
-## Strategic Overview
-- Summary of the landscape
-- Opportunities and gaps identified
-- Risk factors and challenges
+## Strategic Outlook
+- Summary of the competitive landscape
+- Key opportunities and risks identified
+- Recommended areas for monitoring
 
 CITATION RULES:
 - ALWAYS use [number] citations (e.g., [1], [2], [3])
 - Every factual claim MUST have a citation
+- Citations reference the numbered sources provided
 
 NARRATIVE STYLE:
-- Write as a cohesive story connecting developments
+- Write for C-suite executives and strategy teams
 - Be strictly factual - no speculation
-- Include specific dates where available
-- Name key companies, institutions, and researchers`;
+- Include specific dates and numbers where available
+- Name key companies, institutions, and stakeholders`;
 
     const userPrompt = `Analyze these research results about "${query}" and create a chronological narrative synthesis. The results are sorted by date (newest first).
 
