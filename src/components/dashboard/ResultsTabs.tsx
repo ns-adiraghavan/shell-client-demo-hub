@@ -29,10 +29,10 @@ const decodeHtmlEntities = (text: string): string => {
 
 export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) => {
   const ieeeResults = results.filter(r => r.source === 'IEEE');
-  const clinicalResults = results.filter(r => r.source === 'ClinicalTrials');
+  const industryNewsResults = results.filter(r => r.source === 'IndustryNews');
   const scholarResults = results.filter(r => r.source === 'Google Scholar');
   const patentResults = results.filter(r => r.source === 'Patents');
-  const newsResults = results.filter(r => r.source === 'News');
+  const businessNewsResults = results.filter(r => r.source === 'BusinessNews');
 
   const handleExportCSV = () => {
     exportToCSV(results, query);
@@ -187,10 +187,10 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
             <TabsList className="grid w-full grid-cols-6 bg-secondary p-1.5 rounded-lg h-auto">
               <TabsTrigger value="all" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">All ({results.length})</TabsTrigger>
               <TabsTrigger value="ieee" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">IEEE ({ieeeResults.length})</TabsTrigger>
-              <TabsTrigger value="clinical" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Projects ({clinicalResults.length})</TabsTrigger>
+              <TabsTrigger value="industryNews" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Industry ({industryNewsResults.length})</TabsTrigger>
               <TabsTrigger value="scholar" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Scholar ({scholarResults.length})</TabsTrigger>
               <TabsTrigger value="patents" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Patents ({patentResults.length})</TabsTrigger>
-              <TabsTrigger value="news" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">News ({newsResults.length})</TabsTrigger>
+              <TabsTrigger value="businessNews" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Business ({businessNewsResults.length})</TabsTrigger>
             </TabsList>
           </div>
           
@@ -203,8 +203,8 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
               {renderResults(ieeeResults)}
             </TabsContent>
             
-            <TabsContent value="clinical" className="mt-0 space-y-4">
-              {renderResults(clinicalResults)}
+            <TabsContent value="industryNews" className="mt-0 space-y-4">
+              {renderResults(industryNewsResults)}
             </TabsContent>
             
             <TabsContent value="scholar" className="mt-0 space-y-4">
@@ -215,8 +215,8 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
               {renderResults(patentResults)}
             </TabsContent>
             
-            <TabsContent value="news" className="mt-0 space-y-4">
-              {renderResults(newsResults)}
+            <TabsContent value="businessNews" className="mt-0 space-y-4">
+              {renderResults(businessNewsResults)}
             </TabsContent>
           </div>
         </Tabs>
