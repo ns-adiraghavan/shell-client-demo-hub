@@ -41,7 +41,23 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
   const [chartAnalysis, setChartAnalysis] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Process publication dates over time - grouped by month
+  // Get unique sources for the chart
+  const uniqueSources = useMemo(() => {
+    return [...new Set(results.map(r => r.source))];
+  }, [results]);
+
+  // Source color mapping
+  const sourceColors: Record<string, string> = {
+    'News': 'hsl(var(--chart-1))',
+    'Patents': 'hsl(var(--chart-2))',
+    'PubMed': 'hsl(var(--chart-3))',
+    'arXiv': 'hsl(var(--chart-4))',
+    'ClinicalTrials': 'hsl(var(--chart-5))',
+    'IEEE': 'hsl(25 95% 53%)',
+    'Google Scholar': 'hsl(280 60% 55%)',
+  };
+
+  // Process publication dates over time - grouped by month and source
   const publicationTrend = useMemo(() => {
     const dateData = results
       .filter(r => r.date)
@@ -53,19 +69,20 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
             const monthYear = format(date, "MMM yy");
             const sortKey = format(date, "yyyy-MM");
             if (!acc[sortKey]) {
-              acc[sortKey] = { monthYear, count: 0, sortKey };
+              acc[sortKey] = { monthYear, sortKey };
             }
-            acc[sortKey].count += 1;
+            // Add count per source
+            const sourceKey = result.source;
+            acc[sortKey][sourceKey] = ((acc[sortKey][sourceKey] as number) || 0) + 1;
           }
         } catch (e) {
           // Skip invalid dates
         }
         return acc;
-      }, {} as Record<string, { monthYear: string; count: number; sortKey: string }>);
+      }, {} as Record<string, Record<string, string | number>>);
 
     return Object.values(dateData)
-      .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
-      .map(({ monthYear, count }) => ({ monthYear, publications: count }));
+      .sort((a, b) => (a.sortKey as string).localeCompare(b.sortKey as string));
   }, [results]);
 
   // Process source breakdown
@@ -203,7 +220,7 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
           <div className="bg-surface-elevated rounded-xl p-6 border border-border/30">
             <div className="mb-6">
               <h3 className="text-lg font-bold text-foreground">Market Activity Momentum</h3>
-              <p className="text-sm text-muted-foreground mt-1">Volume of competitive and innovation signals over time</p>
+              <p className="text-sm text-muted-foreground mt-1">Volume of competitive and innovation signals over time by source</p>
               <p className="text-xs text-secondary-foreground mt-2 italic">"Market signals remained flat for a decade before sharp acceleration post-2022."</p>
             </div>
             <ResponsiveContainer width="100%" height={300}>
@@ -243,7 +260,6 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
                     fontSize: '12px',
                     boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
                   }}
-                  formatter={(value: number) => [value, 'Publications']}
                 />
                 <Legend 
                   wrapperStyle={{ 
@@ -251,13 +267,17 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
                     paddingTop: '20px'
                   }} 
                 />
-                <Bar 
-                  dataKey="publications" 
-                  fill="hsl(210 100% 50%)" 
-                  radius={[2, 2, 0, 0]}
-                  name="Publications"
-                  maxBarSize={30}
-                />
+                {uniqueSources.map((source, index) => (
+                  <Bar 
+                    key={source}
+                    dataKey={source} 
+                    fill={sourceColors[source] || COLORS[index % COLORS.length]} 
+                    radius={index === uniqueSources.length - 1 ? [2, 2, 0, 0] : [0, 0, 0, 0]}
+                    stackId="sources"
+                    name={source}
+                    maxBarSize={30}
+                  />
+                ))}
               </BarChart>
             </ResponsiveContainer>
           </div>
