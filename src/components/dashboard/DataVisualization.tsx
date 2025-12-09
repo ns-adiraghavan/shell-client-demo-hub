@@ -41,20 +41,31 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
   const [chartAnalysis, setChartAnalysis] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Get unique sources for the chart
+  // Source label mapping to match filter checkboxes
+  const sourceDisplayLabels: Record<string, string> = {
+    'IEEE': 'Technical Literature',
+    'IndustryNews': 'Industry News',
+    'Google Scholar': 'Scholarly Literature',
+    'Patents': 'Patents',
+    'News': 'Business News',
+    'PubMed': 'Scholarly Literature',
+    'arXiv': 'Technical Literature',
+    'ClinicalTrials': 'Industry News',
+  };
+
+  // Get unique sources for the chart (using display labels)
   const uniqueSources = useMemo(() => {
-    return [...new Set(results.map(r => r.source))];
+    const labels = [...new Set(results.map(r => sourceDisplayLabels[r.source] || r.source))];
+    return labels;
   }, [results]);
 
-  // Source color mapping
+  // Source color mapping using display labels
   const sourceColors: Record<string, string> = {
-    'News': 'hsl(var(--chart-1))',
+    'Business News': 'hsl(var(--chart-1))',
     'Patents': 'hsl(var(--chart-2))',
-    'PubMed': 'hsl(var(--chart-3))',
-    'arXiv': 'hsl(var(--chart-4))',
-    'ClinicalTrials': 'hsl(var(--chart-5))',
-    'IEEE': 'hsl(25 95% 53%)',
-    'Google Scholar': 'hsl(280 60% 55%)',
+    'Scholarly Literature': 'hsl(var(--chart-3))',
+    'Technical Literature': 'hsl(var(--chart-4))',
+    'Industry News': 'hsl(var(--chart-5))',
   };
 
   // Process publication dates over time - grouped by month and source
@@ -71,8 +82,8 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
             if (!acc[sortKey]) {
               acc[sortKey] = { monthYear, sortKey };
             }
-            // Add count per source
-            const sourceKey = result.source;
+            // Add count per source using display label
+            const sourceKey = sourceDisplayLabels[result.source] || result.source;
             acc[sortKey][sourceKey] = ((acc[sortKey][sourceKey] as number) || 0) + 1;
           }
         } catch (e) {
@@ -85,9 +96,10 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
       .sort((a, b) => (a.sortKey as string).localeCompare(b.sortKey as string));
   }, [results]);
 
-  // Process source breakdown
+  // Process source breakdown using display labels
   const sourceData = results.reduce((acc, result) => {
-    acc[result.source] = (acc[result.source] || 0) + 1;
+    const displayLabel = sourceDisplayLabels[result.source] || result.source;
+    acc[displayLabel] = (acc[displayLabel] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
@@ -283,76 +295,77 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Intelligence Source Mix */}
-          <div className="bg-surface-elevated rounded-xl p-6 border border-border/30">
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-foreground">Intelligence Source Mix</h3>
-              <p className="text-sm text-muted-foreground mt-1">Where intelligence is being captured from</p>
-              <p className="text-xs text-secondary-foreground mt-2 italic">"Balanced coverage across research, patents, and market news."</p>
-            </div>
-            <div className="flex items-start gap-6">
-              <ResponsiveContainer width="55%" height={220}>
-                <PieChart style={{ background: 'transparent' }}>
-                  <Pie
-                    data={sourceBreakdown}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="hsl(var(--primary))"
-                    dataKey="value"
-                  >
-                    {sourceBreakdown.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      color: 'hsl(var(--foreground))',
-                      fontSize: '12px',
-                      boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
-                    }}
-                    formatter={(value: number, name: string) => [value, name]}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              {/* Legend Table */}
-              <div className="flex-1">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border/30">
-                      <th className="text-left py-2 text-muted-foreground font-medium">Source</th>
-                      <th className="text-right py-2 text-muted-foreground font-medium">Count</th>
-                      <th className="text-right py-2 text-muted-foreground font-medium">%</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sourceBreakdown.map((entry, index) => {
-                      const total = sourceBreakdown.reduce((acc, e) => acc + e.value, 0);
-                      const percentage = total > 0 ? ((entry.value / total) * 100).toFixed(0) : 0;
-                      return (
-                        <tr key={entry.name} className="border-b border-border/20">
-                          <td className="py-2 flex items-center gap-2">
-                            <div 
-                              className="w-3 h-3 rounded-sm" 
-                              style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                            />
-                            <span className="text-foreground">{entry.name}</span>
-                          </td>
-                          <td className="text-right py-2 text-foreground font-medium">{entry.value}</td>
-                          <td className="text-right py-2 text-muted-foreground">{percentage}%</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+        {/* Intelligence Source Mix - Full Width */}
+        <div className="bg-surface-elevated rounded-xl p-6 border border-border/30">
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-foreground">Intelligence Source Mix</h3>
+            <p className="text-sm text-muted-foreground mt-1">Where intelligence is being captured from</p>
+            <p className="text-xs text-secondary-foreground mt-2 italic">"Balanced coverage across research, patents, and market news."</p>
+          </div>
+          <div className="flex items-start gap-8">
+            <ResponsiveContainer width="40%" height={220}>
+              <PieChart style={{ background: 'transparent' }}>
+                <Pie
+                  data={sourceBreakdown}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="hsl(var(--primary))"
+                  dataKey="value"
+                >
+                  {sourceBreakdown.map((entry) => (
+                    <Cell key={`cell-${entry.name}`} fill={sourceColors[entry.name] || COLORS[0]} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    color: 'hsl(var(--foreground))',
+                    fontSize: '12px',
+                    boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
+                  }}
+                  formatter={(value: number, name: string) => [value, name]}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            {/* Legend Table */}
+            <div className="flex-1">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border/30">
+                    <th className="text-left py-2 text-muted-foreground font-medium">Source</th>
+                    <th className="text-right py-2 text-muted-foreground font-medium">Count</th>
+                    <th className="text-right py-2 text-muted-foreground font-medium">%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sourceBreakdown.map((entry) => {
+                    const total = sourceBreakdown.reduce((acc, e) => acc + e.value, 0);
+                    const percentage = total > 0 ? ((entry.value / total) * 100).toFixed(0) : 0;
+                    return (
+                      <tr key={entry.name} className="border-b border-border/20">
+                        <td className="py-2 flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-sm" 
+                            style={{ backgroundColor: sourceColors[entry.name] || COLORS[0] }}
+                          />
+                          <span className="text-foreground">{entry.name}</span>
+                        </td>
+                        <td className="text-right py-2 text-foreground font-medium">{entry.value}</td>
+                        <td className="text-right py-2 text-muted-foreground">{percentage}%</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
+        </div>
+
+        <div className="grid md:grid-cols-1 gap-6">
 
           {/* Execution & Commercialization Stages */}
           {studyTypeDistribution.length > 0 && (
