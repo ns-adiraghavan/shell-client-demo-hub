@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { Search, History, LogOut, Radar, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, History, LogOut, Radar } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SituationRoomToggle } from "./SituationRoomToggle";
@@ -32,48 +31,17 @@ export const SearchHeader = ({
   showWelcome = false,
   hasResults = false
 }: SearchHeaderProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [manuallyExpanded, setManuallyExpanded] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Only auto-collapse if we have results, not manually expanded, and scrolling down past 100px
-      if (hasResults && !isSearching && !manuallyExpanded && currentScrollY > 100) {
-        setIsCollapsed(true);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [hasResults, isSearching, manuallyExpanded]);
-
-  // Expand when searching starts
-  useEffect(() => {
-    if (isSearching) {
-      setIsCollapsed(false);
-      setManuallyExpanded(false);
-    }
-  }, [isSearching]);
-
-  const handleExpand = () => {
-    setIsCollapsed(false);
-    setManuallyExpanded(true);
-  };
-
-  const handleCollapse = () => {
-    setIsCollapsed(true);
-    setManuallyExpanded(false);
-  };
 
   return (
-    <header className={cn(
-      "sticky top-0 z-50 border-b border-border/40 transition-all duration-300",
-      situationRoomMode 
-        ? "bg-[hsl(220,15%,12%)]" 
-        : "bg-[hsl(220,16%,10%)]"
-    )}>
+    <header 
+      id="search-section"
+      className={cn(
+        "border-b border-border/40 transition-all duration-300",
+        situationRoomMode 
+          ? "bg-[hsl(220,15%,12%)]" 
+          : "bg-[hsl(220,16%,10%)]"
+      )}
+    >
       <div className="container mx-auto px-6 py-5">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-4">
@@ -124,55 +92,25 @@ export const SearchHeader = ({
         
         {/* Command Center Search - Hidden in Situation Room */}
         {!situationRoomMode && (
-          <div className="relative">
-            {/* Collapsed state toggle */}
-            {hasResults && isCollapsed && (
-              <Button
-                variant="outline"
-                onClick={handleExpand}
-                className="w-full flex items-center justify-center gap-2 h-12 bg-surface-dark border-border/40 hover:bg-surface-elevated"
-              >
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">New Search</span>
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            )}
-            
-            {/* Expanded search bar */}
-            <div className={cn(
-              "bg-surface-dark rounded-xl p-4 shadow-command border border-border/30 transition-all duration-300",
-              hasResults && isCollapsed ? "hidden" : "block"
-            )}>
-              <div className="flex gap-3">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input 
-                    value={query} 
-                    onChange={e => setQuery(e.target.value)} 
-                    onKeyDown={e => e.key === 'Enter' && onSearch()} 
-                    placeholder="Market / Technology / Keyword Search... (e.g., Renewable Energy, Hydrogen Storage, Carbon Capture)" 
-                    className="pl-12 h-14 text-base bg-surface-elevated border-border/40 text-foreground placeholder:text-muted-foreground focus:border-primary/50 transition-all" 
-                  />
-                </div>
-                <Button 
-                  onClick={onSearch} 
-                  disabled={isSearching} 
-                  className="px-10 h-14 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-elevated transition-all"
-                >
-                  {isSearching ? "Scanning..." : "Search Intelligence"}
-                </Button>
+          <div className="bg-surface-dark rounded-xl p-4 shadow-command border border-border/30">
+            <div className="flex gap-3">
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input 
+                  value={query} 
+                  onChange={e => setQuery(e.target.value)} 
+                  onKeyDown={e => e.key === 'Enter' && onSearch()} 
+                  placeholder="Market / Technology / Keyword Search... (e.g., Renewable Energy, Hydrogen Storage, Carbon Capture)" 
+                  className="pl-12 h-14 text-base bg-surface-elevated border-border/40 text-foreground placeholder:text-muted-foreground focus:border-primary/50 transition-all" 
+                />
               </div>
-              {hasResults && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCollapse}
-                  className="mt-2 w-full text-muted-foreground hover:text-foreground"
-                >
-                  <ChevronUp className="h-4 w-4 mr-1" />
-                  Collapse Search
-                </Button>
-              )}
+              <Button 
+                onClick={onSearch} 
+                disabled={isSearching} 
+                className="px-10 h-14 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-elevated transition-all"
+              >
+                {isSearching ? "Scanning..." : "Search Intelligence"}
+              </Button>
             </div>
           </div>
         )}
