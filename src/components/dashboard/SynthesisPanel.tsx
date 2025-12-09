@@ -164,17 +164,24 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results, situati
               <ExecutiveSnapshot results={results} situationRoomMode={situationRoomMode} />
               <ExecutiveSignal synthesis={synthesis} situationRoomMode={situationRoomMode} />
               
-              <div className="prose prose-sm max-w-none dark:prose-invert">
+              <div className="prose prose-sm max-w-none dark:prose-invert space-y-4">
                 <ReactMarkdown
                   components={{
                     h2: ({ children }) => (
-                      <div className="mt-6 mb-3 pb-2 border-b border-border/20">
-                        <h2 className="text-base font-bold text-primary m-0 uppercase tracking-wide">{children}</h2>
+                      <div className="mt-6 mb-4 bg-surface-command rounded-xl border border-border/30 overflow-hidden">
+                        <div className="px-4 py-3 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                          <div className="w-1.5 h-6 bg-primary rounded-full" />
+                          <h2 className="text-sm font-bold text-primary m-0 uppercase tracking-wider">{children}</h2>
+                        </div>
                       </div>
                     ),
-                    h3: ({ children }) => <h3 className="text-sm font-semibold mt-4 mb-2 text-foreground">{children}</h3>,
-                    p: ({ children }) => <p className="text-sm text-foreground/90 leading-relaxed mb-3">{children}</p>,
-                    ul: ({ children }) => <ul className="text-sm space-y-2 mb-3 list-disc pl-5">{children}</ul>,
+                    h3: ({ children }) => (
+                      <div className="bg-surface-elevated/50 rounded-lg px-4 py-2 mt-3 mb-2 border border-border/20">
+                        <h3 className="text-sm font-semibold text-foreground m-0">{children}</h3>
+                      </div>
+                    ),
+                    p: ({ children }) => <p className="text-sm text-foreground/90 leading-relaxed mb-3 px-1">{children}</p>,
+                    ul: ({ children }) => <ul className="text-sm space-y-2 mb-3 list-disc pl-6 pr-1">{children}</ul>,
                     li: ({ children }) => <li className="text-foreground/90">{children}</li>,
                     strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
                   }}
