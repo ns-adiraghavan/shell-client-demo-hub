@@ -168,6 +168,33 @@ const Index = () => {
         situationRoomMode && "py-6 space-y-6"
       )}>
         
+        {/* How to Use - Collapsible, above search filters */}
+        {!situationRoomMode && !hasSearched && (
+          <details className="group bg-card rounded-xl border border-border/30 shadow-card max-w-4xl mx-auto">
+            <summary className="p-4 cursor-pointer flex items-center justify-between font-medium text-foreground hover:bg-muted/50 rounded-xl transition-colors">
+              <span className="flex items-center gap-2">
+                <span>How to Use</span>
+              </span>
+              <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div className="px-6 pb-6">
+              <p className="text-body text-muted-foreground mb-6">
+                Search across business news, startups, patents, scientific research, suppliers, and partnerships. Get AI-powered synthesis of both external market intelligence and your internal knowledge base.
+              </p>
+              <ol className="text-left max-w-lg mx-auto space-y-3 text-body text-muted-foreground">
+                <li className="flex gap-3"><span className="text-primary font-semibold">1.</span> Enter your market, technology, or competitive keyword in the search bar</li>
+                <li className="flex gap-3"><span className="text-primary font-semibold">2.</span> Select intelligence sources: Technical Literature, Scholarly Literature, Patents, and News</li>
+                <li className="flex gap-3"><span className="text-primary font-semibold">3.</span> Optionally upload internal documents or connect external sources (SharePoint, servers, email) via Document Intelligence</li>
+                <li className="flex gap-3"><span className="text-primary font-semibold">4.</span> Click Search to aggregate insights from selected external sources</li>
+                <li className="flex gap-3"><span className="text-primary font-semibold">5.</span> Review the Executive Intelligence Brief with AI-synthesized strategic insights</li>
+                <li className="flex gap-3"><span className="text-primary font-semibold">6.</span> Explore Competitive Landscape, Market Trends, and Live Intelligence Feed</li>
+                <li className="flex gap-3"><span className="text-primary font-semibold">7.</span> Use Document AI to chat with, summarize, compare, and cross-analyze your uploaded documents</li>
+                <li className="flex gap-3"><span className="text-primary font-semibold">8.</span> Export executive reports as PDF or raw data as CSV/BibTeX/RIS</li>
+              </ol>
+            </div>
+          </details>
+        )}
+        
         {/* Filters Section - Hidden in Situation Room */}
         {!situationRoomMode && (
           <>
@@ -297,24 +324,6 @@ const Index = () => {
               </>
             )}
           </>
-        )}
-        
-        {!hasSearched && !situationRoomMode && (
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center p-8 bg-card rounded-xl border border-border/30 shadow-card">
-              <h3 className="text-title mb-4 text-foreground">How to Use</h3>
-              <p className="text-body text-muted-foreground mb-6">
-                Search across business news, startups, patents, scientific research, suppliers, and partnerships. Get AI-powered synthesis of both external market intelligence and your internal knowledge base.
-              </p>
-              <ol className="text-left max-w-lg mx-auto space-y-3 text-body text-muted-foreground">
-                <li className="flex gap-3"><span className="text-primary font-semibold">1.</span> Enter your market, technology, or competitive keyword above</li>
-                <li className="flex gap-3"><span className="text-primary font-semibold">2.</span> Select intelligence sources (Research, Projects, Patents, News)</li>
-                <li className="flex gap-3"><span className="text-primary font-semibold">3.</span> Click Search to aggregate insights across multiple sources</li>
-                <li className="flex gap-3"><span className="text-primary font-semibold">4.</span> Review AI-generated strategic synthesis and competitive landscape</li>
-                <li className="flex gap-3"><span className="text-primary font-semibold">5.</span> Export executive reports as PDF or raw data as CSV</li>
-              </ol>
-            </div>
-          </div>
         )}
 
         {/* Situation Room - No search state message */}
