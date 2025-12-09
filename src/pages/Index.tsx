@@ -176,6 +176,7 @@ const Index = () => {
         onSignOut={handleSignOut}
         situationRoomMode={situationRoomMode}
         onSituationRoomToggle={() => setSituationRoomMode(!situationRoomMode)}
+        hasResults={hasSearched && results.length > 0}
       />
       
       <div className={cn(
