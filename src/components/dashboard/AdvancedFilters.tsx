@@ -2,19 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Calendar, 
-  SlidersHorizontal, 
-  Briefcase, 
-  Rocket, 
-  Handshake, 
-  TrendingUp, 
-  GraduationCap, 
-  FileText, 
-  Lightbulb,
-  Truck
-} from "lucide-react";
+import { Calendar } from "lucide-react";
 
 export interface AdvancedFilterOptions {
   dateFrom: string;
@@ -29,28 +17,9 @@ interface AdvancedFiltersProps {
   setFilters: (filters: AdvancedFilterOptions) => void;
 }
 
-const insightCategoryOptions = [
-  { id: "business-updates", label: "Business Updates", icon: Briefcase },
-  { id: "product-announcements", label: "Product / Project Announcements", icon: Rocket },
-  { id: "partnerships", label: "Partnerships & Collaborations", icon: Handshake },
-  { id: "investments", label: "Investments & Funding", icon: TrendingUp },
-  { id: "academic-research", label: "Academic Research & Tie-ups", icon: GraduationCap },
-  { id: "patent-ip", label: "Patent & IP Activity", icon: FileText },
-  { id: "startup-innovation", label: "Startup & Innovation News", icon: Lightbulb },
-  { id: "suppliers-logistics", label: "Suppliers, Logistics & Raw Materials", icon: Truck },
-];
-
 export const AdvancedFilters = ({ filters, setFilters }: AdvancedFiltersProps) => {
-  const handleCategoryToggle = (categoryId: string) => {
-    const newCategories = filters.insightCategories.includes(categoryId)
-      ? filters.insightCategories.filter((c) => c !== categoryId)
-      : [...filters.insightCategories, categoryId];
-    setFilters({ ...filters, insightCategories: newCategories });
-  };
-
   return (
     <div className="space-y-4">
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Date Range */}
         <div className="space-y-2">
@@ -120,38 +89,9 @@ export const AdvancedFilters = ({ filters, setFilters }: AdvancedFiltersProps) =
         </div>
       </div>
 
-      {/* Insight Categories */}
-      <div className="mt-4 space-y-2">
-        <Label className="text-sm font-medium text-foreground">Insight Categories</Label>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {insightCategoryOptions.map((category) => {
-            const Icon = category.icon;
-            const isChecked = filters.insightCategories.includes(category.id);
-            return (
-              <div 
-                key={category.id} 
-                className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
-                  isChecked ? 'bg-primary/10 border border-primary/30' : 'hover:bg-muted/50'
-                }`}
-              >
-                <Checkbox
-                  id={category.id}
-                  checked={isChecked}
-                  onCheckedChange={() => handleCategoryToggle(category.id)}
-                  className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                />
-                <Label
-                  htmlFor={category.id}
-                  className="text-sm cursor-pointer font-normal flex items-center gap-2"
-                >
-                  <Icon className={`h-4 w-4 ${isChecked ? 'text-primary' : 'text-muted-foreground'}`} />
-                  {category.label}
-                </Label>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      <p className="text-xs text-muted-foreground italic">
+        Note: Insight category filtering is available in the Live Intelligence Feed section below.
+      </p>
     </div>
   );
 };

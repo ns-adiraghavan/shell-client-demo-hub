@@ -1,10 +1,12 @@
+import { useState, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Download, FileText, BookOpen, Search, Radio, Clock, Tag } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ExternalLink, Download, FileText, BookOpen, Search, Radio, Clock, Tag, Filter, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SearchResult } from "@/lib/searchService";
+import { SearchResult, InsightCategory } from "@/lib/searchService";
 import { exportToCSV, exportToBibTeX, exportToRIS, exportToEndNote } from "@/lib/exportService";
 import { toast } from "sonner";
 import {
@@ -19,6 +21,17 @@ interface ResultsTabsProps {
   isSearching: boolean;
   query: string;
 }
+
+const INSIGHT_CATEGORIES: InsightCategory[] = [
+  "Business Updates",
+  "Product / Project Announcements",
+  "Partnerships & Collaborations",
+  "Investments & Funding",
+  "Academic Research & Tie-ups",
+  "Patent & IP Activity",
+  "Startup & Innovation News",
+  "Suppliers, Logistics & Raw Materials",
+];
 
 // Decode HTML entities properly - handles all common entities
 const decodeHtmlEntities = (text: string): string => {
@@ -65,11 +78,52 @@ const getCategoryColor = (category: string): string => {
 };
 
 export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) => {
-  const ieeeResults = results.filter(r => r.source === 'IEEE');
-  const industryNewsResults = results.filter(r => r.source === 'IndustryNews');
-  const scholarResults = results.filter(r => r.source === 'Google Scholar');
-  const patentResults = results.filter(r => r.source === 'Patents');
-  const businessNewsResults = results.filter(r => r.source === 'BusinessNews');
+  const [selectedCategories, setSelectedCategories] = useState<InsightCategory[]>([]);
+  const [keywordFilter, setKeywordFilter] = useState("");
+
+  // Filter results based on selected categories and keyword
+  const filteredResults = useMemo(() => {
+    return results.filter(result => {
+      // Category filter
+      if (selectedCategories.length > 0) {
+        const resultCategories = result.insightCategories || [];
+        const hasMatchingCategory = selectedCategories.some(cat => 
+          resultCategories.includes(cat)
+        );
+        if (!hasMatchingCategory) return false;
+      }
+      
+      // Keyword filter
+      if (keywordFilter.trim()) {
+        const searchTerm = keywordFilter.toLowerCase();
+        const titleMatch = result.title?.toLowerCase().includes(searchTerm);
+        const abstractMatch = result.abstract?.toLowerCase().includes(searchTerm);
+        const authorsMatch = result.authors?.toLowerCase().includes(searchTerm);
+        if (!titleMatch && !abstractMatch && !authorsMatch) return false;
+      }
+      
+      return true;
+    });
+  }, [results, selectedCategories, keywordFilter]);
+
+  const toggleCategory = (category: InsightCategory) => {
+    setSelectedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const clearFilters = () => {
+    setSelectedCategories([]);
+    setKeywordFilter("");
+  };
+
+  const ieeeResults = filteredResults.filter(r => r.source === 'IEEE');
+  const industryNewsResults = filteredResults.filter(r => r.source === 'IndustryNews');
+  const scholarResults = filteredResults.filter(r => r.source === 'Google Scholar');
+  const patentResults = filteredResults.filter(r => r.source === 'Patents');
+  const businessNewsResults = filteredResults.filter(r => r.source === 'BusinessNews');
 
   const handleExportCSV = () => {
     exportToCSV(results, query);
@@ -229,12 +283,76 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
             </div>
           )}
         </div>
+        
+        {/* Filter Controls */}
+        {results.length > 0 && !isSearching && (
+          <div className="mt-4 space-y-3">
+            {/* Keyword Filter */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={keywordFilter}
+                onChange={(e) => setKeywordFilter(e.target.value)}
+                placeholder="Filter results by keyword..."
+                className="pl-10 bg-surface-elevated border-border/40"
+              />
+              {keywordFilter && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setKeywordFilter("")}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            
+            {/* Category Filter Badges */}
+            <div className="flex flex-wrap gap-2 items-center">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground mr-1">Filter by:</span>
+              {INSIGHT_CATEGORIES.map((category) => (
+                <Badge
+                  key={category}
+                  variant="outline"
+                  onClick={() => toggleCategory(category)}
+                  className={`cursor-pointer transition-all text-xs ${
+                    selectedCategories.includes(category)
+                      ? getCategoryColor(category)
+                      : "bg-secondary/50 text-muted-foreground hover:bg-secondary border-border/40"
+                  }`}
+                >
+                  {category}
+                </Badge>
+              ))}
+              {(selectedCategories.length > 0 || keywordFilter) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="text-xs text-muted-foreground hover:text-foreground h-6 px-2"
+                >
+                  <X className="h-3 w-3 mr-1" />
+                  Clear All
+                </Button>
+              )}
+            </div>
+            
+            {/* Active filter count */}
+            {(selectedCategories.length > 0 || keywordFilter) && (
+              <p className="text-xs text-muted-foreground">
+                Showing {filteredResults.length} of {results.length} results
+              </p>
+            )}
+          </div>
+        )}
       </CardHeader>
       <CardContent className="p-0">
         <Tabs defaultValue="all" className="w-full">
           <div className="px-6 pt-5 pb-4 border-b border-border/20">
             <TabsList className="grid w-full grid-cols-6 bg-secondary p-1.5 rounded-lg h-auto">
-              <TabsTrigger value="all" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">All ({results.length})</TabsTrigger>
+              <TabsTrigger value="all" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">All ({filteredResults.length})</TabsTrigger>
               <TabsTrigger value="ieee" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Technical ({ieeeResults.length})</TabsTrigger>
               <TabsTrigger value="industryNews" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Industry ({industryNewsResults.length})</TabsTrigger>
               <TabsTrigger value="scholar" className="text-xs font-semibold py-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card data-[state=active]:text-primary">Scholarly ({scholarResults.length})</TabsTrigger>
@@ -245,7 +363,7 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
           
           <div className="p-6 space-y-4">
             <TabsContent value="all" className="mt-0 space-y-4">
-              {renderResults(results)}
+              {renderResults(filteredResults)}
             </TabsContent>
             
             <TabsContent value="ieee" className="mt-0 space-y-4">
