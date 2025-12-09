@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Send, FileText, Loader2, Sparkles, ListChecks, GitCompare, BarChart3 } from "lucide-react";
+import { Send, FileText, Loader2, Sparkles, ListChecks, GitCompare, BarChart3, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import ReactMarkdown from "react-markdown";
@@ -220,6 +220,28 @@ export const DocumentChat = () => {
     }
   };
 
+  const deleteDocument = async (docId: string) => {
+    try {
+      const { error } = await supabase
+        .from('uploaded_documents')
+        .delete()
+        .eq('id', docId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setDocuments(prev => prev.filter(d => d.id !== docId));
+      setSelectedDocuments(prev => prev.filter(id => id !== docId));
+      if (selectedDocument === docId) {
+        setSelectedDocument("all");
+      }
+      toast.success("Document deleted successfully");
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast.error("Failed to delete document");
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -240,7 +262,7 @@ export const DocumentChat = () => {
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         <Tabs defaultValue="chat" className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="chat" className="flex items-center gap-1">
               <Send className="h-3 w-3" />
               Chat
@@ -260,6 +282,10 @@ export const DocumentChat = () => {
             <TabsTrigger value="meta-analysis" className="flex items-center gap-1">
               <BarChart3 className="h-3 w-3" />
               Cross-Analysis
+            </TabsTrigger>
+            <TabsTrigger value="manage" className="flex items-center gap-1">
+              <Trash2 className="h-3 w-3" />
+              Manage
             </TabsTrigger>
           </TabsList>
 
@@ -594,6 +620,40 @@ export const DocumentChat = () => {
                 </div>
               </ScrollArea>
             )}
+          </TabsContent>
+
+          <TabsContent value="manage" className="flex-1 flex flex-col gap-4 mt-4">
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Manage your uploaded documents:</p>
+              <ScrollArea className="h-64 border rounded-md p-2">
+                {documents.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-8">
+                    <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No documents uploaded</p>
+                  </div>
+                ) : (
+                  documents.map(doc => (
+                    <div key={doc.id} className="flex items-center justify-between py-2 px-2 hover:bg-muted/50 rounded-md group">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="text-sm font-medium truncate">{doc.filename}</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => deleteDocument(doc.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </ScrollArea>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {documents.length} document{documents.length !== 1 ? 's' : ''} uploaded
+            </p>
           </TabsContent>
         </Tabs>
       </CardContent>
