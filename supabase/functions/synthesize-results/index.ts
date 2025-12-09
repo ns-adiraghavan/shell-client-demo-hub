@@ -112,6 +112,7 @@ CITATION RULES:
 - ALWAYS use [number] citations (e.g., [1], [2], [3])
 - Every factual claim MUST have a citation
 - Citations reference the numbered sources provided
+- ALWAYS include the date/time period when referencing a source (e.g., "According to [1] (March 2024)..." or "A January 2025 report [3] indicates...")
 
 NARRATIVE STYLE:
 - Write for C-suite executives and strategy teams

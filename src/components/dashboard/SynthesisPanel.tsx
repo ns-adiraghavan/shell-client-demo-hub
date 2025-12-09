@@ -143,16 +143,22 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results, situati
 
   return (
     <Card className="flex flex-col shadow-intel bg-surface-dark border-border/30">
-      <CardHeader className="shrink-0 pb-4 border-b border-border/30 bg-surface-command/60">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="p-2 bg-primary rounded-lg">
-            <Sparkles className="h-5 w-5 text-primary-foreground" />
+      <CardHeader className="shrink-0 pb-4 border-b border-border/30 bg-surface-command/60 relative overflow-hidden">
+        {/* Subtle texture background */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2.5 bg-primary rounded-lg shadow-lg">
+              <Sparkles className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-foreground tracking-tight">Strategic Intelligence Brief</CardTitle>
           </div>
-          <CardTitle className="text-xl font-bold text-foreground">Executive Intelligence Brief</CardTitle>
+          <CardDescription className="text-sm text-muted-foreground pl-[52px]">
+            CXO-level synthesis of market signals, competition, and commercialization
+          </CardDescription>
         </div>
-        <CardDescription className="text-sm text-muted-foreground pl-12">
-          CXO-level synthesis of market signals, competition, and commercialization
-        </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col overflow-hidden p-0">
         {isSearching ? (
@@ -194,7 +200,7 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results, situati
                     ),
                     p: ({ children }) => <p className="text-sm text-foreground/90 leading-relaxed mb-3 px-1">{children}</p>,
                     ul: ({ children }) => <ul className="text-sm space-y-2 mb-4 list-disc pl-6 pr-1">{children}</ul>,
-                    li: ({ children }) => <li className="text-foreground/90 leading-relaxed">{children}</li>,
+                    li: ({ children }) => <li className="text-sm text-foreground/90 leading-relaxed">{children}</li>,
                     strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
                   }}
                 >
