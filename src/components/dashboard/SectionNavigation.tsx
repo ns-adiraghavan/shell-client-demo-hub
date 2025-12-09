@@ -77,7 +77,7 @@ export const SectionNavigation = ({ hasResults, hasSynthesis }: SectionNavigatio
   const currentIndex = visibleSections.findIndex(s => s.id === activeSection);
 
   return (
-    <div className="sticky top-0 z-40 bg-[hsl(220,18%,11%)] backdrop-blur-md py-3 border-b border-border/30 shadow-sm">
+    <div className="sticky top-[105px] z-30 bg-[hsl(220,18%,11%)] backdrop-blur-md py-3 border-b border-border/30 shadow-sm">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2 flex-1">
           <span className="text-sm text-muted-foreground font-medium mr-2 shrink-0">Jump to:</span>
