@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SearchResult } from "@/lib/searchService";
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Brain, TrendingUp, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, eachMonthOfInterval, startOfMonth, endOfMonth, isValid } from "date-fns";
 
 interface DataVisualizationProps {
   results: SearchResult[];
@@ -17,23 +17,87 @@ interface DataVisualizationProps {
 
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
-const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, name, percent }: any) => {
+// Chart font configuration for consistency
+const CHART_FONT = {
+  family: 'inherit',
+  size: {
+    tick: 10,
+    axisLabel: 11,
+    legend: 11,
+  },
+};
+
+// Custom label with leader lines for pie chart
+const renderCustomizedLabel = ({
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  percent,
+  name,
+  fill,
+}: any) => {
   const RADIAN = Math.PI / 180;
-  const radius = outerRadius + 30;
+  const radius = outerRadius + 20;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  const ex = cx + (outerRadius + 40) * Math.cos(-midAngle * RADIAN);
+  const ey = cy + (outerRadius + 40) * Math.sin(-midAngle * RADIAN);
+  const textAnchor = ex > cx ? 'start' : 'end';
+
+  if (percent < 0.05) return null; // Hide labels for very small slices
 
   return (
-    <text
-      x={x}
-      y={y}
-      fill="hsl(var(--foreground))"
-      textAnchor={x > cx ? 'start' : 'end'}
-      dominantBaseline="central"
-      className="text-xs font-medium"
-    >
-      {`${name} (${(percent * 100).toFixed(0)}%)`}
-    </text>
+    <g>
+      <path
+        d={`M${cx + outerRadius * Math.cos(-midAngle * RADIAN)},${cy + outerRadius * Math.sin(-midAngle * RADIAN)}L${x},${y}L${ex},${ey}`}
+        stroke={fill}
+        fill="none"
+        strokeWidth={1}
+      />
+      <circle cx={ex} cy={ey} r={2} fill={fill} />
+      <text
+        x={ex + (textAnchor === 'start' ? 4 : -4)}
+        y={ey}
+        textAnchor={textAnchor}
+        fill="hsl(var(--foreground))"
+        style={{ fontSize: CHART_FONT.size.legend, fontFamily: CHART_FONT.family }}
+        dominantBaseline="central"
+      >
+        {`${name}`}
+      </text>
+      <text
+        x={ex + (textAnchor === 'start' ? 4 : -4)}
+        y={ey + 12}
+        textAnchor={textAnchor}
+        fill="hsl(var(--muted-foreground))"
+        style={{ fontSize: CHART_FONT.size.tick, fontFamily: CHART_FONT.family }}
+        dominantBaseline="central"
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    </g>
+  );
+};
+
+// Custom legend renderer for consistent styling
+const renderLegend = (props: any) => {
+  const { payload } = props;
+  return (
+    <div className="flex flex-wrap justify-center gap-4 mt-4">
+      {payload.map((entry: any, index: number) => (
+        <div key={`legend-${index}`} className="flex items-center gap-2">
+          <div
+            className="w-3 h-3 rounded-sm"
+            style={{ backgroundColor: entry.color }}
+          />
+          <span style={{ fontSize: CHART_FONT.size.legend, color: 'hsl(var(--foreground))' }}>
+            {entry.value}
+          </span>
+        </div>
+      ))}
+    </div>
   );
 };
 
@@ -68,33 +132,71 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
     'Industry News': 'hsl(var(--chart-5))',
   };
 
-  // Process publication dates over time - grouped by month and source
+  // Format year as '23, '24, '25
+  const formatMonthYear = (date: Date): string => {
+    const month = format(date, "MMM");
+    const year = format(date, "yy");
+    return `${month} '${year}`;
+  };
+
+  // Process publication dates over time - grouped by month and source (with all months filled in)
   const publicationTrend = useMemo(() => {
-    const dateData = results
+    // First, collect all valid dates
+    const validDates = results
       .filter(r => r.date)
-      .reduce((acc, result) => {
+      .map(r => {
         try {
-          const date = new Date(result.date!);
+          const date = new Date(r.date!);
           if (!isNaN(date.getTime()) && date.getFullYear() > 1990) {
-            // Group by month-year
-            const monthYear = format(date, "MMM yy");
-            const sortKey = format(date, "yyyy-MM");
-            if (!acc[sortKey]) {
-              acc[sortKey] = { monthYear, sortKey };
-            }
-            // Add count per source using display label
-            const sourceKey = sourceDisplayLabels[result.source] || result.source;
-            acc[sortKey][sourceKey] = ((acc[sortKey][sourceKey] as number) || 0) + 1;
+            return date;
           }
         } catch (e) {
           // Skip invalid dates
         }
-        return acc;
-      }, {} as Record<string, Record<string, string | number>>);
+        return null;
+      })
+      .filter((d): d is Date => d !== null);
 
-    return Object.values(dateData)
+    if (validDates.length === 0) return [];
+
+    // Find min and max dates
+    const minDate = startOfMonth(new Date(Math.min(...validDates.map(d => d.getTime()))));
+    const maxDate = endOfMonth(new Date(Math.max(...validDates.map(d => d.getTime()))));
+
+    // Generate all months in the range
+    const allMonths = eachMonthOfInterval({ start: minDate, end: maxDate });
+
+    // Initialize data structure with all months
+    const monthlyData: Record<string, Record<string, string | number>> = {};
+    allMonths.forEach(month => {
+      const sortKey = format(month, "yyyy-MM");
+      const monthYear = formatMonthYear(month);
+      monthlyData[sortKey] = { monthYear, sortKey };
+      // Initialize all sources to 0
+      uniqueSources.forEach(source => {
+        monthlyData[sortKey][source] = 0;
+      });
+    });
+
+    // Fill in actual counts
+    results.forEach(result => {
+      if (!result.date) return;
+      try {
+        const date = new Date(result.date);
+        if (isNaN(date.getTime()) || date.getFullYear() <= 1990) return;
+        const sortKey = format(date, "yyyy-MM");
+        if (monthlyData[sortKey]) {
+          const sourceKey = sourceDisplayLabels[result.source] || result.source;
+          monthlyData[sortKey][sourceKey] = ((monthlyData[sortKey][sourceKey] as number) || 0) + 1;
+        }
+      } catch (e) {
+        // Skip invalid dates
+      }
+    });
+
+    return Object.values(monthlyData)
       .sort((a, b) => (a.sortKey as string).localeCompare(b.sortKey as string));
-  }, [results]);
+  }, [results, uniqueSources]);
 
   // Process source breakdown using display labels
   const sourceData = results.reduce((acc, result) => {
@@ -106,6 +208,13 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
   const sourceBreakdown = Object.entries(sourceData).map(([source, count]) => ({
     name: source,
     value: count
+  }));
+
+  // Source breakdown as bar chart data
+  const sourceBarData = sourceBreakdown.map(item => ({
+    name: item.name,
+    count: item.value,
+    fill: sourceColors[item.name] || COLORS[0]
   }));
 
   // Process project stage distribution
@@ -178,6 +287,8 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
     return null;
   }
 
+  const total = sourceBreakdown.reduce((acc, e) => acc + e.value, 0);
+
   return (
     <Card className="bg-card border-border/30 shadow-elevated">
       <CardHeader className="pb-4 border-b border-border/30">
@@ -235,13 +346,13 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
               <p className="text-sm text-muted-foreground mt-1">Volume of competitive and innovation signals over time by source</p>
               <p className="text-xs text-secondary-foreground mt-2 italic">"Market signals remained flat for a decade before sharp acceleration post-2022."</p>
             </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={publicationTrend} margin={{ top: 20, right: 30, left: 50, bottom: 60 }} style={{ background: 'transparent' }}>
+            <ResponsiveContainer width="100%" height={340}>
+              <BarChart data={publicationTrend} margin={{ top: 20, right: 30, left: 50, bottom: 80 }} style={{ background: 'transparent' }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 12% 25%)" strokeOpacity={0.5} vertical={false} />
                 <XAxis 
                   dataKey="monthYear" 
                   stroke="hsl(var(--muted-foreground))"
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: CHART_FONT.size.tick, fontFamily: CHART_FONT.family }}
                   angle={-45}
                   textAnchor="end"
                   height={60}
@@ -251,7 +362,7 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
                 />
                 <YAxis 
                   stroke="hsl(var(--muted-foreground))"
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: CHART_FONT.size.tick, fontFamily: CHART_FONT.family }}
                   width={50}
                   axisLine={{ stroke: 'hsl(220 12% 25%)' }}
                   tickLine={{ stroke: 'hsl(220 12% 25%)' }}
@@ -259,7 +370,7 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
                     value: 'Publications', 
                     angle: -90, 
                     position: 'insideLeft',
-                    style: { fill: 'hsl(var(--muted-foreground))', fontSize: 11, fontWeight: 500 },
+                    style: { fill: 'hsl(var(--muted-foreground))', fontSize: CHART_FONT.size.axisLabel, fontFamily: CHART_FONT.family, fontWeight: 500 },
                     dx: -10
                   }}
                 />
@@ -269,16 +380,12 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
                     color: 'hsl(var(--foreground))',
-                    fontSize: '12px',
+                    fontSize: CHART_FONT.size.legend,
+                    fontFamily: CHART_FONT.family,
                     boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
                   }}
                 />
-                <Legend 
-                  wrapperStyle={{ 
-                    color: 'hsl(var(--foreground))',
-                    paddingTop: '20px'
-                  }} 
-                />
+                <Legend content={renderLegend} />
                 {uniqueSources.map((source, index) => (
                   <Bar 
                     key={source}
@@ -295,72 +402,98 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
           </div>
         )}
 
-        {/* Intelligence Source Mix - Full Width */}
+        {/* Intelligence Source Mix - Full Width with Pie + Bar */}
         <div className="bg-surface-elevated rounded-xl p-6 border border-border/30">
           <div className="mb-6">
             <h3 className="text-lg font-bold text-foreground">Intelligence Source Mix</h3>
             <p className="text-sm text-muted-foreground mt-1">Where intelligence is being captured from</p>
             <p className="text-xs text-secondary-foreground mt-2 italic">"Balanced coverage across research, patents, and market news."</p>
           </div>
-          <div className="flex items-start gap-8">
-            <ResponsiveContainer width="40%" height={220}>
-              <PieChart style={{ background: 'transparent' }}>
-                <Pie
-                  data={sourceBreakdown}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={80}
-                  fill="hsl(var(--primary))"
-                  dataKey="value"
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Pie Chart with Leader Lines */}
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground mb-4 text-center">Distribution</h4>
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart style={{ background: 'transparent' }}>
+                  <Pie
+                    data={sourceBreakdown}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={(props) => renderCustomizedLabel({ ...props, fill: sourceColors[props.name] || COLORS[0] })}
+                    outerRadius={70}
+                    fill="hsl(var(--primary))"
+                    dataKey="value"
+                  >
+                    {sourceBreakdown.map((entry) => (
+                      <Cell key={`cell-${entry.name}`} fill={sourceColors[entry.name] || COLORS[0]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      color: 'hsl(var(--foreground))',
+                      fontSize: CHART_FONT.size.legend,
+                      fontFamily: CHART_FONT.family,
+                      boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
+                    }}
+                    formatter={(value: number, name: string) => [`${value} (${((value / total) * 100).toFixed(0)}%)`, name]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            {/* Bar Chart */}
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground mb-4 text-center">Count by Source</h4>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart 
+                  data={sourceBarData} 
+                  layout="vertical"
+                  margin={{ top: 10, right: 30, left: 100, bottom: 10 }} 
+                  style={{ background: 'transparent' }}
                 >
-                  {sourceBreakdown.map((entry) => (
-                    <Cell key={`cell-${entry.name}`} fill={sourceColors[entry.name] || COLORS[0]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    color: 'hsl(var(--foreground))',
-                    fontSize: '12px',
-                    boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
-                  }}
-                  formatter={(value: number, name: string) => [value, name]}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            {/* Legend Table */}
-            <div className="flex-1">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border/30">
-                    <th className="text-left py-2 text-muted-foreground font-medium">Source</th>
-                    <th className="text-right py-2 text-muted-foreground font-medium">Count</th>
-                    <th className="text-right py-2 text-muted-foreground font-medium">%</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sourceBreakdown.map((entry) => {
-                    const total = sourceBreakdown.reduce((acc, e) => acc + e.value, 0);
-                    const percentage = total > 0 ? ((entry.value / total) * 100).toFixed(0) : 0;
-                    return (
-                      <tr key={entry.name} className="border-b border-border/20">
-                        <td className="py-2 flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-sm" 
-                            style={{ backgroundColor: sourceColors[entry.name] || COLORS[0] }}
-                          />
-                          <span className="text-foreground">{entry.name}</span>
-                        </td>
-                        <td className="text-right py-2 text-foreground font-medium">{entry.value}</td>
-                        <td className="text-right py-2 text-muted-foreground">{percentage}%</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 12% 25%)" strokeOpacity={0.5} horizontal={true} vertical={false} />
+                  <XAxis 
+                    type="number"
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: CHART_FONT.size.tick, fontFamily: CHART_FONT.family }}
+                    axisLine={{ stroke: 'hsl(220 12% 25%)' }}
+                    tickLine={{ stroke: 'hsl(220 12% 25%)' }}
+                  />
+                  <YAxis 
+                    type="category"
+                    dataKey="name"
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fill: 'hsl(var(--foreground))', fontSize: CHART_FONT.size.tick, fontFamily: CHART_FONT.family }}
+                    width={90}
+                    axisLine={{ stroke: 'hsl(220 12% 25%)' }}
+                    tickLine={{ stroke: 'hsl(220 12% 25%)' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      color: 'hsl(var(--foreground))',
+                      fontSize: CHART_FONT.size.legend,
+                      fontFamily: CHART_FONT.family,
+                      boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
+                    }}
+                    formatter={(value: number, name: string) => [`${value} (${((value / total) * 100).toFixed(0)}%)`, 'Count']}
+                  />
+                  <Bar 
+                    dataKey="count" 
+                    radius={[0, 4, 4, 0]}
+                    maxBarSize={24}
+                  >
+                    {sourceBarData.map((entry, index) => (
+                      <Cell key={`cell-bar-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
@@ -381,7 +514,7 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
                   <XAxis 
                     dataKey="name" 
                     stroke="hsl(var(--muted-foreground))"
-                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: CHART_FONT.size.tick, fontFamily: CHART_FONT.family }}
                     angle={-45}
                     textAnchor="end"
                     height={80}
@@ -389,13 +522,13 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
                   />
                   <YAxis 
                     stroke="hsl(var(--muted-foreground))"
-                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: CHART_FONT.size.tick, fontFamily: CHART_FONT.family }}
                     width={40}
                     label={{ 
                       value: 'Count', 
                       angle: -90, 
                       position: 'insideLeft',
-                      style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12, fontWeight: 600 }
+                      style: { fill: 'hsl(var(--muted-foreground))', fontSize: CHART_FONT.size.axisLabel, fontFamily: CHART_FONT.family, fontWeight: 500 }
                     }}
                   />
                   <Tooltip 
@@ -404,7 +537,8 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
                       border: '1px solid hsl(var(--border))',
                       borderRadius: '8px',
                       color: 'hsl(var(--foreground))',
-                      fontSize: '12px',
+                      fontSize: CHART_FONT.size.legend,
+                      fontFamily: CHART_FONT.family,
                       boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
                     }}
                     formatter={(value: number) => [value, 'Initiatives']}
