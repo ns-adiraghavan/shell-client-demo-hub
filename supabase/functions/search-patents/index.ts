@@ -195,12 +195,80 @@ serve(async (req) => {
                       formattedDate = `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
                     }
                     
+                    // Fetch bibliographic data for this patent
+                    let title = `Patent ${patentId}`;
+                    let abstract = '';
+                    let applicant = '';
+                    
+                    try {
+                      const biblioUrl = `https://ops.epo.org/3.2/rest-services/published-data/publication/epodoc/${country}.${docNumber}/biblio`;
+                      const biblioResponse = await fetch(biblioUrl, {
+                        headers: {
+                          'Authorization': `Bearer ${accessToken}`,
+                          'Accept': 'application/json'
+                        }
+                      });
+                      
+                      if (biblioResponse.ok) {
+                        const biblioData = await biblioResponse.json();
+                        const exchDoc = biblioData?.['ops:world-patent-data']?.['exchange-documents']?.['exchange-document'];
+                        const biblio = exchDoc?.['bibliographic-data'];
+                        
+                        // Extract title
+                        const titles = biblio?.['invention-title'];
+                        if (titles) {
+                          const titleArray = Array.isArray(titles) ? titles : [titles];
+                          const enTitle = titleArray.find((t: any) => t?.['@lang'] === 'en' || t?.lang === 'en');
+                          title = enTitle?.['$'] || titleArray[0]?.['$'] || title;
+                        }
+                        
+                        // Extract applicant
+                        const parties = biblio?.['parties']?.['applicants']?.['applicant'];
+                        if (parties) {
+                          const partyArray = Array.isArray(parties) ? parties : [parties];
+                          const firstName = partyArray[0]?.['applicant-name']?.['name']?.['$'];
+                          applicant = firstName || '';
+                        }
+                      }
+                    } catch (biblioError) {
+                      console.error('Error fetching biblio for patent:', patentId, biblioError);
+                    }
+                    
+                    // Fetch abstract separately
+                    try {
+                      const abstractUrl = `https://ops.epo.org/3.2/rest-services/published-data/publication/epodoc/${country}.${docNumber}/abstract`;
+                      const abstractResponse = await fetch(abstractUrl, {
+                        headers: {
+                          'Authorization': `Bearer ${accessToken}`,
+                          'Accept': 'application/json'
+                        }
+                      });
+                      
+                      if (abstractResponse.ok) {
+                        const abstractData = await abstractResponse.json();
+                        const exchDoc = abstractData?.['ops:world-patent-data']?.['exchange-documents']?.['exchange-document'];
+                        const abstracts = exchDoc?.['abstract'];
+                        if (abstracts) {
+                          const abstractArray = Array.isArray(abstracts) ? abstracts : [abstracts];
+                          const enAbstract = abstractArray.find((a: any) => a?.['@lang'] === 'en' || a?.lang === 'en');
+                          const targetAbstract = enAbstract || abstractArray[0];
+                          const paragraphs = targetAbstract?.['p'];
+                          if (paragraphs) {
+                            const pArray = Array.isArray(paragraphs) ? paragraphs : [paragraphs];
+                            abstract = pArray.map((p: any) => p?.['$'] || p).join(' ').trim();
+                          }
+                        }
+                      }
+                    } catch (abstractError) {
+                      console.error('Error fetching abstract for patent:', patentId, abstractError);
+                    }
+                    
                     results.push({
                       source: 'Patents',
                       id: patentId,
-                      title: `Patent ${patentId}`,
-                      abstract: 'View patent for full details',
-                      authors: 'View patent for details',
+                      title: title,
+                      abstract: abstract || 'Abstract not available',
+                      authors: applicant || 'View patent for applicant details',
                       date: formattedDate,
                       url: `https://worldwide.espacenet.com/patent/search/family/publication/?q=${docNumber}`
                     });

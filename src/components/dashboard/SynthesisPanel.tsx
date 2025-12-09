@@ -75,7 +75,19 @@ const ExecutiveSignal = ({ synthesis, situationRoomMode = false }: { synthesis: 
     line.includes('leading')
   ) || lines[1] || "Multiple market signals detected across intelligence sources.";
   
-  const cleanInsight = keyInsight.replace(/^[#*\-\s]+/, '').replace(/\*\*/g, '').slice(0, 180);
+  // Clean the insight and ensure we don't cut off mid-sentence
+  const rawInsight = keyInsight.replace(/^[#*\-\s]+/, '').replace(/\*\*/g, '');
+  let cleanInsight = rawInsight;
+  
+  // If longer than 280 chars, try to end at a sentence boundary
+  if (rawInsight.length > 280) {
+    const sentenceEnd = rawInsight.substring(0, 300).lastIndexOf('.');
+    if (sentenceEnd > 100) {
+      cleanInsight = rawInsight.substring(0, sentenceEnd + 1);
+    } else {
+      cleanInsight = rawInsight.substring(0, 280) + '...';
+    }
+  }
 
   return (
     <div className={cn(
@@ -170,19 +182,19 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results, situati
                     h2: ({ children }) => (
                       <div className="mt-6 mb-4 bg-surface-command rounded-xl border border-border/30 overflow-hidden">
                         <div className="px-4 py-3 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
-                          <div className="w-1.5 h-6 bg-primary rounded-full" />
-                          <h2 className="text-sm font-bold text-primary m-0 uppercase tracking-wider">{children}</h2>
+                          <div className="w-1.5 h-5 bg-primary rounded-full" />
+                          <h2 className="text-base font-bold text-primary m-0 tracking-wide">{children}</h2>
                         </div>
                       </div>
                     ),
                     h3: ({ children }) => (
-                      <div className="bg-surface-elevated/50 rounded-lg px-4 py-2 mt-3 mb-2 border border-border/20">
+                      <div className="bg-surface-elevated/50 rounded-lg px-4 py-2.5 mt-4 mb-2 border border-border/20">
                         <h3 className="text-sm font-semibold text-foreground m-0">{children}</h3>
                       </div>
                     ),
                     p: ({ children }) => <p className="text-sm text-foreground/90 leading-relaxed mb-3 px-1">{children}</p>,
-                    ul: ({ children }) => <ul className="text-sm space-y-2 mb-3 list-disc pl-6 pr-1">{children}</ul>,
-                    li: ({ children }) => <li className="text-foreground/90">{children}</li>,
+                    ul: ({ children }) => <ul className="text-sm space-y-2 mb-4 list-disc pl-6 pr-1">{children}</ul>,
+                    li: ({ children }) => <li className="text-foreground/90 leading-relaxed">{children}</li>,
                     strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
                   }}
                 >
