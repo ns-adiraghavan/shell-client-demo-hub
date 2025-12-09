@@ -150,6 +150,22 @@ const Index = () => {
       "min-h-screen transition-all duration-500",
       situationRoomMode ? "bg-surface-command-dark" : "bg-surface-sunken"
     )}>
+      {/* Welcome Message - Above Search Header */}
+      {!hasSearched && !situationRoomMode && (
+        <div className="container mx-auto px-6 pt-8 pb-4">
+          <div className="text-center">
+            <div className="max-w-2xl mx-auto space-y-3">
+              <h2 className="text-display text-foreground">
+                Welcome to Innovation Insights Engine
+              </h2>
+              <p className="text-subtitle text-muted-foreground">
+                Track business updates, innovation, investments, partnerships, research, and patents across global markets in one intelligent workspace.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <SearchHeader 
         query={query}
         setQuery={setQuery}
@@ -276,41 +292,27 @@ const Index = () => {
         )}
         
         {!hasSearched && !situationRoomMode && (
-          <div className="space-y-10">
-            {/* Welcome Message - Above Search */}
-            <div className="text-center pt-8 pb-4">
-              <div className="max-w-2xl mx-auto space-y-3">
-                <h2 className="text-display text-foreground">
-                  Welcome to Innovation Insights Engine
-                </h2>
-                <p className="text-subtitle text-muted-foreground">
-                  Track business updates, innovation, investments, partnerships, research, and patents across global markets in one intelligent workspace.
-                </p>
+          <Tabs defaultValue="search" className="max-w-4xl mx-auto">
+            <TabsList className="grid w-full grid-cols-2 bg-secondary p-1 rounded-lg">
+              <TabsTrigger value="search" className="rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card">Quick Start</TabsTrigger>
+              <TabsTrigger value="upload" className="rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card">Upload Documents</TabsTrigger>
+            </TabsList>
+            <TabsContent value="search" className="space-y-4 pt-6">
+              <div className="text-center p-8 bg-card rounded-xl border border-border/30 shadow-card">
+                <h3 className="text-title mb-4 text-foreground">How to Use</h3>
+                <ol className="text-left max-w-lg mx-auto space-y-3 text-body text-muted-foreground">
+                  <li className="flex gap-3"><span className="text-primary font-semibold">1.</span> Enter your market, technology, or competitive keyword above</li>
+                  <li className="flex gap-3"><span className="text-primary font-semibold">2.</span> Select intelligence sources (Research, Projects, Patents, News)</li>
+                  <li className="flex gap-3"><span className="text-primary font-semibold">3.</span> Click Search to aggregate insights across multiple sources</li>
+                  <li className="flex gap-3"><span className="text-primary font-semibold">4.</span> Review AI-generated strategic synthesis and competitive landscape</li>
+                  <li className="flex gap-3"><span className="text-primary font-semibold">5.</span> Export executive reports as PDF or raw data as CSV</li>
+                </ol>
               </div>
-            </div>
-
-            <Tabs defaultValue="search" className="max-w-4xl mx-auto">
-              <TabsList className="grid w-full grid-cols-2 bg-secondary p-1 rounded-lg">
-                <TabsTrigger value="search" className="rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card">Quick Start</TabsTrigger>
-                <TabsTrigger value="upload" className="rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card">Upload Documents</TabsTrigger>
-              </TabsList>
-              <TabsContent value="search" className="space-y-4 pt-6">
-                <div className="text-center p-8 bg-card rounded-xl border border-border/30 shadow-card">
-                  <h3 className="text-title mb-4 text-foreground">How to Use</h3>
-                  <ol className="text-left max-w-lg mx-auto space-y-3 text-body text-muted-foreground">
-                    <li className="flex gap-3"><span className="text-primary font-semibold">1.</span> Enter your market, technology, or competitive keyword above</li>
-                    <li className="flex gap-3"><span className="text-primary font-semibold">2.</span> Select intelligence sources (Research, Projects, Patents, News)</li>
-                    <li className="flex gap-3"><span className="text-primary font-semibold">3.</span> Click Search to aggregate insights across multiple sources</li>
-                    <li className="flex gap-3"><span className="text-primary font-semibold">4.</span> Review AI-generated strategic synthesis and competitive landscape</li>
-                    <li className="flex gap-3"><span className="text-primary font-semibold">5.</span> Export executive reports as PDF or raw data as CSV</li>
-                  </ol>
-                </div>
-              </TabsContent>
-              <TabsContent value="upload" className="pt-6">
-                <DocumentUpload />
-              </TabsContent>
-            </Tabs>
-          </div>
+            </TabsContent>
+            <TabsContent value="upload" className="pt-6">
+              <DocumentUpload />
+            </TabsContent>
+          </Tabs>
         )}
 
         {/* Situation Room - No search state message */}
