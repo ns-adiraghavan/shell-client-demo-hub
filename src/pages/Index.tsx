@@ -12,11 +12,8 @@ import { DocumentUpload } from "@/components/dashboard/DocumentUpload";
 import { DataVisualization } from "@/components/dashboard/DataVisualization";
 import { DocumentChat } from "@/components/dashboard/DocumentChat";
 import { SectionNavigation } from "@/components/dashboard/SectionNavigation";
-import { Button } from "@/components/ui/button";
 import { searchAllSources, synthesizeResults, saveSearch, SearchResult } from "@/lib/searchService";
 import { toast } from "sonner";
-import { History } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 const Index = () => {
@@ -44,7 +41,6 @@ const Index = () => {
     booleanOperator: "AND",
     minMarketImpact: 0,
   });
-  const [situationRoomMode, setSituationRoomMode] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -146,10 +142,7 @@ const Index = () => {
   };
 
   return (
-    <div className={cn(
-      "min-h-screen transition-all duration-500",
-      situationRoomMode ? "bg-surface-command-dark" : "bg-surface-sunken"
-    )}>
+    <div className="min-h-screen transition-all duration-500 bg-surface-sunken">
       <SearchHeader
         query={query}
         setQuery={setQuery}
@@ -158,190 +151,96 @@ const Index = () => {
         user={user}
         onHistoryClick={() => navigate("/history")}
         onSignOut={handleSignOut}
-        situationRoomMode={situationRoomMode}
-        onSituationRoomToggle={() => setSituationRoomMode(!situationRoomMode)}
         hasResults={hasSearched && results.length > 0}
       />
       
-      <div className={cn(
-        "container mx-auto px-6 py-8 space-y-8 transition-all duration-300",
-        situationRoomMode && "py-6 space-y-6"
-      )}>
+      <div className="container mx-auto px-6 py-8 space-y-8 transition-all duration-300">
         
-        {/* How to Use - Collapsible, above search filters */}
-        {!situationRoomMode && !hasSearched && (
-          <details className="group bg-card rounded-xl border border-border/30 shadow-card max-w-4xl mx-auto">
-            <summary className="p-4 cursor-pointer flex items-center justify-between font-medium text-foreground hover:bg-muted/50 rounded-xl transition-colors">
-              <span className="flex items-center gap-2">
-                <span>How to Use</span>
-              </span>
-              <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <div className="px-6 pb-6">
-              <p className="text-body text-muted-foreground mb-6">
-                Search across business news, startups, patents, scientific research, suppliers, and partnerships. Get AI-powered synthesis of both external market intelligence and your internal knowledge base.
-              </p>
-              <ol className="text-left max-w-lg mx-auto space-y-3 text-body text-muted-foreground">
-                <li className="flex gap-3"><span className="text-primary font-semibold">1.</span> Enter your market, technology, or competitive keyword in the search bar</li>
-                <li className="flex gap-3"><span className="text-primary font-semibold">2.</span> Select intelligence sources: Technical Literature, Scholarly Literature, Patents, and News</li>
-                <li className="flex gap-3"><span className="text-primary font-semibold">3.</span> Optionally upload internal documents or connect external sources (SharePoint, servers, email) via Document Intelligence</li>
-                <li className="flex gap-3"><span className="text-primary font-semibold">4.</span> Click Search to aggregate insights from selected external sources</li>
-                <li className="flex gap-3"><span className="text-primary font-semibold">5.</span> Review the Executive Intelligence Brief with AI-synthesized strategic insights</li>
-                <li className="flex gap-3"><span className="text-primary font-semibold">6.</span> Explore Competitive Landscape, Market Trends, and Live Intelligence Feed</li>
-                <li className="flex gap-3"><span className="text-primary font-semibold">7.</span> Use Document AI to chat with, summarize, compare, and cross-analyze your uploaded documents</li>
-                <li className="flex gap-3"><span className="text-primary font-semibold">8.</span> Export executive reports as PDF or raw data as CSV/BibTeX/RIS</li>
-              </ol>
-            </div>
-          </details>
-        )}
+        {/* Filters Section */}
+        <div className="bg-card rounded-xl border border-border/30 shadow-card p-6">
+          <SearchFilters 
+            sources={sources} 
+            setSources={setSources} 
+            maxResults={maxResults} 
+            setMaxResults={setMaxResults} 
+          />
+        </div>
+        <details className="group bg-card rounded-xl border border-border/30 shadow-card">
+          <summary className="p-4 cursor-pointer flex items-center justify-between font-medium text-foreground hover:bg-muted/50 rounded-xl transition-colors">
+            <span className="flex items-center gap-2">
+              <span>Advanced Filters</span>
+            </span>
+            <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div className="px-6 pb-6">
+            <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
+          </div>
+        </details>
         
-        {/* Filters Section - Hidden in Situation Room */}
-        {!situationRoomMode && (
-          <>
-            <div className="bg-card rounded-xl border border-border/30 shadow-card p-6">
-              <SearchFilters 
-                sources={sources} 
-                setSources={setSources} 
-                maxResults={maxResults} 
-                setMaxResults={setMaxResults} 
-              />
-            </div>
-            <details className="group bg-card rounded-xl border border-border/30 shadow-card">
-              <summary className="p-4 cursor-pointer flex items-center justify-between font-medium text-foreground hover:bg-muted/50 rounded-xl transition-colors">
-                <span className="flex items-center gap-2">
-                  <span>Advanced Filters</span>
-                </span>
-                <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-              </summary>
-              <div className="px-6 pb-6">
-                <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
-              </div>
-            </details>
-            
-            {/* Document Intelligence - Collapsible */}
-            <details className="group bg-card rounded-xl border border-border/30 shadow-card">
-              <summary className="p-4 cursor-pointer flex items-center justify-between font-medium text-foreground hover:bg-muted/50 rounded-xl transition-colors">
-                <span className="flex items-center gap-2">
-                  <span>Document Intelligence</span>
-                  <span className="text-xs text-muted-foreground font-normal">(Upload files or connect external sources)</span>
-                </span>
-                <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-              </summary>
-              <div className="p-0">
-                <DocumentUpload />
-              </div>
-            </details>
-          </>
-        )}
+        {/* Document Intelligence - Collapsible */}
+        <details className="group bg-card rounded-xl border border-border/30 shadow-card">
+          <summary className="p-4 cursor-pointer flex items-center justify-between font-medium text-foreground hover:bg-muted/50 rounded-xl transition-colors">
+            <span className="flex items-center gap-2">
+              <span>Document Intelligence</span>
+              <span className="text-xs text-muted-foreground font-normal">(Upload files or connect external sources)</span>
+            </span>
+            <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div className="p-0">
+            <DocumentUpload />
+          </div>
+        </details>
         
         {hasSearched && (
           <>
             {/* Jump-to Navigation */}
-            {!situationRoomMode && (
-              <SectionNavigation hasResults={hasSearched} hasSynthesis={!!synthesis} />
-            )}
+            <SectionNavigation hasResults={hasSearched} hasSynthesis={!!synthesis} />
             
-            {/* KPI Cards - Always visible, enhanced in Situation Room */}
+            {/* KPI Cards */}
             <div id="stats">
               <StatsCards 
                 counts={getCounts()} 
                 isSearching={isSearching} 
-                situationRoomMode={situationRoomMode}
               />
             </div>
             
-            {/* Situation Room: Executive Brief takes center stage */}
-            {situationRoomMode ? (
-              <>
-                {/* Executive Intelligence Brief - Hero in Situation Room */}
-                <div className="max-h-[70vh] overflow-y-auto">
-                  <SynthesisPanel 
-                    synthesis={synthesis}
-                    isSearching={isSynthesizing}
-                    query={query}
-                    results={results}
-                    situationRoomMode={situationRoomMode}
-                  />
-                </div>
-                
-                {/* Competitive Landscape - Full Width in Situation Room */}
-                {synthesis && results.length > 0 && (
-                  <div className="max-h-[50vh] overflow-y-auto">
-                    <CompetitiveLandscape 
-                      results={results} 
-                      synthesis={synthesis} 
-                      situationRoomMode={situationRoomMode}
-                    />
-                  </div>
-                )}
-                
-                {/* Data Visualization - Condensed in Situation Room */}
-                <DataVisualization 
-                  results={results} 
-                  isLoading={isSearching} 
-                  query={query}
-                  situationRoomMode={situationRoomMode}
-                />
-              </>
-            ) : (
-              <>
-                {/* Normal Mode Layout - Single Column Long Scroll */}
-                {/* Executive Intelligence Brief */}
-                <div id="synthesis">
-                  <SynthesisPanel 
-                    synthesis={synthesis}
-                    isSearching={isSynthesizing}
-                    query={query}
-                    results={results}
-                  />
-                </div>
-                
-                {/* Competitive Landscape */}
-                {synthesis && results.length > 0 && (
-                  <div id="landscape">
-                    <CompetitiveLandscape results={results} synthesis={synthesis} />
-                  </div>
-                )}
-                
-                {/* Data Visualization */}
-                <div id="visualization">
-                  <DataVisualization results={results} isLoading={isSearching} query={query} />
-                </div>
-                
-                {/* Search Results - Full Width */}
-                <div id="results">
-                  <ResultsTabs 
-                    results={results} 
-                    isSearching={isSearching}
-                    query={query}
-                  />
-                </div>
-                
-                {/* Document AI - Full Width */}
-                <div id="documents">
-                  <DocumentChat />
-                </div>
-              </>
-            )}
-          </>
-        )}
-
-        {/* Situation Room - No search state message */}
-        {!hasSearched && situationRoomMode && (
-          <div className="text-center py-20">
-            <div className="max-w-lg mx-auto space-y-4">
-              <h2 className="text-2xl font-bold text-foreground">No Active Intelligence</h2>
-              <p className="text-muted-foreground">
-                Run a search to populate the Situation Room with live market intelligence.
-              </p>
-              <button 
-                onClick={() => setSituationRoomMode(false)}
-                className="mt-4 px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
-              >
-                Exit Situation Room
-              </button>
+            {/* Normal Mode Layout - Single Column Long Scroll */}
+            {/* Executive Intelligence Brief */}
+            <div id="synthesis">
+              <SynthesisPanel 
+                synthesis={synthesis}
+                isSearching={isSynthesizing}
+                query={query}
+                results={results}
+              />
             </div>
-          </div>
+            
+            {/* Competitive Landscape */}
+            {synthesis && results.length > 0 && (
+              <div id="landscape">
+                <CompetitiveLandscape results={results} synthesis={synthesis} />
+              </div>
+            )}
+            
+            {/* Data Visualization */}
+            <div id="visualization">
+              <DataVisualization results={results} isLoading={isSearching} query={query} />
+            </div>
+            
+            {/* Search Results - Full Width */}
+            <div id="results">
+              <ResultsTabs 
+                results={results} 
+                isSearching={isSearching}
+                query={query}
+              />
+            </div>
+            
+            {/* Document AI - Full Width */}
+            <div id="documents">
+              <DocumentChat />
+            </div>
+          </>
         )}
       </div>
     </div>
