@@ -45,7 +45,7 @@ export const SearchHeader = ({
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground tracking-tight">
-                {situationRoomMode ? "Situation Room" : "Market Insights Engine"}
+                {situationRoomMode ? "Situation Room" : "Innovation Insights Engine"}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {situationRoomMode ? "Executive Command Center • Live Intelligence" : "Unified Market, Startup & Technology Intelligence"}
