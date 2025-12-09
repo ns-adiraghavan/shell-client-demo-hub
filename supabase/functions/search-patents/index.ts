@@ -186,22 +186,15 @@ serve(async (req) => {
                     const docNumber = docId?.['doc-number']?.['$'] || docId?.['doc-number'] || '';
                     const country = docId?.['country']?.['$'] || docId?.['country'] || '';
                     const kind = docId?.['kind']?.['$'] || docId?.['kind'] || '';
-                    const date = docId?.['date']?.['$'] || docId?.['date'] || '';
+                    const searchDate = docId?.['date']?.['$'] || docId?.['date'] || '';
 
                     const patentId = `${country}${docNumber}${kind}`;
-                    
-                    let formattedDate = '';
-                    if (date && date.length >= 8) {
-                      formattedDate = `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
-                    } else if (date && date.length === 4) {
-                      // Just a year
-                      formattedDate = date;
-                    }
                     
                     // Fetch bibliographic data for this patent
                     let title = `Patent ${patentId}`;
                     let abstract = '';
                     let applicant = '';
+                    let publicationDate = '';
                     
                     try {
                       const biblioUrl = `https://ops.epo.org/3.2/rest-services/published-data/publication/epodoc/${country}.${docNumber}/biblio`;
@@ -232,9 +225,47 @@ serve(async (req) => {
                           const firstName = partyArray[0]?.['applicant-name']?.['name']?.['$'];
                           applicant = firstName || '';
                         }
+                        
+                        // Extract publication date from biblio data
+                        const pubRef = biblio?.['publication-reference']?.['document-id'];
+                        if (pubRef) {
+                          const pubRefArray = Array.isArray(pubRef) ? pubRef : [pubRef];
+                          for (const ref of pubRefArray) {
+                            const refDate = ref?.['date']?.['$'] || ref?.['date'];
+                            if (refDate && refDate.length >= 8) {
+                              publicationDate = `${refDate.substring(0, 4)}-${refDate.substring(4, 6)}-${refDate.substring(6, 8)}`;
+                              break;
+                            }
+                          }
+                        }
+                        
+                        // Fallback: try application-reference date
+                        if (!publicationDate) {
+                          const appRef = biblio?.['application-reference']?.['document-id'];
+                          if (appRef) {
+                            const appRefArray = Array.isArray(appRef) ? appRef : [appRef];
+                            for (const ref of appRefArray) {
+                              const refDate = ref?.['date']?.['$'] || ref?.['date'];
+                              if (refDate && refDate.length >= 8) {
+                                publicationDate = `${refDate.substring(0, 4)}-${refDate.substring(4, 6)}-${refDate.substring(6, 8)}`;
+                                break;
+                              }
+                            }
+                          }
+                        }
                       }
                     } catch (biblioError) {
                       console.error('Error fetching biblio for patent:', patentId, biblioError);
+                    }
+                    
+                    // Use search date as final fallback
+                    let formattedDate = publicationDate;
+                    if (!formattedDate && searchDate) {
+                      if (searchDate.length >= 8) {
+                        formattedDate = `${searchDate.substring(0, 4)}-${searchDate.substring(4, 6)}-${searchDate.substring(6, 8)}`;
+                      } else if (searchDate.length === 4) {
+                        formattedDate = searchDate;
+                      }
                     }
                     
                     // Fetch abstract separately
@@ -265,6 +296,8 @@ serve(async (req) => {
                     } catch (abstractError) {
                       console.error('Error fetching abstract for patent:', patentId, abstractError);
                     }
+                    
+                    console.log(`Patent ${patentId}: date=${formattedDate}, applicant=${applicant}`);
                     
                     results.push({
                       source: 'Patents',
