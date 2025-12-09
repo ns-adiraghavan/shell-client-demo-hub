@@ -20,9 +20,9 @@ interface SearchFiltersProps {
 
 export const SearchFilters = ({ sources, setSources, maxResults, setMaxResults }: SearchFiltersProps) => {
   const sourceOptions = [
-    { id: "ieee", label: "IEEE Xplore", icon: Database },
+    { id: "ieee", label: "Technical Literature", icon: Database },
     { id: "clinical", label: "Industry News", icon: FileText },
-    { id: "googleScholar", label: "Google Scholar", icon: GraduationCap },
+    { id: "googleScholar", label: "Scholarly Literature", icon: GraduationCap },
     { id: "patents", label: "Patents (EPO)", icon: Scale },
     { id: "news", label: "Business News", icon: Newspaper },
   ];
