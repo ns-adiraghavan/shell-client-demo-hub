@@ -3,13 +3,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
-import { Database, FileText, Microscope, Scale, Newspaper } from "lucide-react";
+import { Database, FileText, GraduationCap, Scale, Newspaper } from "lucide-react";
 
 interface SearchFiltersProps {
   sources: {
-    pubmed: boolean;
+    ieee: boolean;
     clinical: boolean;
-    arxiv: boolean;
+    googleScholar: boolean;
     patents: boolean;
     news: boolean;
   };
@@ -20,9 +20,9 @@ interface SearchFiltersProps {
 
 export const SearchFilters = ({ sources, setSources, maxResults, setMaxResults }: SearchFiltersProps) => {
   const sourceOptions = [
-    { id: "pubmed", label: "PubMed", icon: Microscope },
+    { id: "ieee", label: "IEEE Xplore", icon: Database },
     { id: "clinical", label: "ClinicalTrials.gov", icon: FileText },
-    { id: "arxiv", label: "arXiv / Preprints", icon: Database },
+    { id: "googleScholar", label: "Google Scholar", icon: GraduationCap },
     { id: "patents", label: "Patents (EPO)", icon: Scale },
     { id: "news", label: "Industry News", icon: Newspaper },
   ];
