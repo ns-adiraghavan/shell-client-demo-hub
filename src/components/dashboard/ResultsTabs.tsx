@@ -20,11 +20,34 @@ interface ResultsTabsProps {
   query: string;
 }
 
-// Decode HTML entities properly
+// Decode HTML entities properly - handles all common entities
 const decodeHtmlEntities = (text: string): string => {
+  if (!text) return '';
+  // First pass: use textarea for basic entities
   const textarea = document.createElement('textarea');
   textarea.innerHTML = text;
-  return textarea.value;
+  let decoded = textarea.value;
+  
+  // Second pass: handle any remaining numeric entities
+  decoded = decoded.replace(/&#(\d+);/g, (_, num) => String.fromCharCode(parseInt(num, 10)));
+  decoded = decoded.replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+  
+  // Third pass: handle named entities that might be missed
+  const entityMap: Record<string, string> = {
+    '&nbsp;': ' ', '&amp;': '&', '&lt;': '<', '&gt;': '>',
+    '&quot;': '"', '&apos;': "'", '&ndash;': '\u2013', '&mdash;': '\u2014',
+    '&lsquo;': '\u2018', '&rsquo;': '\u2019', '&ldquo;': '\u201C', '&rdquo;': '\u201D',
+    '&bull;': '\u2022', '&hellip;': '\u2026', '&trade;': '\u2122', '&copy;': '\u00A9',
+    '&reg;': '\u00AE', '&deg;': '\u00B0', '&plusmn;': '\u00B1', '&times;': '\u00D7',
+    '&divide;': '\u00F7', '&micro;': '\u03BC', '&alpha;': '\u03B1', '&beta;': '\u03B2',
+    '&gamma;': '\u03B3', '&delta;': '\u03B4', '&epsilon;': '\u03B5', '&sigma;': '\u03C3',
+  };
+  
+  Object.entries(entityMap).forEach(([entity, char]) => {
+    decoded = decoded.replace(new RegExp(entity, 'gi'), char);
+  });
+  
+  return decoded;
 };
 
 const getCategoryColor = (category: string): string => {

@@ -259,9 +259,9 @@ const Index = () => {
               </>
             ) : (
               <>
-                {/* Normal Mode Layout */}
-                {/* Executive Intelligence Brief - Full Width */}
-                <div id="synthesis" className="max-h-[560px] overflow-y-auto">
+                {/* Normal Mode Layout - Single Column Long Scroll */}
+                {/* Executive Intelligence Brief */}
+                <div id="synthesis">
                   <SynthesisPanel 
                     synthesis={synthesis}
                     isSearching={isSynthesizing}
@@ -270,29 +270,30 @@ const Index = () => {
                   />
                 </div>
                 
-                {/* Competitive Landscape - Full Width */}
+                {/* Competitive Landscape */}
                 {synthesis && results.length > 0 && (
-                  <div id="landscape" className="max-h-[560px] overflow-y-auto">
+                  <div id="landscape">
                     <CompetitiveLandscape results={results} synthesis={synthesis} />
                   </div>
                 )}
                 
+                {/* Data Visualization */}
                 <div id="visualization">
                   <DataVisualization results={results} isLoading={isSearching} query={query} />
                 </div>
                 
-                {/* Search Results & Document AI Row */}
-                <div className="grid lg:grid-cols-2 gap-8">
-                  <div id="results" className="max-h-[640px] overflow-y-auto">
-                    <ResultsTabs 
-                      results={results} 
-                      isSearching={isSearching}
-                      query={query}
-                    />
-                  </div>
-                  <div id="documents" className="max-h-[640px] overflow-y-auto">
-                    <DocumentChat />
-                  </div>
+                {/* Search Results - Full Width */}
+                <div id="results">
+                  <ResultsTabs 
+                    results={results} 
+                    isSearching={isSearching}
+                    query={query}
+                  />
+                </div>
+                
+                {/* Document AI - Full Width */}
+                <div id="documents">
+                  <DocumentChat />
                 </div>
               </>
             )}

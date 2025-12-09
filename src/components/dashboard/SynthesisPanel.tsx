@@ -130,7 +130,7 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results, situati
   };
 
   return (
-    <Card className="flex flex-col h-[calc(100vh-6rem)] shadow-intel bg-surface-dark border-border/30">
+    <Card className="flex flex-col shadow-intel bg-surface-dark border-border/30">
       <CardHeader className="shrink-0 pb-4 border-b border-border/30 bg-surface-command/60">
         <div className="flex items-center gap-3 mb-1">
           <div className="p-2 bg-primary rounded-lg">
