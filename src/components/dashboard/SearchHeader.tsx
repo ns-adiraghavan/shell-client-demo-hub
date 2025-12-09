@@ -69,8 +69,10 @@ export const SearchHeader = ({
 
   return (
     <header className={cn(
-      "sticky top-0 z-10 border-b border-border/40 transition-all duration-300",
-      situationRoomMode ? "bg-surface-command-dark" : "bg-surface-command"
+      "sticky top-0 z-50 border-b border-border/40 transition-all duration-300",
+      situationRoomMode 
+        ? "bg-[hsl(220,15%,12%)]" 
+        : "bg-[hsl(220,16%,10%)]"
     )}>
       <div className="container mx-auto px-6 py-5">
         <div className="flex items-center justify-between mb-5">
