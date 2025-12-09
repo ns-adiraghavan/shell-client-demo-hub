@@ -15,7 +15,14 @@ interface DataVisualizationProps {
   situationRoomMode?: boolean;
 }
 
-const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+// Distinct, vibrant color palette for maximum visual separation
+const COLORS = [
+  'hsl(25 95% 53%)',    // Vivid orange
+  'hsl(200 95% 45%)',   // Bright blue
+  'hsl(145 70% 42%)',   // Emerald green
+  'hsl(280 75% 55%)',   // Rich purple
+  'hsl(340 80% 55%)',   // Magenta/pink
+];
 
 // Chart font configuration for consistency
 const CHART_FONT = {
@@ -123,13 +130,13 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
     return labels;
   }, [results]);
 
-  // Source color mapping using display labels
+  // Source color mapping using display labels - distinct vibrant colors
   const sourceColors: Record<string, string> = {
-    'Business News': 'hsl(var(--chart-1))',
-    'Patents': 'hsl(var(--chart-2))',
-    'Scholarly Literature': 'hsl(var(--chart-3))',
-    'Technical Literature': 'hsl(var(--chart-4))',
-    'Industry News': 'hsl(var(--chart-5))',
+    'Business News': 'hsl(25 95% 53%)',       // Vivid orange
+    'Patents': 'hsl(200 95% 45%)',            // Bright blue
+    'Scholarly Literature': 'hsl(145 70% 42%)', // Emerald green
+    'Technical Literature': 'hsl(280 75% 55%)', // Rich purple
+    'Industry News': 'hsl(340 80% 55%)',      // Magenta/pink
   };
 
   // Format year as '23, '24, '25
@@ -198,32 +205,13 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
     const dataArray = Object.values(monthlyData)
       .sort((a, b) => (a.sortKey as string).localeCompare(b.sortKey as string));
     
-    // Smart spacing: only keep months with data + boundary months for context
-    const monthsWithData: number[] = [];
-    dataArray.forEach((month, index) => {
+    // Filter to only keep months that have at least one publication
+    const monthsWithData = dataArray.filter((month) => {
       const totalCount = uniqueSources.reduce((sum, source) => sum + ((month[source] as number) || 0), 0);
-      if (totalCount > 0) {
-        monthsWithData.push(index);
-      }
+      return totalCount > 0;
     });
 
-    // If too sparse (more than 12 months with <6 data points), only show months with data + neighbors
-    if (dataArray.length > 12 && monthsWithData.length < 6) {
-      const indicesToKeep = new Set<number>();
-      monthsWithData.forEach(idx => {
-        // Keep the month with data and one month before/after for context
-        if (idx > 0) indicesToKeep.add(idx - 1);
-        indicesToKeep.add(idx);
-        if (idx < dataArray.length - 1) indicesToKeep.add(idx + 1);
-      });
-      // Always keep first and last for context
-      indicesToKeep.add(0);
-      indicesToKeep.add(dataArray.length - 1);
-      
-      return Array.from(indicesToKeep).sort((a, b) => a - b).map(idx => dataArray[idx]);
-    }
-
-    return dataArray;
+    return monthsWithData;
   }, [results, uniqueSources]);
 
   // Process source breakdown using display labels
