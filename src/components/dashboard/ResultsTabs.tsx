@@ -91,6 +91,13 @@ const isPlaceholderAbstract = (abstract: string): boolean => {
   return placeholders.some(p => normalized === p || normalized.startsWith(p));
 };
 
+// Detect if text contains non-Latin characters (likely non-English)
+const isNonEnglish = (text: string): boolean => {
+  // Check for CJK, Cyrillic, Arabic, Hebrew, Thai, etc.
+  const nonLatinRegex = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\u0400-\u04ff\u0600-\u06ff\u0590-\u05ff\u0e00-\u0e7f]/;
+  return nonLatinRegex.test(text);
+};
+
 // Clean abstract text by removing redundant source attributions and HTML
 const cleanAbstract = (abstract: string): string => {
   let cleaned = abstract
@@ -100,6 +107,10 @@ const cleanAbstract = (abstract: string): string => {
   
   // Remove redundant source attributions at the start
   cleaned = cleaned.replace(/^(Source:|From:|Via:|Published by:|By:)\s*/i, '');
+  
+  // Remove source attributions at the end (e.g., "... - Source: IEEE", "Source: arXiv", etc.)
+  cleaned = cleaned.replace(/\s*[-–—]\s*(Source|From|Via):\s*[^\s]+.*$/gi, '');
+  cleaned = cleaned.replace(/\s*(Source|From|Via):\s*[^\s]+.*$/gi, '');
   
   // Remove trailing ellipsis duplication
   cleaned = cleaned.replace(/\.{3,}$/g, '...');
@@ -194,10 +205,20 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
             </div>
             
             <div className="flex-1 min-w-0">
-              {/* Title - Editorial Style */}
-              <h3 className="text-base font-bold text-foreground leading-snug mb-2 hover:text-primary transition-colors">
-                {decodeHtmlEntities(result.title)}
-              </h3>
+              {/* Title - Editorial Style with translation tooltip for non-English */}
+              {isNonEnglish(result.title) ? (
+                <h3 
+                  className="text-base font-bold text-foreground leading-snug mb-2 hover:text-primary transition-colors cursor-help"
+                  title="Non-English text detected - hover for translation coming soon"
+                >
+                  {decodeHtmlEntities(result.title)}
+                  <span className="ml-2 text-xs text-muted-foreground font-normal">(Non-English)</span>
+                </h3>
+              ) : (
+                <h3 className="text-base font-bold text-foreground leading-snug mb-2 hover:text-primary transition-colors">
+                  {decodeHtmlEntities(result.title)}
+                </h3>
+              )}
               
               {/* Metadata Row */}
               <div className="flex items-center flex-wrap gap-2 text-xs text-muted-foreground mb-3">
@@ -216,13 +237,13 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
                     </Badge>
                   ))
                 )}
-                {result.date && (
+                {result.date && result.date !== 'Unknown' && result.date !== '' && (
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {result.date}
                   </span>
                 )}
-                {result.authors && (
+                {result.authors && result.authors !== 'Unknown' && result.authors !== '' && (
                   <span className="truncate max-w-[200px]">{result.authors}</span>
                 )}
               </div>

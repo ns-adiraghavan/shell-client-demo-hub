@@ -37,8 +37,8 @@ async function searchPatentsView(query: string, maxResults: number): Promise<any
       id: patent.patent_number || `us-${Date.now()}-${Math.random()}`,
       title: patent.patent_title || 'No title',
       abstract: patent.patent_abstract || 'Abstract not available',
-      authors: patent.assignees?.[0]?.assignee_organization || 'Unknown assignee',
-      date: patent.patent_date || 'Unknown',
+      authors: patent.assignees?.[0]?.assignee_organization || 'Unknown',
+      date: patent.patent_date || '',
       url: `https://patents.google.com/patent/US${patent.patent_number}`
     }));
   } catch (error) {
@@ -81,8 +81,8 @@ async function searchLensPatents(query: string, maxResults: number): Promise<any
       id: patent.lens_id || patent.doc_number || `lens-${Date.now()}-${Math.random()}`,
       title: patent.title || 'No title',
       abstract: patent.abstract || 'Abstract not available',
-      authors: patent.applicants?.[0]?.name || 'Unknown applicant',
-      date: patent.date_published || 'Unknown',
+      authors: patent.applicants?.[0]?.name || 'Unknown',
+      date: patent.date_published || '',
       url: `https://www.lens.org/lens/patent/${patent.lens_id}`
     }));
   } catch (error) {
@@ -117,7 +117,7 @@ async function searchOpenAlexPatents(query: string, maxResults: number): Promise
       title: work.title || 'No title',
       abstract: 'View source for details',
       authors: work.authorships?.slice(0, 3).map((a: any) => a.author?.display_name).filter(Boolean).join(', ') || 'Unknown',
-      date: work.publication_date || 'Unknown',
+      date: work.publication_date || '',
       url: work.primary_location?.landing_page_url || work.doi || '#'
     }));
   } catch (error) {
@@ -190,9 +190,12 @@ serve(async (req) => {
 
                     const patentId = `${country}${docNumber}${kind}`;
                     
-                    let formattedDate = 'N/A';
+                    let formattedDate = '';
                     if (date && date.length >= 8) {
                       formattedDate = `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
+                    } else if (date && date.length === 4) {
+                      // Just a year
+                      formattedDate = date;
                     }
                     
                     // Fetch bibliographic data for this patent
@@ -268,7 +271,7 @@ serve(async (req) => {
                       id: patentId,
                       title: title,
                       abstract: abstract || 'Abstract not available',
-                      authors: applicant || 'View patent for applicant details',
+                      authors: applicant || 'Unknown',
                       date: formattedDate,
                       url: `https://worldwide.espacenet.com/patent/search/family/publication/?q=${docNumber}`
                     });

@@ -139,11 +139,11 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
     return `${month} '${year}`;
   };
 
-  // Process publication dates over time - grouped by month and source (with all months filled in)
+  // Process publication dates over time - grouped by month and source (with smart spacing)
   const publicationTrend = useMemo(() => {
     // First, collect all valid dates
     const validDates = results
-      .filter(r => r.date)
+      .filter(r => r.date && r.date !== 'Unknown' && r.date !== '')
       .map(r => {
         try {
           const date = new Date(r.date!);
@@ -180,7 +180,7 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
 
     // Fill in actual counts
     results.forEach(result => {
-      if (!result.date) return;
+      if (!result.date || result.date === 'Unknown' || result.date === '') return;
       try {
         const date = new Date(result.date);
         if (isNaN(date.getTime()) || date.getFullYear() <= 1990) return;
@@ -194,8 +194,36 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
       }
     });
 
-    return Object.values(monthlyData)
+    // Convert to array and sort
+    const dataArray = Object.values(monthlyData)
       .sort((a, b) => (a.sortKey as string).localeCompare(b.sortKey as string));
+    
+    // Smart spacing: only keep months with data + boundary months for context
+    const monthsWithData: number[] = [];
+    dataArray.forEach((month, index) => {
+      const totalCount = uniqueSources.reduce((sum, source) => sum + ((month[source] as number) || 0), 0);
+      if (totalCount > 0) {
+        monthsWithData.push(index);
+      }
+    });
+
+    // If too sparse (more than 12 months with <6 data points), only show months with data + neighbors
+    if (dataArray.length > 12 && monthsWithData.length < 6) {
+      const indicesToKeep = new Set<number>();
+      monthsWithData.forEach(idx => {
+        // Keep the month with data and one month before/after for context
+        if (idx > 0) indicesToKeep.add(idx - 1);
+        indicesToKeep.add(idx);
+        if (idx < dataArray.length - 1) indicesToKeep.add(idx + 1);
+      });
+      // Always keep first and last for context
+      indicesToKeep.add(0);
+      indicesToKeep.add(dataArray.length - 1);
+      
+      return Array.from(indicesToKeep).sort((a, b) => a - b).map(idx => dataArray[idx]);
+    }
+
+    return dataArray;
   }, [results, uniqueSources]);
 
   // Process source breakdown using display labels
