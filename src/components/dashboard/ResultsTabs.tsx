@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Download, FileText, BookOpen, Search, Radio, Clock } from "lucide-react";
+import { ExternalLink, Download, FileText, BookOpen, Search, Radio, Clock, Tag } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SearchResult } from "@/lib/searchService";
 import { exportToCSV, exportToBibTeX, exportToRIS, exportToEndNote } from "@/lib/exportService";
@@ -25,6 +25,20 @@ const decodeHtmlEntities = (text: string): string => {
   const textarea = document.createElement('textarea');
   textarea.innerHTML = text;
   return textarea.value;
+};
+
+const getCategoryColor = (category: string): string => {
+  const colors: Record<string, string> = {
+    "Business Updates": "bg-blue-500/15 text-blue-400 border-blue-500/30",
+    "Product / Project Announcements": "bg-green-500/15 text-green-400 border-green-500/30",
+    "Partnerships & Collaborations": "bg-purple-500/15 text-purple-400 border-purple-500/30",
+    "Investments & Funding": "bg-amber-500/15 text-amber-400 border-amber-500/30",
+    "Academic Research & Tie-ups": "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
+    "Patent & IP Activity": "bg-rose-500/15 text-rose-400 border-rose-500/30",
+    "Startup & Innovation News": "bg-orange-500/15 text-orange-400 border-orange-500/30",
+    "Suppliers, Logistics & Raw Materials": "bg-teal-500/15 text-teal-400 border-teal-500/30",
+  };
+  return colors[category] || "bg-muted text-muted-foreground";
 };
 
 export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) => {
@@ -79,10 +93,19 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
               </h3>
               
               {/* Metadata Row */}
-              <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+              <div className="flex items-center flex-wrap gap-2 text-xs text-muted-foreground mb-3">
                 <Badge variant="outline" className="text-xs border-border/40 bg-secondary font-medium">
                   {result.source}
                 </Badge>
+                {result.insightCategory && (
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs font-medium ${getCategoryColor(result.insightCategory)}`}
+                  >
+                    <Tag className="h-3 w-3 mr-1" />
+                    {result.insightCategory}
+                  </Badge>
+                )}
                 {result.date && (
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
