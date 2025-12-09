@@ -77,6 +77,36 @@ const getCategoryColor = (category: string): string => {
   return colors[category] || "bg-muted text-muted-foreground";
 };
 
+// Check if abstract is a placeholder that shouldn't be displayed
+const isPlaceholderAbstract = (abstract: string): boolean => {
+  const placeholders = [
+    'abstract not available',
+    'view patent for full details',
+    'view patent for details',
+    'view source for details',
+    'no abstract available',
+    'n/a',
+  ];
+  const normalized = abstract.toLowerCase().trim();
+  return placeholders.some(p => normalized === p || normalized.startsWith(p));
+};
+
+// Clean abstract text by removing redundant source attributions and HTML
+const cleanAbstract = (abstract: string): string => {
+  let cleaned = abstract
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/\s+/g, ' ')     // Normalize whitespace
+    .trim();
+  
+  // Remove redundant source attributions at the start
+  cleaned = cleaned.replace(/^(Source:|From:|Via:|Published by:|By:)\s*/i, '');
+  
+  // Remove trailing ellipsis duplication
+  cleaned = cleaned.replace(/\.{3,}$/g, '...');
+  
+  return cleaned;
+};
+
 export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) => {
   const [selectedCategories, setSelectedCategories] = useState<InsightCategory[]>([]);
   const [keywordFilter, setKeywordFilter] = useState("");
@@ -206,9 +236,9 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
               )}
               
               {/* Abstract - De-emphasized */}
-              {result.abstract && (
-                <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-3">
-                  {decodeHtmlEntities(result.abstract.replace(/<[^>]*>/g, ''))}
+              {result.abstract && !isPlaceholderAbstract(result.abstract) && (
+                <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed mb-3">
+                  {decodeHtmlEntities(cleanAbstract(result.abstract))}
                 </p>
               )}
               {result.enrollment && <p className="text-sm text-muted-foreground mb-3">{result.enrollment}</p>}
