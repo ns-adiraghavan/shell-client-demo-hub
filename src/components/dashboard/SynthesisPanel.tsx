@@ -41,11 +41,8 @@ const ExecutiveSnapshot = ({ results, situationRoomMode = false }: { results: Se
       situationRoomMode ? "p-8" : "p-5"
     )}>
       <div className="flex items-center gap-2 mb-4">
-        <Zap className={cn("text-primary", situationRoomMode ? "h-6 w-6" : "h-4 w-4")} />
-        <h4 className={cn(
-          "font-bold text-primary uppercase tracking-wider",
-          situationRoomMode ? "text-base" : "text-sm"
-        )}>Executive Snapshot</h4>
+        <Zap className="h-4 w-4 text-primary" />
+        <h4 className="text-xs font-bold text-primary uppercase tracking-wider">Executive Snapshot</h4>
       </div>
       <div className={cn("grid grid-cols-2 gap-4", situationRoomMode && "gap-6")}>
         {metrics.map((metric) => (
@@ -54,10 +51,10 @@ const ExecutiveSnapshot = ({ results, situationRoomMode = false }: { results: Se
             situationRoomMode ? "p-5" : "p-3"
           )}>
             <div className="flex items-center gap-2 mb-1">
-              <metric.icon className={cn("text-primary shrink-0", situationRoomMode ? "h-5 w-5" : "h-4 w-4")} />
-              <span className={cn("text-muted-foreground font-medium", situationRoomMode ? "text-sm" : "text-xs")}>{metric.label}</span>
+              <metric.icon className="h-3.5 w-3.5 text-primary shrink-0" />
+              <span className="text-xs text-muted-foreground font-medium">{metric.label}</span>
             </div>
-            <span className={cn("font-bold", metric.color, situationRoomMode ? "text-2xl" : "text-lg")}>{metric.value}</span>
+            <span className={cn("text-base font-bold", metric.color)}>{metric.value}</span>
           </div>
         ))}
       </div>
@@ -95,19 +92,10 @@ const ExecutiveSignal = ({ synthesis, situationRoomMode = false }: { synthesis: 
       situationRoomMode ? "p-6 animate-pulse-subtle" : "p-5"
     )}>
       <div className="flex items-start gap-3">
-        <AlertTriangle className={cn(
-          "text-primary shrink-0 mt-0.5",
-          situationRoomMode ? "h-6 w-6" : "h-5 w-5"
-        )} />
+        <AlertTriangle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
         <div>
-          <span className={cn(
-            "font-bold text-primary uppercase tracking-wider",
-            situationRoomMode ? "text-sm" : "text-xs"
-          )}>Executive Signal</span>
-          <p className={cn(
-            "text-foreground mt-2 leading-relaxed font-medium",
-            situationRoomMode ? "text-base" : "text-sm"
-          )}>{cleanInsight}</p>
+          <span className="text-xs font-bold text-primary uppercase tracking-wider">Executive Signal</span>
+          <p className="text-sm text-foreground mt-2 leading-relaxed font-medium">{cleanInsight}</p>
         </div>
       </div>
     </div>
@@ -143,19 +131,19 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results, situati
 
   return (
     <Card className="flex flex-col shadow-intel bg-surface-dark border-border/30">
-      <CardHeader className="shrink-0 pb-4 border-b border-border/30 bg-surface-command/60 relative overflow-hidden">
+      <CardHeader className="shrink-0 pb-5 border-b border-border/30 bg-surface-command/60 relative overflow-hidden">
         {/* Subtle texture background */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
+        <div className="absolute inset-0 opacity-[0.04]" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }} />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2.5 bg-primary rounded-lg shadow-lg">
+            <div className="p-3 bg-primary rounded-lg shadow-lg">
               <Sparkles className="h-6 w-6 text-primary-foreground" />
             </div>
             <CardTitle className="text-2xl font-bold text-foreground tracking-tight">Strategic Intelligence Brief</CardTitle>
           </div>
-          <CardDescription className="text-sm text-muted-foreground pl-[52px]">
+          <CardDescription className="text-xs text-muted-foreground pl-[56px] uppercase tracking-wide">
             CXO-level synthesis of market signals, competition, and commercialization
           </CardDescription>
         </div>
@@ -189,13 +177,13 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results, situati
                       <div className="mt-6 mb-4 bg-surface-command rounded-xl border border-border/30 overflow-hidden">
                         <div className="px-4 py-3 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
                           <div className="w-1.5 h-5 bg-primary rounded-full" />
-                          <h2 className="text-base font-bold text-primary m-0 tracking-wide">{children}</h2>
+                          <h2 className="text-sm font-bold text-primary m-0 uppercase tracking-wide">{children}</h2>
                         </div>
                       </div>
                     ),
                     h3: ({ children }) => (
                       <div className="bg-surface-elevated/50 rounded-lg px-4 py-2.5 mt-4 mb-2 border border-border/20">
-                        <h3 className="text-sm font-semibold text-foreground m-0">{children}</h3>
+                        <h3 className="text-xs font-semibold text-foreground m-0 uppercase tracking-wide">{children}</h3>
                       </div>
                     ),
                     p: ({ children }) => <p className="text-sm text-foreground/90 leading-relaxed mb-3 px-1">{children}</p>,
