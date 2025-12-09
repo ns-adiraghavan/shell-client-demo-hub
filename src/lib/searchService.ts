@@ -17,9 +17,9 @@ export interface SearchOptions {
   query: string;
   maxResults: number;
   sources: {
-    pubmed: boolean;
+    ieee: boolean;
     clinical: boolean;
-    arxiv: boolean;
+    googleScholar: boolean;
     patents: boolean;
     news: boolean;
   };
@@ -31,9 +31,9 @@ export const searchAllSources = async (options: SearchOptions): Promise<SearchRe
 
   const searchPromises: Promise<any>[] = [];
 
-  if (sources.pubmed) {
+  if (sources.ieee) {
     searchPromises.push(
-      supabase.functions.invoke('search-pubmed', {
+      supabase.functions.invoke('search-ieee', {
         body: { query, maxResults }
       })
     );
@@ -47,9 +47,9 @@ export const searchAllSources = async (options: SearchOptions): Promise<SearchRe
     );
   }
 
-  if (sources.arxiv) {
+  if (sources.googleScholar) {
     searchPromises.push(
-      supabase.functions.invoke('search-arxiv', {
+      supabase.functions.invoke('search-google-scholar', {
         body: { query, maxResults }
       })
     );

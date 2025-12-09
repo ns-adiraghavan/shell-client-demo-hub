@@ -31,9 +31,9 @@ const Index = () => {
   const [synthesis, setSynthesis] = useState("");
   const [maxResults, setMaxResults] = useState(20);
   const [sources, setSources] = useState({
-    pubmed: true,
+    ieee: true,
     clinical: true,
-    arxiv: true,
+    googleScholar: true,
     patents: true,
     news: true
   });
@@ -137,9 +137,9 @@ const Index = () => {
 
   const getCounts = () => {
     return {
-      pubmed: results.filter(r => r.source === 'PubMed').length,
+      ieee: results.filter(r => r.source === 'IEEE').length,
       clinical: results.filter(r => r.source === 'ClinicalTrials').length,
-      arxiv: results.filter(r => r.source === 'arXiv').length,
+      googleScholar: results.filter(r => r.source === 'Google Scholar').length,
       patents: results.filter(r => r.source === 'Patents').length,
       news: results.filter(r => r.source === 'News').length,
     };

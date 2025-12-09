@@ -1,12 +1,12 @@
 project_id = "tkgushubkbrjsjaglggu"
 
-[functions.search-pubmed]
+[functions.search-ieee]
 verify_jwt = false
 
 [functions.search-clinical-trials]
 verify_jwt = false
 
-[functions.search-arxiv]
+[functions.search-google-scholar]
 verify_jwt = false
 
 [functions.search-patents]
