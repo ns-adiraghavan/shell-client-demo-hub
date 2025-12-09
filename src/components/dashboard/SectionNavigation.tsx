@@ -8,11 +8,11 @@ interface SectionNavigationProps {
 
 const sections = [
   { id: "stats", label: "No. of Results", icon: BarChart2 },
-  { id: "visualization", label: "Viz.", icon: ChartLine },
-  { id: "synthesis", label: "GenAI Summary", icon: Sparkles },
-  { id: "landscape", label: "Comp. Intel", icon: Building2 },
-  { id: "results", label: "Results", icon: Search },
-  { id: "documents", label: "Docs/Data Connections", icon: FileText },
+  { id: "visualization", label: "Data Viz", icon: ChartLine },
+  { id: "synthesis", label: "Strategic Analysis", icon: Sparkles },
+  { id: "landscape", label: "Competitive Landscape", icon: Building2 },
+  { id: "results", label: "Live Feed", icon: Search },
+  { id: "documents", label: "Document AI", icon: FileText },
 ];
 
 export const SectionNavigation = ({ hasResults, hasSynthesis }: SectionNavigationProps) => {

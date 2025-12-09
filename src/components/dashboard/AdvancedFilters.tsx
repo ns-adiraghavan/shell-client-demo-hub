@@ -49,11 +49,7 @@ export const AdvancedFilters = ({ filters, setFilters }: AdvancedFiltersProps) =
   };
 
   return (
-    <Card className="p-4 border-border/50">
-      <div className="flex items-center gap-2 mb-4">
-        <SlidersHorizontal className="h-5 w-5 text-primary" />
-        <h3 className="font-semibold text-foreground">Advanced Filters</h3>
-      </div>
+    <div className="space-y-4">
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Date Range */}
@@ -156,6 +152,6 @@ export const AdvancedFilters = ({ filters, setFilters }: AdvancedFiltersProps) =
           })}
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
