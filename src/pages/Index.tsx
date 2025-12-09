@@ -190,6 +190,20 @@ const Index = () => {
                 <AdvancedFilters filters={advancedFilters} setFilters={setAdvancedFilters} />
               </div>
             </details>
+            
+            {/* Document Intelligence - Collapsible */}
+            <details className="group bg-card rounded-xl border border-border/30 shadow-card">
+              <summary className="p-4 cursor-pointer flex items-center justify-between font-medium text-foreground hover:bg-muted/50 rounded-xl transition-colors">
+                <span className="flex items-center gap-2">
+                  <span>Document Intelligence</span>
+                  <span className="text-xs text-muted-foreground font-normal">(Upload files or connect external sources)</span>
+                </span>
+                <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <div className="p-0">
+                <DocumentUpload />
+              </div>
+            </details>
           </>
         )}
         
@@ -286,30 +300,21 @@ const Index = () => {
         )}
         
         {!hasSearched && !situationRoomMode && (
-          <Tabs defaultValue="search" className="max-w-4xl mx-auto">
-            <TabsList className="grid w-full grid-cols-2 bg-secondary p-1 rounded-lg">
-              <TabsTrigger value="search" className="rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card">Quick Start</TabsTrigger>
-              <TabsTrigger value="upload" className="rounded-md data-[state=active]:bg-card data-[state=active]:shadow-card">Upload Documents</TabsTrigger>
-            </TabsList>
-            <TabsContent value="search" className="space-y-4 pt-6">
-              <div className="text-center p-8 bg-card rounded-xl border border-border/30 shadow-card">
-                <h3 className="text-title mb-4 text-foreground">How to Use</h3>
-                <p className="text-body text-muted-foreground mb-6">
-                  Search across business news, startups, patents, scientific research, suppliers, and partnerships. Get AI-powered synthesis of both external market intelligence and your internal knowledge base.
-                </p>
-                <ol className="text-left max-w-lg mx-auto space-y-3 text-body text-muted-foreground">
-                  <li className="flex gap-3"><span className="text-primary font-semibold">1.</span> Enter your market, technology, or competitive keyword above</li>
-                  <li className="flex gap-3"><span className="text-primary font-semibold">2.</span> Select intelligence sources (Research, Projects, Patents, News)</li>
-                  <li className="flex gap-3"><span className="text-primary font-semibold">3.</span> Click Search to aggregate insights across multiple sources</li>
-                  <li className="flex gap-3"><span className="text-primary font-semibold">4.</span> Review AI-generated strategic synthesis and competitive landscape</li>
-                  <li className="flex gap-3"><span className="text-primary font-semibold">5.</span> Export executive reports as PDF or raw data as CSV</li>
-                </ol>
-              </div>
-            </TabsContent>
-            <TabsContent value="upload" className="pt-6">
-              <DocumentUpload />
-            </TabsContent>
-          </Tabs>
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center p-8 bg-card rounded-xl border border-border/30 shadow-card">
+              <h3 className="text-title mb-4 text-foreground">How to Use</h3>
+              <p className="text-body text-muted-foreground mb-6">
+                Search across business news, startups, patents, scientific research, suppliers, and partnerships. Get AI-powered synthesis of both external market intelligence and your internal knowledge base.
+              </p>
+              <ol className="text-left max-w-lg mx-auto space-y-3 text-body text-muted-foreground">
+                <li className="flex gap-3"><span className="text-primary font-semibold">1.</span> Enter your market, technology, or competitive keyword above</li>
+                <li className="flex gap-3"><span className="text-primary font-semibold">2.</span> Select intelligence sources (Research, Projects, Patents, News)</li>
+                <li className="flex gap-3"><span className="text-primary font-semibold">3.</span> Click Search to aggregate insights across multiple sources</li>
+                <li className="flex gap-3"><span className="text-primary font-semibold">4.</span> Review AI-generated strategic synthesis and competitive landscape</li>
+                <li className="flex gap-3"><span className="text-primary font-semibold">5.</span> Export executive reports as PDF or raw data as CSV</li>
+              </ol>
+            </div>
+          </div>
         )}
 
         {/* Situation Room - No search state message */}
