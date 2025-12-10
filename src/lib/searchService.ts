@@ -36,6 +36,93 @@ export interface SearchOptions {
   };
 }
 
+// Parse date strings from various formats into Date objects
+// Handles: "YYYY-MM-DD", "YYYY", "Month YYYY", "DD Month YYYY", "Month DD, YYYY", etc.
+export function parseResultDate(dateStr?: string): Date | null {
+  if (!dateStr || dateStr === 'Unknown' || dateStr === '' || dateStr === 'N/A') {
+    return null;
+  }
+  
+  const trimmed = dateStr.trim();
+  
+  // Try ISO format first (YYYY-MM-DD)
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    const date = new Date(parseInt(isoMatch[1]), parseInt(isoMatch[2]) - 1, parseInt(isoMatch[3]));
+    if (!isNaN(date.getTime())) return date;
+  }
+  
+  // Try YYYYMMDD format (common in patents)
+  const compactMatch = trimmed.match(/^(\d{4})(\d{2})(\d{2})$/);
+  if (compactMatch) {
+    const date = new Date(parseInt(compactMatch[1]), parseInt(compactMatch[2]) - 1, parseInt(compactMatch[3]));
+    if (!isNaN(date.getTime())) return date;
+  }
+  
+  // Try year-only format
+  const yearOnlyMatch = trimmed.match(/^(\d{4})$/);
+  if (yearOnlyMatch) {
+    const year = parseInt(yearOnlyMatch[1]);
+    // Validate year is reasonable (1900-current year)
+    if (year >= 1900 && year <= new Date().getFullYear()) {
+      return new Date(year, 0, 1); // January 1st of that year
+    }
+    return null;
+  }
+  
+  // Month name patterns
+  const months: Record<string, number> = {
+    'january': 0, 'jan': 0, 'february': 1, 'feb': 1, 'march': 2, 'mar': 2,
+    'april': 3, 'apr': 3, 'may': 4, 'june': 5, 'jun': 5, 'july': 6, 'jul': 6,
+    'august': 7, 'aug': 7, 'september': 8, 'sep': 8, 'sept': 8, 'october': 9, 'oct': 9,
+    'november': 10, 'nov': 10, 'december': 11, 'dec': 11
+  };
+  
+  // Try "Month YYYY" or "Mon YYYY" format
+  const monthYearMatch = trimmed.match(/^([a-zA-Z]+)\s+(\d{4})$/);
+  if (monthYearMatch) {
+    const monthStr = monthYearMatch[1].toLowerCase();
+    const year = parseInt(monthYearMatch[2]);
+    if (months[monthStr] !== undefined && year >= 1900 && year <= new Date().getFullYear()) {
+      return new Date(year, months[monthStr], 1);
+    }
+  }
+  
+  // Try "DD Month YYYY" format
+  const dayMonthYearMatch = trimmed.match(/^(\d{1,2})\s+([a-zA-Z]+)\s+(\d{4})$/);
+  if (dayMonthYearMatch) {
+    const day = parseInt(dayMonthYearMatch[1]);
+    const monthStr = dayMonthYearMatch[2].toLowerCase();
+    const year = parseInt(dayMonthYearMatch[3]);
+    if (months[monthStr] !== undefined && year >= 1900 && year <= new Date().getFullYear()) {
+      return new Date(year, months[monthStr], day);
+    }
+  }
+  
+  // Try "Month DD, YYYY" format
+  const monthDayYearMatch = trimmed.match(/^([a-zA-Z]+)\s+(\d{1,2}),?\s+(\d{4})$/);
+  if (monthDayYearMatch) {
+    const monthStr = monthDayYearMatch[1].toLowerCase();
+    const day = parseInt(monthDayYearMatch[2]);
+    const year = parseInt(monthDayYearMatch[3]);
+    if (months[monthStr] !== undefined && year >= 1900 && year <= new Date().getFullYear()) {
+      return new Date(year, months[monthStr], day);
+    }
+  }
+  
+  // Try standard Date parse as last resort
+  const parsed = new Date(trimmed);
+  if (!isNaN(parsed.getTime())) {
+    // Validate the parsed date is reasonable
+    const year = parsed.getFullYear();
+    if (year >= 1900 && year <= new Date().getFullYear()) {
+      return parsed;
+    }
+  }
+  
+  return null;
+}
+
 // Local categorization function to tag results with multiple categories
 function categorizeResult(result: SearchResult): InsightCategory[] {
   const text = `${result.title} ${result.abstract || ''}`.toLowerCase();

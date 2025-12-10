@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SearchHeader } from "@/components/dashboard/SearchHeader";
@@ -12,7 +12,7 @@ import { DocumentUpload } from "@/components/dashboard/DocumentUpload";
 import { DataVisualization } from "@/components/dashboard/DataVisualization";
 import { DocumentChat } from "@/components/dashboard/DocumentChat";
 import { SectionNavigation } from "@/components/dashboard/SectionNavigation";
-import { searchAllSources, synthesizeResults, saveSearch, SearchResult } from "@/lib/searchService";
+import { searchAllSources, synthesizeResults, saveSearch, SearchResult, parseResultDate } from "@/lib/searchService";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -131,13 +131,49 @@ const Index = () => {
     }
   };
 
+  // Apply date filters to results
+  const filteredResults = useMemo(() => {
+    if (!advancedFilters.dateFrom && !advancedFilters.dateTo) {
+      return results;
+    }
+    
+    const fromDate = advancedFilters.dateFrom ? new Date(advancedFilters.dateFrom) : null;
+    const toDate = advancedFilters.dateTo ? new Date(advancedFilters.dateTo) : null;
+    
+    // Set toDate to end of day for inclusive comparison
+    if (toDate) {
+      toDate.setHours(23, 59, 59, 999);
+    }
+    
+    const today = new Date();
+    
+    return results.filter(result => {
+      const parsedDate = parseResultDate(result.date);
+      
+      // If date couldn't be parsed, include the result (don't filter it out)
+      if (!parsedDate) return true;
+      
+      // Reject dates in the future (likely hallucinations/errors)
+      if (parsedDate > today) {
+        console.warn(`Filtered out future date: ${result.date} for result: ${result.title}`);
+        return false;
+      }
+      
+      // Apply date range filter
+      if (fromDate && parsedDate < fromDate) return false;
+      if (toDate && parsedDate > toDate) return false;
+      
+      return true;
+    });
+  }, [results, advancedFilters.dateFrom, advancedFilters.dateTo]);
+
   const getCounts = () => {
     return {
-      ieee: results.filter(r => r.source === 'IEEE').length,
-      industryNews: results.filter(r => r.source === 'IndustryNews').length,
-      googleScholar: results.filter(r => r.source === 'Google Scholar').length,
-      patents: results.filter(r => r.source === 'Patents').length,
-      businessNews: results.filter(r => r.source === 'BusinessNews').length,
+      ieee: filteredResults.filter(r => r.source === 'IEEE').length,
+      industryNews: filteredResults.filter(r => r.source === 'IndustryNews').length,
+      googleScholar: filteredResults.filter(r => r.source === 'Google Scholar').length,
+      patents: filteredResults.filter(r => r.source === 'Patents').length,
+      businessNews: filteredResults.filter(r => r.source === 'BusinessNews').length,
     };
   };
 
@@ -211,26 +247,26 @@ const Index = () => {
                 synthesis={synthesis}
                 isSearching={isSynthesizing}
                 query={query}
-                results={results}
+                results={filteredResults}
               />
             </div>
             
             {/* Competitive Landscape */}
-            {synthesis && results.length > 0 && (
+            {synthesis && filteredResults.length > 0 && (
               <div id="landscape">
-                <CompetitiveLandscape results={results} synthesis={synthesis} />
+                <CompetitiveLandscape results={filteredResults} synthesis={synthesis} />
               </div>
             )}
             
             {/* Data Visualization */}
             <div id="visualization">
-              <DataVisualization results={results} isLoading={isSearching} query={query} />
+              <DataVisualization results={filteredResults} isLoading={isSearching} query={query} />
             </div>
             
             {/* Search Results - Full Width */}
             <div id="results">
               <ResultsTabs 
-                results={results} 
+                results={filteredResults} 
                 isSearching={isSearching}
                 query={query}
               />
