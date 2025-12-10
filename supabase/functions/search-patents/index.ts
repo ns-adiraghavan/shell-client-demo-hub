@@ -218,12 +218,27 @@ serve(async (req) => {
                           title = enTitle?.['$'] || titleArray[0]?.['$'] || title;
                         }
                         
-                        // Extract applicant
-                        const parties = biblio?.['parties']?.['applicants']?.['applicant'];
-                        if (parties) {
-                          const partyArray = Array.isArray(parties) ? parties : [parties];
-                          const firstName = partyArray[0]?.['applicant-name']?.['name']?.['$'];
-                          applicant = firstName || '';
+                        // Extract inventors first, then fallback to applicant
+                        const inventors = biblio?.['parties']?.['inventors']?.['inventor'];
+                        if (inventors) {
+                          const inventorArray = Array.isArray(inventors) ? inventors : [inventors];
+                          const inventorNames = inventorArray
+                            .slice(0, 3)
+                            .map((inv: any) => inv?.['inventor-name']?.['name']?.['$'])
+                            .filter(Boolean);
+                          if (inventorNames.length > 0) {
+                            applicant = inventorNames.join(', ');
+                          }
+                        }
+                        
+                        // Fallback to applicant if no inventors found
+                        if (!applicant) {
+                          const parties = biblio?.['parties']?.['applicants']?.['applicant'];
+                          if (parties) {
+                            const partyArray = Array.isArray(parties) ? parties : [parties];
+                            const firstName = partyArray[0]?.['applicant-name']?.['name']?.['$'];
+                            applicant = firstName || '';
+                          }
                         }
                         
                         // Extract publication date from biblio data

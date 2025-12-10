@@ -25,7 +25,7 @@ export const AdvancedFilters = ({ filters, setFilters }: AdvancedFiltersProps) =
         {/* Date Range */}
         <div className="space-y-2">
           <Label className="text-sm font-medium flex items-center gap-2 text-foreground">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="h-4 w-4 text-foreground" />
             Date From
           </Label>
           <Input
@@ -39,7 +39,7 @@ export const AdvancedFilters = ({ filters, setFilters }: AdvancedFiltersProps) =
 
         <div className="space-y-2">
           <Label className="text-sm font-medium flex items-center gap-2 text-foreground">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="h-4 w-4 text-foreground" />
             Date To
           </Label>
           <Input
@@ -78,7 +78,9 @@ export const AdvancedFilters = ({ filters, setFilters }: AdvancedFiltersProps) =
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help hover:text-foreground transition-colors" />
+                  <button type="button" className="inline-flex items-center justify-center focus:outline-none">
+                    <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help hover:text-foreground transition-colors" />
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-xs text-xs">
                   <p className="font-medium mb-1">Market Impact Score (0-10)</p>

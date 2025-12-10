@@ -103,11 +103,21 @@ serve(async (req) => {
               }
             }
             
+            // Extract abstract from multiple possible fields
+            let abstractText = 'Abstract not available';
+            if (item.abstract) {
+              abstractText = item.abstract.replace(/<[^>]*>/g, '');
+            } else if (item.description) {
+              abstractText = item.description.replace(/<[^>]*>/g, '');
+            } else if (item.subtitle && item.subtitle.length > 0) {
+              abstractText = Array.isArray(item.subtitle) ? item.subtitle.join(' ') : item.subtitle;
+            }
+            
             return {
               source: 'IEEE',
               id: item.DOI || `ieee-${Date.now()}-${Math.random()}`,
               title: Array.isArray(item.title) ? item.title[0] : (item.title || 'No title'),
-              abstract: item.abstract?.replace(/<[^>]*>/g, '') || 'Abstract not available',
+              abstract: abstractText,
               authors: item.author?.map((a: any) => `${a.given || ''} ${a.family || ''}`).slice(0, 5).join(', ') || 'Unknown',
               date: dateStr,
               url: item.URL || `https://doi.org/${item.DOI}`

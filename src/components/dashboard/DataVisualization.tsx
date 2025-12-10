@@ -226,7 +226,37 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
     value: count
   }));
 
-  // Source breakdown as bar chart data
+  // Insight category colors - distinct palette
+  const insightCategoryColors: Record<string, string> = {
+    "Business Updates": 'hsl(200 95% 45%)',              // Bright blue
+    "Product / Project Announcements": 'hsl(145 70% 42%)', // Emerald green
+    "Partnerships & Collaborations": 'hsl(280 75% 55%)',   // Rich purple
+    "Investments & Funding": 'hsl(25 95% 53%)',            // Vivid orange
+    "Academic Research & Tie-ups": 'hsl(180 70% 45%)',     // Teal
+    "Patent & IP Activity": 'hsl(340 80% 55%)',            // Magenta/pink
+    "Startup & Innovation News": 'hsl(45 90% 50%)',        // Gold
+    "Suppliers, Logistics & Raw Materials": 'hsl(220 70% 55%)', // Blue-violet
+  };
+
+  // Process insight category breakdown
+  const insightCategoryData = useMemo(() => {
+    const categoryCount: Record<string, number> = {};
+    results.forEach(result => {
+      const categories = result.insightCategories || [];
+      categories.forEach((cat: string) => {
+        categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+      });
+    });
+    return Object.entries(categoryCount)
+      .map(([name, count]) => ({
+        name,
+        count,
+        fill: insightCategoryColors[name] || COLORS[0]
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [results]);
+
+  // Source breakdown as bar chart data (keeping for pie chart)
   const sourceBarData = sourceBreakdown.map(item => ({
     name: item.name,
     count: item.value,
@@ -460,14 +490,14 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            {/* Bar Chart */}
+            {/* Bar Chart - Count by Insight Category */}
             <div>
-              <h4 className="text-sm font-medium text-muted-foreground mb-4 text-center">Count by Source</h4>
+              <h4 className="text-sm font-medium text-muted-foreground mb-4 text-center">Count by Insight Category</h4>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart 
-                  data={sourceBarData} 
+                  data={insightCategoryData} 
                   layout="vertical"
-                  margin={{ top: 10, right: 30, left: 100, bottom: 10 }} 
+                  margin={{ top: 10, right: 30, left: 140, bottom: 10 }} 
                   style={{ background: 'transparent' }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 12% 25%)" strokeOpacity={0.5} horizontal={true} vertical={false} />
@@ -482,8 +512,8 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
                     type="category"
                     dataKey="name"
                     stroke="hsl(var(--muted-foreground))"
-                    tick={{ fill: 'hsl(var(--foreground))', fontSize: CHART_FONT.size.tick, fontFamily: CHART_FONT.family }}
-                    width={90}
+                    tick={{ fill: 'hsl(var(--foreground))', fontSize: 9, fontFamily: CHART_FONT.family }}
+                    width={130}
                     axisLine={{ stroke: 'hsl(220 12% 25%)' }}
                     tickLine={{ stroke: 'hsl(220 12% 25%)' }}
                   />
@@ -497,14 +527,14 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
                       fontFamily: CHART_FONT.family,
                       boxShadow: '0 8px 24px -4px hsl(220 15% 10% / 0.12)'
                     }}
-                    formatter={(value: number, name: string) => [`${value} (${((value / total) * 100).toFixed(0)}%)`, 'Count']}
+                    formatter={(value: number) => [`${value} results`, 'Count']}
                   />
                   <Bar 
                     dataKey="count" 
                     radius={[0, 4, 4, 0]}
                     maxBarSize={24}
                   >
-                    {sourceBarData.map((entry, index) => (
+                    {insightCategoryData.map((entry, index) => (
                       <Cell key={`cell-bar-${index}`} fill={entry.fill} />
                     ))}
                   </Bar>
