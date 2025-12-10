@@ -8,7 +8,85 @@ import { SearchResult } from "@/lib/searchService";
 import { exportToPDF } from "@/lib/exportService";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import React from "react";
 
+// Transform text with citations like [1], [2] into hover links on the last word
+const transformCitations = (text: string, results: SearchResult[]): React.ReactNode[] => {
+  // Match patterns like "word [1]" or "word [1, 2]" or "word [1][2]"
+  const citationPattern = /(\S+)\s*(\[[\d,\s]+\](?:\s*\[[\d,\s]+\])*)/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = citationPattern.exec(text)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
+    const word = match[1];
+    const citationsText = match[2];
+    
+    // Extract all citation numbers
+    const numbers = citationsText.match(/\d+/g)?.map(n => parseInt(n, 10)) || [];
+    
+    // Build tooltip content with source titles
+    const sourceInfo = numbers.map(num => {
+      const result = results[num - 1]; // 1-based indexing
+      if (result) {
+        const shortTitle = result.title.length > 60 ? result.title.slice(0, 60) + '...' : result.title;
+        return `[${num}] ${shortTitle}`;
+      }
+      return `[${num}] Source`;
+    }).join('\n');
+
+    parts.push(
+      <Tooltip key={match.index}>
+        <TooltipTrigger asChild>
+          <span className="text-primary underline decoration-dotted underline-offset-2 cursor-help hover:text-primary/80 transition-colors">
+            {word}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-xs text-xs whitespace-pre-line bg-surface-elevated border-border/50">
+          {sourceInfo}
+        </TooltipContent>
+      </Tooltip>
+    );
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : [text];
+};
+
+// Custom text renderer that applies citation transformation
+const CitationText = ({ children, results }: { children: React.ReactNode; results: SearchResult[] }) => {
+  if (typeof children === 'string') {
+    return <>{transformCitations(children, results)}</>;
+  }
+  
+  if (Array.isArray(children)) {
+    return (
+      <>
+        {children.map((child, i) => (
+          <CitationText key={i} results={results}>{child}</CitationText>
+        ))}
+      </>
+    );
+  }
+  
+  if (React.isValidElement(children)) {
+    return children;
+  }
+  
+  return <>{children}</>;
+};
 interface SynthesisPanelProps {
   synthesis: string;
   isSearching: boolean;
@@ -167,34 +245,44 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results, situati
         ) : synthesis ? (
           <div className="flex flex-col flex-1 overflow-hidden">
             <ScrollArea className="flex-1 px-6 py-5">
-              <ExecutiveSnapshot results={results} situationRoomMode={situationRoomMode} />
-              <ExecutiveSignal synthesis={synthesis} situationRoomMode={situationRoomMode} />
-              
-              <div className="prose prose-sm max-w-none dark:prose-invert space-y-4 break-words">
-                <ReactMarkdown
-                  components={{
-                    h2: ({ children }) => (
-                      <div className="mt-6 mb-4 bg-surface-command rounded-xl border border-border/30 overflow-hidden">
-                        <div className="px-4 py-3 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
-                          <div className="w-1.5 h-5 bg-primary rounded-full shrink-0" />
-                          <h2 className="text-sm font-bold text-primary m-0 uppercase tracking-wide break-words">{children}</h2>
+              <TooltipProvider delayDuration={200}>
+                <ExecutiveSnapshot results={results} situationRoomMode={situationRoomMode} />
+                <ExecutiveSignal synthesis={synthesis} situationRoomMode={situationRoomMode} />
+                
+                <div className="prose prose-sm max-w-none dark:prose-invert space-y-4 break-words">
+                  <ReactMarkdown
+                    components={{
+                      h2: ({ children }) => (
+                        <div className="mt-6 mb-4 bg-surface-command rounded-xl border border-border/30 overflow-hidden">
+                          <div className="px-4 py-3 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                            <div className="w-1.5 h-5 bg-primary rounded-full shrink-0" />
+                            <h2 className="text-sm font-bold text-primary m-0 uppercase tracking-wide break-words">{children}</h2>
+                          </div>
                         </div>
-                      </div>
-                    ),
-                    h3: ({ children }) => (
-                      <div className="bg-surface-elevated/50 rounded-lg px-4 py-2.5 mt-4 mb-2 border border-border/20">
-                        <h3 className="text-xs font-semibold text-foreground m-0 uppercase tracking-wide break-words">{children}</h3>
-                      </div>
-                    ),
-                    p: ({ children }) => <p className="text-sm text-foreground/90 leading-relaxed mb-3 px-1 break-words whitespace-normal">{children}</p>,
-                    ul: ({ children }) => <ul className="text-sm space-y-2 mb-4 list-disc pl-6 pr-1 break-words">{children}</ul>,
-                    li: ({ children }) => <li className="text-sm text-foreground/90 leading-relaxed break-words whitespace-normal">{children}</li>,
-                    strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
-                  }}
-                >
-                  {synthesis}
-                </ReactMarkdown>
-              </div>
+                      ),
+                      h3: ({ children }) => (
+                        <div className="bg-surface-elevated/50 rounded-lg px-4 py-2.5 mt-4 mb-2 border border-border/20">
+                          <h3 className="text-xs font-semibold text-foreground m-0 uppercase tracking-wide break-words">{children}</h3>
+                        </div>
+                      ),
+                      p: ({ children }) => (
+                        <p className="text-sm text-foreground/90 leading-relaxed mb-3 px-1 break-words whitespace-normal">
+                          <CitationText results={results}>{children}</CitationText>
+                        </p>
+                      ),
+                      ul: ({ children }) => <ul className="text-sm space-y-2 mb-4 list-disc pl-6 pr-1 break-words">{children}</ul>,
+                      li: ({ children }) => (
+                        <li className="text-sm text-foreground/90 leading-relaxed break-words whitespace-normal">
+                          <CitationText results={results}>{children}</CitationText>
+                        </li>
+                      ),
+                      strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                    }}
+                  >
+                    {synthesis}
+                  </ReactMarkdown>
+                </div>
+              </TooltipProvider>
             </ScrollArea>
             
             <div className="shrink-0 px-6 py-4 border-t border-border/20 space-y-3 bg-surface-command/30">
