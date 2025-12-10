@@ -105,7 +105,7 @@ const isNonEnglish = (text: string): boolean => {
 };
 
 // Clean abstract text by removing redundant source attributions and HTML
-const cleanAbstract = (abstract: string): string => {
+const cleanAbstract = (abstract: string, sourceName?: string): string => {
   let cleaned = abstract
     .replace(/<[^>]*>/g, '') // Remove HTML tags
     .replace(/\s+/g, ' ')     // Normalize whitespace
@@ -117,6 +117,26 @@ const cleanAbstract = (abstract: string): string => {
   // Remove source attributions at the end (e.g., "... - Source: IEEE", "Source: arXiv", etc.)
   cleaned = cleaned.replace(/\s*[-–—]\s*(Source|From|Via):\s*[^\s]+.*$/gi, '');
   cleaned = cleaned.replace(/\s*(Source|From|Via):\s*[^\s]+.*$/gi, '');
+  
+  // Remove known news outlet names at the end of the abstract
+  const newsOutlets = [
+    'Financial Times', 'Reuters', 'Bloomberg', 'The New York Times', 'Wall Street Journal', 'WSJ',
+    'CNBC', 'BBC', 'The Guardian', 'Forbes', 'Fortune', 'The Economist', 'Business Insider',
+    'ET EnergyWorld', 'Economic Times', 'Oil & Gas Journal', 'Rigzone', 'OGN', 'Oil & Gas IQ',
+    'Recharge News', 'CleanTechnica', 'Energy Digital', 'PV Tech', 'Heatmap News',
+    'AP News', 'Associated Press', 'AFP', 'Yahoo Finance', 'MarketWatch', 'Seeking Alpha'
+  ];
+  
+  // Escape special regex characters and create pattern
+  const escapedOutlets = newsOutlets.map(name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const outletsPattern = new RegExp(`\\s*(${escapedOutlets.join('|')})\\s*$`, 'i');
+  cleaned = cleaned.replace(outletsPattern, '');
+  
+  // Also remove the source name if provided (e.g., "BusinessNews" -> might appear as text)
+  if (sourceName) {
+    const sourcePattern = new RegExp(`\\s*${sourceName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i');
+    cleaned = cleaned.replace(sourcePattern, '');
+  }
   
   // Remove trailing ellipsis duplication
   cleaned = cleaned.replace(/\.{3,}$/g, '...');
@@ -373,7 +393,7 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
                 {/* Abstract - De-emphasized */}
                 {result.abstract && !isPlaceholderAbstract(result.abstract) && (
                   <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed mb-3">
-                    {decodeHtmlEntities(cleanAbstract(result.abstract))}
+                    {decodeHtmlEntities(cleanAbstract(result.abstract, result.authors))}
                   </p>
                 )}
                 {result.enrollment && <p className="text-sm text-muted-foreground mb-3">{result.enrollment}</p>}
