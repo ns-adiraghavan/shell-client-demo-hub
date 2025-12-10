@@ -288,11 +288,14 @@ export const ResultsTabs = ({ results, isSearching, query }: ResultsTabsProps) =
       const isNonEng = isNonEnglish(result.title) || (result.abstract && isNonEnglish(result.abstract));
       const translation = translations[result.id];
       const isExpanded = expandedTranslations.has(result.id);
+      // Find the global index in the full results array for citation linking
+      const globalIndex = results.findIndex(r => r.id === result.id);
 
       return (
         <div 
-          key={result.id} 
-          className="bg-surface-elevated hover:bg-secondary transition-all rounded-xl border border-border/30 hover:border-border/50 shadow-card hover:shadow-card-hover overflow-hidden"
+          key={result.id}
+          id={`result-${globalIndex + 1}`}
+          className="bg-surface-elevated hover:bg-secondary transition-all rounded-xl border border-border/30 hover:border-border/50 shadow-card hover:shadow-card-hover overflow-hidden scroll-mt-24"
         >
           <div className="p-5">
             <div className="flex items-start gap-4">
