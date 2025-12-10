@@ -170,25 +170,25 @@ export const SynthesisPanel = ({ synthesis, isSearching, query, results, situati
               <ExecutiveSnapshot results={results} situationRoomMode={situationRoomMode} />
               <ExecutiveSignal synthesis={synthesis} situationRoomMode={situationRoomMode} />
               
-              <div className="prose prose-sm max-w-none dark:prose-invert space-y-4">
+              <div className="prose prose-sm max-w-none dark:prose-invert space-y-4 break-words">
                 <ReactMarkdown
                   components={{
                     h2: ({ children }) => (
                       <div className="mt-6 mb-4 bg-surface-command rounded-xl border border-border/30 overflow-hidden">
                         <div className="px-4 py-3 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
-                          <div className="w-1.5 h-5 bg-primary rounded-full" />
-                          <h2 className="text-sm font-bold text-primary m-0 uppercase tracking-wide">{children}</h2>
+                          <div className="w-1.5 h-5 bg-primary rounded-full shrink-0" />
+                          <h2 className="text-sm font-bold text-primary m-0 uppercase tracking-wide break-words">{children}</h2>
                         </div>
                       </div>
                     ),
                     h3: ({ children }) => (
                       <div className="bg-surface-elevated/50 rounded-lg px-4 py-2.5 mt-4 mb-2 border border-border/20">
-                        <h3 className="text-xs font-semibold text-foreground m-0 uppercase tracking-wide">{children}</h3>
+                        <h3 className="text-xs font-semibold text-foreground m-0 uppercase tracking-wide break-words">{children}</h3>
                       </div>
                     ),
-                    p: ({ children }) => <p className="text-sm text-foreground/90 leading-relaxed mb-3 px-1">{children}</p>,
-                    ul: ({ children }) => <ul className="text-sm space-y-2 mb-4 list-disc pl-6 pr-1">{children}</ul>,
-                    li: ({ children }) => <li className="text-sm text-foreground/90 leading-relaxed">{children}</li>,
+                    p: ({ children }) => <p className="text-sm text-foreground/90 leading-relaxed mb-3 px-1 break-words whitespace-normal">{children}</p>,
+                    ul: ({ children }) => <ul className="text-sm space-y-2 mb-4 list-disc pl-6 pr-1 break-words">{children}</ul>,
+                    li: ({ children }) => <li className="text-sm text-foreground/90 leading-relaxed break-words whitespace-normal">{children}</li>,
                     strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
                   }}
                 >

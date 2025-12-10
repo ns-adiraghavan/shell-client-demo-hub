@@ -100,9 +100,96 @@ const KNOWN_COMPANIES: Record<string, { geography: string; type: string; logoDom
   "santos": { geography: "Australia/APAC", type: "Energy", logoDomain: "santos.com" },
 };
 
+// Canonical display names for companies (proper capitalization and branding)
+const COMPANY_DISPLAY_NAMES: Record<string, string> = {
+  "shell": "Shell",
+  "bp": "BP",
+  "exxonmobil": "ExxonMobil",
+  "exxon": "ExxonMobil",
+  "chevron": "Chevron",
+  "totalenergies": "TotalEnergies",
+  "total": "TotalEnergies",
+  "ongc": "ONGC",
+  "reliance": "Reliance Industries",
+  "reliance industries": "Reliance Industries",
+  "petronas": "PETRONAS",
+  "saudi aramco": "Saudi Aramco",
+  "aramco": "Saudi Aramco",
+  "equinor": "Equinor",
+  "eni": "Eni",
+  "conocophillips": "ConocoPhillips",
+  "marathon petroleum": "Marathon Petroleum",
+  "valero": "Valero",
+  "phillips 66": "Phillips 66",
+  "halliburton": "Halliburton",
+  "schlumberger": "SLB",
+  "slb": "SLB",
+  "baker hughes": "Baker Hughes",
+  "siemens": "Siemens",
+  "siemens energy": "Siemens Energy",
+  "ge": "GE",
+  "general electric": "GE",
+  "ge vernova": "GE Vernova",
+  "schneider electric": "Schneider Electric",
+  "abb": "ABB",
+  "honeywell": "Honeywell",
+  "emerson": "Emerson",
+  "rockwell": "Rockwell Automation",
+  "tesla": "Tesla",
+  "vestas": "Vestas",
+  "orsted": "Ørsted",
+  "iberdrola": "Iberdrola",
+  "enel": "Enel",
+  "engie": "ENGIE",
+  "nexterra": "NextEra Energy",
+  "nextera": "NextEra Energy",
+  "bloom energy": "Bloom Energy",
+  "plug power": "Plug Power",
+  "nel asa": "Nel ASA",
+  "air liquide": "Air Liquide",
+  "linde": "Linde",
+  "catl": "CATL",
+  "lg energy": "LG Energy Solution",
+  "panasonic": "Panasonic",
+  "byd": "BYD",
+  "iocl": "IOCL",
+  "indian oil": "Indian Oil",
+  "bpcl": "BPCL",
+  "bharat petroleum": "Bharat Petroleum",
+  "gail": "GAIL",
+  "adani": "Adani",
+  "adani green": "Adani Green Energy",
+  "tata power": "Tata Power",
+  "ntpc": "NTPC",
+  "sinopec": "Sinopec",
+  "cnpc": "CNPC",
+  "cnooc": "CNOOC",
+  "petrobras": "Petrobras",
+  "repsol": "Repsol",
+  "woodside": "Woodside",
+  "santos": "Santos",
+};
+
+// Map of aliases to canonical company keys for deduplication
+const COMPANY_ALIASES: Record<string, string> = {
+  "exxon": "exxonmobil",
+  "total": "totalenergies",
+  "reliance": "reliance industries",
+  "aramco": "saudi aramco",
+  "slb": "schlumberger",
+  "ge": "general electric",
+  "nextera": "nexterra",
+  "siemens energy": "siemens energy", // Keep separate from siemens
+  "siemens": "siemens",
+  "indian oil": "iocl",
+  "bharat petroleum": "bpcl",
+};
+
 function getCompanyLogo(companyName: string): string {
   const lowerName = companyName.toLowerCase();
-  const companyInfo = KNOWN_COMPANIES[lowerName];
+  // Check canonical name first, then lookup
+  const canonicalKey = COMPANY_ALIASES[lowerName] || lowerName;
+  const companyInfo = KNOWN_COMPANIES[canonicalKey] || KNOWN_COMPANIES[lowerName];
   if (companyInfo?.logoDomain) {
     return `https://logo.clearbit.com/${companyInfo.logoDomain}`;
   }
@@ -115,12 +202,21 @@ function extractCompanies(results: SearchResult[], synthesis: string): CompanySt
   const companies = new Map<string, CompanyStage>();
   const text = `${synthesis} ${results.map(r => `${r.title} ${r.abstract || ''}`).join(' ')}`.toLowerCase();
   
-  // Extract known companies
+  // Extract known companies, using canonical keys to avoid duplicates
   for (const [company, info] of Object.entries(KNOWN_COMPANIES)) {
     if (text.includes(company)) {
+      // Get canonical key for deduplication
+      const canonicalKey = COMPANY_ALIASES[company] || company;
+      
+      // Skip if we already have this company under its canonical name
+      if (companies.has(canonicalKey)) continue;
+      
       const stage = determineStage(text, company);
-      companies.set(company, {
-        name: company.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+      const displayName = COMPANY_DISPLAY_NAMES[company] || 
+        company.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      
+      companies.set(canonicalKey, {
+        name: displayName,
         stage: stage.index,
         stageName: stage.name,
         geography: info.geography,
