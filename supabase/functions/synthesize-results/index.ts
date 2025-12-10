@@ -35,10 +35,12 @@ serve(async (req) => {
     });
 
     // Prepare context from results with dates for chronological narrative
+    // Use the result's index position (1-based) for citation references
     const context = sortedResults.slice(0, 50).map((result: any, idx: number) => {
       const dateInfo = result.date ? `(${result.date})` : '';
-      return `[${idx + 1}] ${result.source} ${dateInfo} - ${result.id}: ${result.title}\n${result.abstract || result.status || 'No abstract'}`;
-    }).join('\n\n');
+      const resultIndex = idx + 1; // 1-based index for citations
+      return `[${resultIndex}] Source: ${result.source} ${dateInfo}\nTitle: ${result.title}\nID: ${result.id}\nAbstract: ${result.abstract || result.status || 'No abstract available'}`;
+    }).join('\n\n---\n\n');
 
     // Create synthesis prompt organized by insight categories
     const systemPrompt = `You are an expert market and competitive intelligence analyst specializing in the oil, natural gas, petrochemical, and energy infrastructure sectors. Your audience is C-suite executives at major energy enterprises (e.g., Shell, ONGC, BP, Chevron, ExxonMobil, Reliance Industries). Your task is to create a comprehensive strategic intelligence brief organized by insight categories.
@@ -58,7 +60,7 @@ INDUSTRY CONTEXT:
 
 REQUIRED SECTIONS - Organize intelligence by these insight categories:
 
-## 🔥 Executive Summary
+## Executive Summary
 A 2-3 sentence overview of the most critical developments and strategic implications for energy sector stakeholders.
 
 ## Business Updates
@@ -115,10 +117,12 @@ Break down key developments by region:
 - Key opportunities and risks for energy sector players
 - Recommended areas for monitoring and strategic action
 
-CITATION RULES:
-- ALWAYS use [number] citations (e.g., [1], [2], [3])
-- Every factual claim MUST have a citation
-- Citations reference the numbered sources provided
+CITATION RULES - CRITICAL:
+- ALWAYS use [number] citations (e.g., [1], [2], [3]) that correspond EXACTLY to the numbered sources provided
+- Citation numbers MUST match the source index numbers provided in the SOURCES section
+- DO NOT invent or hallucinate citation numbers - only cite sources that exist in the provided list
+- If you cannot find a source to support a claim, do not make that claim
+- Every factual claim MUST have a valid citation from the provided sources
 - ALWAYS include the date/time period when referencing a source (e.g., "According to [1] (March 2024)..." or "A January 2025 report [3] indicates...")
 
 NARRATIVE STYLE:
