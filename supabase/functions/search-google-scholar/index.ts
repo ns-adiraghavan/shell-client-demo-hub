@@ -57,7 +57,7 @@ serve(async (req) => {
       console.log('Using Semantic Scholar fallback');
       
       try {
-        const semanticUrl = `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=${maxResults}&fields=paperId,title,abstract,authors,year,url,venue,citationCount`;
+        const semanticUrl = `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=${maxResults}&fields=paperId,title,abstract,authors,year,url,venue,citationCount,externalIds,openAccessPdf`;
         
         const response = await fetch(semanticUrl, {
           headers: {
@@ -67,15 +67,45 @@ serve(async (req) => {
 
         if (response.ok) {
           const data = await response.json();
-          results = (data.data || []).map((paper: any) => ({
-            source: 'Google Scholar',
-            id: paper.paperId || `scholar-${Date.now()}-${Math.random()}`,
-            title: paper.title || 'No title',
-            abstract: paper.abstract || 'Abstract not available',
-            authors: paper.authors?.map((a: any) => a.name).slice(0, 5).join(', ') || 'Unknown',
-            date: paper.year?.toString() || 'Unknown',
-            url: paper.url || `https://www.semanticscholar.org/paper/${paper.paperId}`
-          }));
+          results = (data.data || []).map((paper: any) => {
+            // Prioritize actual publication URLs over intermediary links
+            let publicationUrl = '#';
+            
+            // First priority: Open access PDF or landing page
+            if (paper.openAccessPdf?.url) {
+              publicationUrl = paper.openAccessPdf.url;
+            }
+            // Second priority: DOI link (actual publication)
+            else if (paper.externalIds?.DOI) {
+              publicationUrl = `https://doi.org/${paper.externalIds.DOI}`;
+            }
+            // Third priority: ArXiv link
+            else if (paper.externalIds?.ArXiv) {
+              publicationUrl = `https://arxiv.org/abs/${paper.externalIds.ArXiv}`;
+            }
+            // Fourth priority: PubMed link
+            else if (paper.externalIds?.PubMed) {
+              publicationUrl = `https://pubmed.ncbi.nlm.nih.gov/${paper.externalIds.PubMed}`;
+            }
+            // Fifth priority: Direct URL from paper data
+            else if (paper.url) {
+              publicationUrl = paper.url;
+            }
+            // Last resort: Semantic Scholar page
+            else if (paper.paperId) {
+              publicationUrl = `https://www.semanticscholar.org/paper/${paper.paperId}`;
+            }
+            
+            return {
+              source: 'Google Scholar',
+              id: paper.paperId || `scholar-${Date.now()}-${Math.random()}`,
+              title: paper.title || 'No title',
+              abstract: paper.abstract || 'Abstract not available',
+              authors: paper.authors?.map((a: any) => a.name).slice(0, 5).join(', ') || 'Unknown',
+              date: paper.year?.toString() || 'Unknown',
+              url: publicationUrl
+            };
+          });
         }
       } catch (error) {
         console.error('Semantic Scholar fallback error:', error);
