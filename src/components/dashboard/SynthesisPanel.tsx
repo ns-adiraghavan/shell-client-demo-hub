@@ -11,21 +11,32 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import React from "react";
 
-// Transform text by replacing citation numbers with a single [Source] hover
+// Scroll to a result in the Live Feed
+const scrollToResult = (resultNumber: number) => {
+  const element = document.getElementById(`result-${resultNumber}`);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Add a brief highlight effect
+    element.classList.add('ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-background');
+    setTimeout(() => {
+      element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-background');
+    }, 2000);
+  }
+};
+
+// Transform text by replacing citation numbers with a single [Source] hover/click
 const transformCitations = (text: string, results: SearchResult[]): React.ReactNode[] => {
   // Match all citation patterns like [1], [2], [1, 2], [1][2] etc.
   const citationPattern = /\s*\[[\d,\s]+\](?:\s*\[[\d,\s]+\])*/g;
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match;
-  let allNumbers: number[] = [];
 
-  // First pass: collect all citation numbers
+  // First pass: collect all citation matches
   const matches: { index: number; length: number; numbers: number[] }[] = [];
   while ((match = citationPattern.exec(text)) !== null) {
     const numbers = match[0].match(/\d+/g)?.map(n => parseInt(n, 10)) || [];
     matches.push({ index: match.index, length: match[0].length, numbers });
-    allNumbers.push(...numbers);
   }
 
   if (matches.length === 0) {
@@ -40,25 +51,42 @@ const transformCitations = (text: string, results: SearchResult[]): React.ReactN
     }
 
     // Build tooltip content for this specific citation group
-    const sourceInfo = m.numbers.map(num => {
+    const sourceItems = m.numbers.map(num => {
       const result = results[num - 1];
       if (result) {
         const shortTitle = result.title.length > 50 ? result.title.slice(0, 50) + '...' : result.title;
-        return `[${num}] ${shortTitle}`;
+        return { num, title: shortTitle };
       }
-      return `[${num}] Source`;
-    }).join('\n');
+      return { num, title: 'Source' };
+    });
 
     parts.push(
       <Tooltip key={`citation-${i}`}>
         <TooltipTrigger asChild>
-          <span className="text-primary/70 text-xs cursor-help hover:text-primary transition-colors">
+          <span 
+            className="text-primary cursor-pointer hover:text-primary/80 hover:underline transition-colors ml-1"
+            onClick={() => {
+              if (m.numbers.length > 0) {
+                scrollToResult(m.numbers[0]);
+              }
+            }}
+          >
             [Source]
           </span>
         </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-sm text-xs whitespace-pre-line bg-surface-elevated border-border/50 p-3">
-          <div className="font-medium text-primary mb-1">Referenced Sources:</div>
-          {sourceInfo}
+        <TooltipContent side="top" className="max-w-sm bg-surface-elevated border-border/50 p-3">
+          <div className="font-medium text-primary mb-2 text-sm">Referenced Sources:</div>
+          <div className="space-y-1.5">
+            {sourceItems.map(item => (
+              <div 
+                key={item.num}
+                className="text-sm text-foreground/90 cursor-pointer hover:text-primary transition-colors"
+                onClick={() => scrollToResult(item.num)}
+              >
+                <span className="font-medium text-primary">[{item.num}]</span> {item.title}
+              </div>
+            ))}
+          </div>
         </TooltipContent>
       </Tooltip>
     );
