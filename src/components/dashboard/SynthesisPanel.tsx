@@ -11,58 +11,67 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import React from "react";
 
-// Transform text with citations like [1], [2] into hover links on the last word
+// Transform text by replacing citation numbers with a single [Source] hover
 const transformCitations = (text: string, results: SearchResult[]): React.ReactNode[] => {
-  // Match patterns like "word [1]" or "word [1, 2]" or "word [1][2]"
-  const citationPattern = /(\S+)\s*(\[[\d,\s]+\](?:\s*\[[\d,\s]+\])*)/g;
+  // Match all citation patterns like [1], [2], [1, 2], [1][2] etc.
+  const citationPattern = /\s*\[[\d,\s]+\](?:\s*\[[\d,\s]+\])*/g;
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match;
+  let allNumbers: number[] = [];
 
+  // First pass: collect all citation numbers
+  const matches: { index: number; length: number; numbers: number[] }[] = [];
   while ((match = citationPattern.exec(text)) !== null) {
-    // Add text before the match
-    if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index));
+    const numbers = match[0].match(/\d+/g)?.map(n => parseInt(n, 10)) || [];
+    matches.push({ index: match.index, length: match[0].length, numbers });
+    allNumbers.push(...numbers);
+  }
+
+  if (matches.length === 0) {
+    return [text];
+  }
+
+  // Build the text with [Source] replacements
+  matches.forEach((m, i) => {
+    // Add text before this citation
+    if (m.index > lastIndex) {
+      parts.push(text.slice(lastIndex, m.index));
     }
 
-    const word = match[1];
-    const citationsText = match[2];
-    
-    // Extract all citation numbers
-    const numbers = citationsText.match(/\d+/g)?.map(n => parseInt(n, 10)) || [];
-    
-    // Build tooltip content with source titles
-    const sourceInfo = numbers.map(num => {
-      const result = results[num - 1]; // 1-based indexing
+    // Build tooltip content for this specific citation group
+    const sourceInfo = m.numbers.map(num => {
+      const result = results[num - 1];
       if (result) {
-        const shortTitle = result.title.length > 60 ? result.title.slice(0, 60) + '...' : result.title;
+        const shortTitle = result.title.length > 50 ? result.title.slice(0, 50) + '...' : result.title;
         return `[${num}] ${shortTitle}`;
       }
       return `[${num}] Source`;
     }).join('\n');
 
     parts.push(
-      <Tooltip key={match.index}>
+      <Tooltip key={`citation-${i}`}>
         <TooltipTrigger asChild>
-          <span className="text-primary underline decoration-dotted underline-offset-2 cursor-help hover:text-primary/80 transition-colors">
-            {word}
+          <span className="text-primary/70 text-xs cursor-help hover:text-primary transition-colors">
+            [Source]
           </span>
         </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-xs text-xs whitespace-pre-line bg-surface-elevated border-border/50">
+        <TooltipContent side="top" className="max-w-sm text-xs whitespace-pre-line bg-surface-elevated border-border/50 p-3">
+          <div className="font-medium text-primary mb-1">Referenced Sources:</div>
           {sourceInfo}
         </TooltipContent>
       </Tooltip>
     );
 
-    lastIndex = match.index + match[0].length;
-  }
+    lastIndex = m.index + m.length;
+  });
 
   // Add remaining text
   if (lastIndex < text.length) {
     parts.push(text.slice(lastIndex));
   }
 
-  return parts.length > 0 ? parts : [text];
+  return parts;
 };
 
 // Custom text renderer that applies citation transformation
