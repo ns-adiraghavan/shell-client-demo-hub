@@ -36,7 +36,7 @@ export const exportToBibTeX = (results: SearchResult[], query: string) => {
   }).join('\n\n');
 
   const content = `% BibTeX Bibliography\n% Query: ${query}\n% Generated: ${new Date().toLocaleDateString()}\n\n${bibEntries}`;
-  downloadFile(content, `pharmaai-bibliography-${query.replace(/\s+/g, '-')}-${Date.now()}.bib`, 'text/plain');
+  downloadFile(content, `innovationengine-bibliography-${query.replace(/\s+/g, '-')}-${Date.now()}.bib`, 'text/plain');
 };
 
 export const exportToRIS = (results: SearchResult[], query: string) => {
@@ -66,8 +66,8 @@ export const exportToRIS = (results: SearchResult[], query: string) => {
     return entry;
   }).join('\n');
 
-  const content = `Provider: PharmaAI\nDatabase: Multi-source Research Database\nContent: text/plain; charset="utf-8"\n\n${risEntries}`;
-  downloadFile(content, `pharmaai-bibliography-${query.replace(/\s+/g, '-')}-${Date.now()}.ris`, 'application/x-research-info-systems');
+  const content = `Provider: Innovation Insights Engine\nDatabase: Multi-source Research Database\nContent: text/plain; charset="utf-8"\n\n${risEntries}`;
+  downloadFile(content, `innovationengine-bibliography-${query.replace(/\s+/g, '-')}-${Date.now()}.ris`, 'application/x-research-info-systems');
 };
 
 export const exportToEndNote = (results: SearchResult[], query: string) => {
@@ -97,7 +97,7 @@ export const exportToEndNote = (results: SearchResult[], query: string) => {
   }).join('\n\n');
 
   const content = endNoteEntries;
-  downloadFile(content, `pharmaai-bibliography-${query.replace(/\s+/g, '-')}-${Date.now()}.enw`, 'text/plain');
+  downloadFile(content, `innovationengine-bibliography-${query.replace(/\s+/g, '-')}-${Date.now()}.enw`, 'text/plain');
 };
 
 const downloadFile = (content: string, filename: string, mimeType: string) => {
@@ -131,7 +131,7 @@ export const exportToCSV = (results: SearchResult[], query: string) => {
   });
 
   const csvContent = csvRows.join('\n');
-  downloadFile(csvContent, `pharmaai-results-${query.replace(/\s+/g, '-')}-${Date.now()}.csv`, 'text/csv');
+  downloadFile(csvContent, `innovationengine-results-${query.replace(/\s+/g, '-')}-${Date.now()}.csv`, 'text/csv');
 };
 
 // Convert markdown to formatted HTML for export
