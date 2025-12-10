@@ -58,64 +58,65 @@ serve(async (req) => {
     // Configure prompts based on mode
     switch (mode) {
       case 'summarize':
-        systemPrompt = `You are a research assistant specializing in biomedical and pharmaceutical research analysis. Provide a comprehensive, well-structured summary using clear markdown formatting.${documentContext}
+        systemPrompt = `You are a research assistant specializing in energy industry analysis, including oil & gas, petrochemicals, refining, LNG, and energy infrastructure. Your audience is C-suite executives at major energy enterprises. Provide a comprehensive, well-structured summary using clear markdown formatting.${documentContext}
 
 Format your response using:
 - Clear section headers (##)
 - Bullet points for key items
 - Bold text for emphasis on important terms
-- Numbered lists for sequential information`;
+- Numbered lists for sequential information
+- Industry-standard terminology (upstream, downstream, E&P, FID, etc.)`;
         
         userPrompt = documentId && documentId !== 'all'
-          ? `Please provide a detailed summary of the document "${documentNames[0] || 'selected document'}". Include: main objectives, methodology, key findings, conclusions, and implications.`
-          : 'Please provide a comprehensive summary synthesizing all uploaded research documents. Identify common themes, methodologies, and key findings across the papers.';
+          ? `Please provide a detailed summary of the document "${documentNames[0] || 'selected document'}". Include: main objectives, methodology, key findings, conclusions, and strategic implications for energy sector stakeholders.`
+          : 'Please provide a comprehensive summary synthesizing all uploaded documents. Identify common themes, technologies, market dynamics, and key findings relevant to oil/gas/petrochemical industry executives.';
         break;
 
       case 'key-findings':
-        systemPrompt = `You are a research assistant specializing in extracting and synthesizing key findings from biomedical research. Present findings in a clear, structured format using markdown.${documentContext}
+        systemPrompt = `You are a research assistant specializing in extracting and synthesizing key findings from energy industry research, technical reports, and market analyses. Present findings in a clear, structured format using markdown.${documentContext}
 
 Format your response using:
 - Numbered or bullet lists for findings
 - Bold text for key discoveries
-- Clear categorization of findings by type`;
+- Clear categorization of findings by type (technical, commercial, regulatory, etc.)`;
         
         userPrompt = documentId && documentId !== 'all'
-          ? `Extract and list the key findings from "${documentNames[0] || 'the selected document'}". Focus on: main discoveries, statistical significance, novel contributions, and practical implications.`
-          : 'Extract and synthesize key findings across all research documents. Identify patterns, contradictions, and consensus findings.';
+          ? `Extract and list the key findings from "${documentNames[0] || 'the selected document'}". Focus on: main discoveries, technology advancements, market implications, and practical applications for energy sector operations.`
+          : 'Extract and synthesize key findings across all documents. Identify patterns, technology trends, market dynamics, and consensus findings relevant to oil/gas/petrochemical industry stakeholders.';
         break;
 
       case 'compare':
         if (!documentIds || documentIds.length < 2) {
           throw new Error('At least 2 documents required for comparison');
         }
-        systemPrompt = `You are a research analyst performing comparative analysis of biomedical research papers. Provide detailed, structured comparisons using clear markdown formatting.${documentContext}
+        systemPrompt = `You are a research analyst performing comparative analysis of energy industry documents, technical reports, and market studies. Provide detailed, structured comparisons using clear markdown formatting.${documentContext}
 
 Structure your analysis with clear sections:
-## Research Objectives Comparison
-## Methodology Comparison  
+## Research/Report Objectives Comparison
+## Methodology & Data Sources Comparison  
 ## Key Findings Comparison
-## Conclusions & Implications
-## Strengths & Limitations
+## Market & Strategic Implications
+## Technology Readiness & Commercial Applicability
 
 Use tables where appropriate, bullet points for clarity, and bold text for emphasis.`;
         
-        userPrompt = `Perform a detailed comparative analysis of these ${documentNames.length} research documents: ${documentNames.join(', ')}. 
+        userPrompt = `Perform a detailed comparative analysis of these ${documentNames.length} documents: ${documentNames.join(', ')}. 
 
 Compare their:
-1. Research objectives and hypotheses
-2. Methodological approaches and study designs
+1. Research objectives and scope
+2. Methodological approaches and data sources
 3. Key findings and results
-4. Conclusions and implications
-5. Relative strengths and limitations
+4. Market and strategic implications for energy sector
+5. Technology readiness levels and commercial applicability
 
-Highlight key similarities, differences, and complementary insights.`;
+Highlight key similarities, differences, and complementary insights for energy industry decision-makers.`;
         break;
 
       case 'meta-analysis':
         if (!documentIds || documentIds.length < 2) {
           throw new Error('At least 2 documents required for meta-analysis');
         }
-        systemPrompt = `You are a senior research meta-analyst specializing in biomedical and pharmaceutical research synthesis. Generate comprehensive meta-analysis reports with proper academic structure and formatting.${documentContext}
+        systemPrompt = `You are a senior research analyst specializing in energy industry synthesis, including oil & gas, petrochemicals, LNG, and energy infrastructure. Generate comprehensive meta-analysis reports with proper structure and formatting for executive audiences.${documentContext}
 
 Use proper markdown formatting throughout:
 - ## for main sections
@@ -124,46 +125,47 @@ Use proper markdown formatting throughout:
 - Bold and italic for emphasis
 - Tables where data comparison is needed`;
         
-        userPrompt = `Generate a comprehensive meta-analysis report for these ${documentNames.length} research documents: ${documentNames.join(', ')}.
+        userPrompt = `Generate a comprehensive meta-analysis report for these ${documentNames.length} documents: ${documentNames.join(', ')}.
 
 Structure the report as follows:
 
 ## Executive Summary
-High-level overview of the collective research body
+High-level overview of the collective research body and strategic implications for energy sector
 
 ## Research Overview
-- Number of studies analyzed
-- Research timeframe and contexts
-- Primary research domains and themes
+- Number of studies/reports analyzed
+- Research timeframe and geographic contexts
+- Primary domains (upstream, downstream, midstream, energy transition, etc.)
 
 ## Methodology Analysis
 - Common methodological approaches
-- Sample sizes and study designs
-- Data collection methods
+- Data sources and study designs
+- Technical parameters analyzed
 
 ## Key Findings Synthesis
 - Convergent findings across studies
 - Divergent or conflicting results
-- Statistical significance patterns
-- Effect sizes and outcomes
+- Technology readiness assessments
+- Market dynamics and commercial viability
 
 ## Trends and Patterns
-- Temporal trends
-- Geographical or contextual patterns
-- Evolution of findings
+- Temporal trends in technology/market development
+- Regional/geographic patterns
+- Evolution of industry practices
 
-## Limitations and Gaps
-- Common limitations
+## Gaps and Opportunities
 - Research gaps identified
 - Areas requiring further investigation
+- Market opportunities for energy companies
 
-## Practical Implications
-- Real-world applications
-- Recommendations for practitioners
-- Policy implications
+## Strategic Implications
+- Implications for oil/gas/petrochemical operations
+- Recommendations for energy executives
+- Competitive positioning considerations
+- Investment and partnership opportunities
 
 ## Conclusion
-Overall contribution of this body of research`;
+Overall contribution and strategic takeaways for energy industry stakeholders`;
         break;
 
       case 'chat':
@@ -171,7 +173,7 @@ Overall contribution of this body of research`;
         if (!message) {
           throw new Error('Message is required for chat mode');
         }
-        systemPrompt = `You are a helpful research assistant specializing in biomedical and pharmaceutical research. Answer questions clearly and cite relevant information when possible. Use markdown formatting for clarity.${documentContext}`;
+        systemPrompt = `You are a helpful research assistant specializing in energy industry analysis, including oil & gas, petrochemicals, refining, LNG, pipelines, and energy infrastructure. Your audience is executives at major energy enterprises. Answer questions clearly and cite relevant information when possible. Use markdown formatting for clarity and industry-standard terminology.${documentContext}`;
         userPrompt = message;
         break;
     }

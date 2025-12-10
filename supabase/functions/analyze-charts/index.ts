@@ -32,23 +32,26 @@ serve(async (req) => {
       `[${i + 1}] ${r.source} (${r.date || 'N/A'}): ${r.title}`
     ).join('\n') || '';
 
-    const systemPrompt = `You are a pharmaceutical industry analyst and competitive intelligence expert. Analyze the provided visualization data and provide strategic insights.
+    const systemPrompt = `You are an energy industry analyst and competitive intelligence expert specializing in oil, natural gas, petrochemicals, and energy infrastructure. Your audience is C-suite executives at major energy enterprises. Analyze the provided visualization data and provide strategic insights.
 
 ANALYSIS STRUCTURE:
-1. **Research Momentum Analysis**: Interpret publication trends - accelerating/decelerating research activity, key inflection points
-2. **Development Stage Assessment**: Based on source distribution (patents vs trials vs papers), determine:
-   - Early research phase (mostly papers/preprints)
-   - Pre-clinical/IP building phase (increasing patents)
-   - Clinical development (trial activity)
-   - Commercialization stage (news, regulatory filings)
-3. **Competitive Landscape Signals**: What the data distribution reveals about competition
+1. **Innovation & Research Momentum**: Interpret publication and patent trends - accelerating/decelerating R&D activity, key inflection points in technology development
+2. **Development Stage Assessment**: Based on source distribution (patents vs academic papers vs news), determine:
+   - Early research phase (mostly academic papers, university research)
+   - Technology development phase (increasing patents, pilot projects)
+   - Commercial deployment (news coverage, project announcements, partnerships)
+   - Mature/scaling phase (multiple commercial projects, industry-wide adoption)
+3. **Competitive Landscape Signals**: What the data distribution reveals about:
+   - Which companies/NOCs/IOCs are leading
+   - Technology provider positioning
+   - Regional concentration of activity
 4. **Market & Commercial Insights**: 
-   - Patent activity indicating IP strategies
-   - Trial phases suggesting timeline to market
-   - News coverage indicating commercial momentum
-5. **Key Highlights**: 2-3 most significant recent developments with commercial implications
+   - Patent activity indicating IP strategies and technology leadership
+   - Project announcements suggesting capital deployment priorities
+   - News coverage indicating commercial momentum and market interest
+5. **Key Highlights**: 2-3 most significant recent developments with strategic implications for energy sector players
 
-Be specific, data-driven, and highlight actionable intelligence. Use bullet points for clarity.`;
+Be specific, data-driven, and highlight actionable intelligence for energy executives. Use bullet points for clarity.`;
 
     const userPrompt = `Analyze these visualization metrics for "${query}":
 
@@ -58,17 +61,17 @@ ${JSON.stringify(chartData.publicationTrend, null, 2)}
 SOURCE DISTRIBUTION:
 ${JSON.stringify(chartData.sourceBreakdown, null, 2)}
 
-CLINICAL TRIAL PHASES:
+PROJECT/STUDY TYPE DISTRIBUTION:
 ${JSON.stringify(chartData.studyTypeDistribution, null, 2)}
 
 RECENT KEY RESULTS:
 ${recentResults}
 
-Provide strategic interpretation focusing on:
-- What stage is this therapeutic/technology at?
-- Is momentum building or waning?
-- What do the sources tell us about competitive positioning?
-- Highlight 2-3 commercially significant recent developments`;
+Provide strategic interpretation for energy industry executives focusing on:
+- What stage is this technology/sector at in terms of commercial readiness?
+- Is innovation momentum building or waning?
+- What do the sources tell us about competitive positioning in the energy sector?
+- Highlight 2-3 commercially significant recent developments for oil/gas/petrochemical stakeholders`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
