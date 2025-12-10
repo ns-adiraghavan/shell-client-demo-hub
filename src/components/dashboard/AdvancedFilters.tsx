@@ -2,7 +2,8 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Calendar, Info } from "lucide-react";
 
 export interface AdvancedFilterOptions {
   dateFrom: string;
@@ -72,7 +73,24 @@ export const AdvancedFilters = ({ filters, setFilters }: AdvancedFiltersProps) =
 
         {/* Market Impact Score */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">Minimum Market Impact Score</Label>
+          <Label className="text-sm font-medium text-foreground flex items-center gap-1.5">
+            Minimum Market Impact Score
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help hover:text-foreground transition-colors" />
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs text-xs">
+                  <p className="font-medium mb-1">Market Impact Score (0-10)</p>
+                  <p className="text-muted-foreground">
+                    AI-calculated score based on: source credibility, entity prominence, 
+                    commercial relevance, geographic reach, and recency. Higher scores 
+                    indicate stronger market signals for strategic decision-making.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </Label>
           <Input
             type="number"
             min="0"
