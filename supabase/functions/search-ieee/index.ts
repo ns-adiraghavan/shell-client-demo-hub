@@ -5,6 +5,22 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper function to reconstruct abstract from OpenAlex inverted index
+function reconstructAbstract(invertedIndex: Record<string, number[]>): string {
+  if (!invertedIndex) return '';
+  
+  const positions: [number, string][] = [];
+  for (const [word, indices] of Object.entries(invertedIndex)) {
+    for (const index of indices) {
+      positions.push([index, word]);
+    }
+  }
+  
+  positions.sort((a, b) => a[0] - b[0]);
+  const text = positions.map(p => p[1]).join(' ');
+  return text.length > 600 ? text.slice(0, 600) + '...' : text;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -23,7 +39,6 @@ serve(async (req) => {
     console.log(`Searching IEEE Xplore for: ${query}, max results: ${maxResults}`);
 
     // IEEE Xplore API - using the open access endpoint
-    // Note: For production, you'd want to use the official API with an API key
     const searchUrl = `https://ieeexploreapi.ieee.org/api/v1/search/articles?querytext=${encodeURIComponent(query)}&max_records=${maxResults}&start_record=1&sort_order=desc&sort_field=publication_date`;
     
     const apiKey = Deno.env.get('IEEE_API_KEY');
@@ -43,10 +58,8 @@ serve(async (req) => {
         if (response.ok) {
           const data = await response.json();
           results = (data.articles || []).map((article: any) => {
-            // Format date consistently as YYYY-MM-DD
             let dateStr = 'Unknown';
             if (article.publication_date) {
-              // publication_date might be "YYYYMMDD" or "YYYY-MM-DD" or other formats
               const pubDate = article.publication_date.replace(/\D/g, '');
               if (pubDate.length >= 8) {
                 dateStr = `${pubDate.slice(0, 4)}-${pubDate.slice(4, 6)}-${pubDate.slice(6, 8)}`;
@@ -57,7 +70,6 @@ serve(async (req) => {
               dateStr = `${article.publication_year}-01-01`;
             }
             
-            // Extract author affiliations for institutional context
             const authorsWithAffiliations = article.authors?.authors?.map((a: any) => {
               const name = a.full_name || 'Unknown';
               const affiliation = a.affiliation || a.org || '';
@@ -80,7 +92,63 @@ serve(async (req) => {
       }
     }
     
-    // Fallback: Use CrossRef API to find IEEE publications
+    // Primary fallback: Use OpenAlex API (better abstract coverage)
+    if (results.length === 0) {
+      console.log('Using OpenAlex fallback for IEEE publications');
+      
+      // Filter for IEEE publisher (member ID or publisher name)
+      const openAlexUrl = `https://api.openalex.org/works?search=${encodeURIComponent(query)}&filter=primary_location.source.publisher:IEEE&per-page=${maxResults}&sort=publication_date:desc`;
+      
+      try {
+        const response = await fetch(openAlexUrl, {
+          headers: {
+            'User-Agent': 'mailto:research@innovationinsights.com'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          results = (data.results || []).map((work: any) => {
+            // Extract date
+            let dateStr = 'Unknown';
+            if (work.publication_date) {
+              dateStr = work.publication_date;
+            } else if (work.publication_year) {
+              dateStr = `${work.publication_year}-01-01`;
+            }
+            
+            // Extract abstract - OpenAlex uses inverted index
+            let abstractText = '';
+            if (work.abstract_inverted_index) {
+              abstractText = reconstructAbstract(work.abstract_inverted_index);
+            }
+            
+            // Extract authors with affiliations
+            const authorsWithAffiliations = work.authorships?.map((a: any) => {
+              const name = a.author?.display_name || 'Unknown';
+              const institution = a.institutions?.[0]?.display_name || '';
+              return institution ? `${name} (${institution})` : name;
+            }).slice(0, 5).join(', ') || 'Unknown';
+            
+            return {
+              source: 'IEEE',
+              id: work.id?.replace('https://openalex.org/', '') || `ieee-${Date.now()}-${Math.random()}`,
+              title: work.title || 'No title',
+              abstract: abstractText || 'Abstract not available',
+              authors: authorsWithAffiliations,
+              date: dateStr,
+              url: work.primary_location?.landing_page_url || (work.doi ? `https://doi.org/${work.doi}` : '#')
+            };
+          });
+          
+          console.log(`OpenAlex returned ${results.length} IEEE results`);
+        }
+      } catch (error) {
+        console.error('OpenAlex fallback error:', error);
+      }
+    }
+    
+    // Secondary fallback: Use CrossRef API
     if (results.length === 0) {
       console.log('Using CrossRef fallback for IEEE publications');
       
@@ -96,8 +164,7 @@ serve(async (req) => {
         if (response.ok) {
           const data = await response.json();
           results = (data.message?.items || []).map((item: any) => {
-            // Parse date-parts array properly: [year, month, day] or [year, month] or [year]
-            // Prioritize 'published-online' or 'deposited' for actual publication date over print date
+            // Parse date-parts array properly
             let dateStr = 'Unknown';
             const dateParts = item['published-online']?.['date-parts']?.[0] || 
                               item.deposited?.['date-parts']?.[0] || 
@@ -115,11 +182,11 @@ serve(async (req) => {
             }
             
             // Extract abstract from multiple possible fields
-            let abstractText = 'Abstract not available';
+            let abstractText = '';
             if (item.abstract) {
-              abstractText = item.abstract.replace(/<[^>]*>/g, '');
+              abstractText = item.abstract.replace(/<[^>]*>/g, '').trim();
             } else if (item.description) {
-              abstractText = item.description.replace(/<[^>]*>/g, '');
+              abstractText = item.description.replace(/<[^>]*>/g, '').trim();
             } else if (item.subtitle && item.subtitle.length > 0) {
               abstractText = Array.isArray(item.subtitle) ? item.subtitle.join(' ') : item.subtitle;
             }
@@ -135,7 +202,7 @@ serve(async (req) => {
               source: 'IEEE',
               id: item.DOI || `ieee-${Date.now()}-${Math.random()}`,
               title: Array.isArray(item.title) ? item.title[0] : (item.title || 'No title'),
-              abstract: abstractText,
+              abstract: abstractText || 'Abstract not available',
               authors: authorsWithAffiliations,
               date: dateStr,
               url: item.URL || `https://doi.org/${item.DOI}`

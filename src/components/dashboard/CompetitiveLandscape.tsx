@@ -448,19 +448,28 @@ export const CompetitiveLandscape = ({ results, synthesis, situationRoomMode = f
               <span className={cn("font-medium", situationRoomMode ? "text-base" : "text-sm")}>Geographic Distribution</span>
             </div>
             <div className={cn("flex flex-wrap gap-2", situationRoomMode && "gap-3")}>
-              {Array.from(geographies.entries()).map(([geo, geoCompanies]) => (
-                <Badge 
-                  key={geo} 
-                  variant="secondary" 
-                  className={cn("flex items-center gap-1", situationRoomMode && "text-sm py-1")}
-                  style={{ borderLeftColor: getGeographyColor(geo), borderLeftWidth: '3px' }}
-                >
-                  {geo}
-                  <span className="bg-primary/20 text-primary px-1.5 rounded-full text-xs">
-                    {geoCompanies.length}
-                  </span>
-                </Badge>
-              ))}
+              {Array.from(geographies.entries()).map(([geo, geoCompanies]) => {
+                const geoColor = getGeographyColor(geo);
+                return (
+                  <Badge 
+                    key={geo} 
+                    variant="secondary" 
+                    className={cn("flex items-center gap-2 pr-2", situationRoomMode && "text-sm py-1")}
+                  >
+                    <div 
+                      className={cn("rounded-full", situationRoomMode ? "w-3 h-3" : "w-2.5 h-2.5")}
+                      style={{ backgroundColor: geoColor }}
+                    />
+                    {geo}
+                    <span 
+                      className="px-1.5 rounded-full text-xs font-semibold"
+                      style={{ backgroundColor: `${geoColor}33`, color: geoColor }}
+                    >
+                      {geoCompanies.length}
+                    </span>
+                  </Badge>
+                );
+              })}
             </div>
           </div>
         </CardContent>
