@@ -57,12 +57,19 @@ serve(async (req) => {
               dateStr = `${article.publication_year}-01-01`;
             }
             
+            // Extract author affiliations for institutional context
+            const authorsWithAffiliations = article.authors?.authors?.map((a: any) => {
+              const name = a.full_name || 'Unknown';
+              const affiliation = a.affiliation || a.org || '';
+              return affiliation ? `${name} (${affiliation})` : name;
+            }).join(', ') || 'Unknown';
+            
             return {
               source: 'IEEE',
               id: article.article_number || article.doi || `ieee-${Date.now()}-${Math.random()}`,
               title: article.title || 'No title',
               abstract: article.abstract || 'Abstract not available',
-              authors: article.authors?.authors?.map((a: any) => a.full_name).join(', ') || 'Unknown',
+              authors: authorsWithAffiliations,
               date: dateStr,
               url: article.html_url || `https://ieeexplore.ieee.org/document/${article.article_number}`
             };
@@ -90,8 +97,12 @@ serve(async (req) => {
           const data = await response.json();
           results = (data.message?.items || []).map((item: any) => {
             // Parse date-parts array properly: [year, month, day] or [year, month] or [year]
+            // Prioritize 'published-online' or 'deposited' for actual publication date over print date
             let dateStr = 'Unknown';
-            const dateParts = item.published?.['date-parts']?.[0] || item.created?.['date-parts']?.[0];
+            const dateParts = item['published-online']?.['date-parts']?.[0] || 
+                              item.deposited?.['date-parts']?.[0] || 
+                              item.published?.['date-parts']?.[0] || 
+                              item.created?.['date-parts']?.[0];
             if (dateParts && Array.isArray(dateParts)) {
               const [year, month, day] = dateParts;
               if (year && month && day) {
@@ -113,12 +124,19 @@ serve(async (req) => {
               abstractText = Array.isArray(item.subtitle) ? item.subtitle.join(' ') : item.subtitle;
             }
             
+            // Extract authors with affiliations where available
+            const authorsWithAffiliations = item.author?.map((a: any) => {
+              const name = `${a.given || ''} ${a.family || ''}`.trim();
+              const affiliation = a.affiliation?.[0]?.name || '';
+              return affiliation ? `${name} (${affiliation})` : name;
+            }).slice(0, 5).join(', ') || 'Unknown';
+            
             return {
               source: 'IEEE',
               id: item.DOI || `ieee-${Date.now()}-${Math.random()}`,
               title: Array.isArray(item.title) ? item.title[0] : (item.title || 'No title'),
               abstract: abstractText,
-              authors: item.author?.map((a: any) => `${a.given || ''} ${a.family || ''}`).slice(0, 5).join(', ') || 'Unknown',
+              authors: authorsWithAffiliations,
               date: dateStr,
               url: item.URL || `https://doi.org/${item.DOI}`
             };

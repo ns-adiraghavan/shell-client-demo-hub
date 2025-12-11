@@ -159,13 +159,17 @@ Break down key developments by region:
 - Key opportunities and risks for energy sector players
 - Recommended areas for monitoring and strategic action
 
-CITATION RULES - CRITICAL:
-- ALWAYS use [number] citations (e.g., [1], [2], [3]) that correspond EXACTLY to the numbered sources provided
-- Citation numbers MUST match the source index numbers provided in the SOURCES section
-- DO NOT invent or hallucinate citation numbers - only cite sources that exist in the provided list
-- If you cannot find a source to support a claim, do not make that claim
-- Every factual claim MUST have a valid citation from the provided sources
+CITATION RULES - CRITICAL (ZERO HALLUCINATION TOLERANCE):
+- ONLY cite sources that exist in the provided SOURCES list - verify each citation number exists before using it
+- Citation numbers [1], [2], etc. MUST match EXACTLY the index numbers in the SOURCES section
+- DO NOT invent, fabricate, or hallucinate ANY citation numbers, source titles, or content
+- If the SOURCES list has 20 items, you can ONLY use citations [1] through [20]
+- If you cannot find a source to support a claim, DO NOT make that claim - omit it entirely
+- NEVER extrapolate or assume information not explicitly stated in the provided sources
+- Cross-reference: Before finalizing, verify EVERY citation number corresponds to a real source
 - ALWAYS include the date/time period when referencing a source (e.g., "According to [1] (March 2024)..." or "A January 2025 report [3] indicates...")
+- For patents: ALWAYS state the applicant/assignee organization from the Authors/Applicants field
+- For publications: ALWAYS include institutional affiliations from the Authors/Applicants field (shown in parentheses)
 
 NARRATIVE STYLE:
 - Write for C-suite executives and strategy teams at energy companies
