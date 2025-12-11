@@ -25,7 +25,7 @@ export const AdvancedFilters = ({ filters, setFilters }: AdvancedFiltersProps) =
         {/* Date Range */}
         <div className="space-y-2">
           <Label className="text-sm font-medium flex items-center gap-2 text-foreground">
-            <Calendar className="h-4 w-4 text-foreground" />
+            <Calendar className="h-4 w-4 text-white" />
             Date From
           </Label>
           <Input
@@ -39,7 +39,7 @@ export const AdvancedFilters = ({ filters, setFilters }: AdvancedFiltersProps) =
 
         <div className="space-y-2">
           <Label className="text-sm font-medium flex items-center gap-2 text-foreground">
-            <Calendar className="h-4 w-4 text-foreground" />
+            <Calendar className="h-4 w-4 text-white" />
             Date To
           </Label>
           <Input
