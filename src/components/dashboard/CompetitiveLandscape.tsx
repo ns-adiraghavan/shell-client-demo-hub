@@ -19,15 +19,27 @@ interface CompanyStage {
   type: string;
 }
 
+// Distinct color palette matching market momentum/source mix charts
+const STAGE_COLORS = {
+  research: "hsl(25 95% 53%)",      // burnt orange
+  development: "hsl(200 95% 45%)",  // bright blue
+  pilot: "hsl(145 70% 42%)",        // teal/green
+  production: "hsl(280 75% 55%)",   // purple
+  scaling: "hsl(340 80% 55%)",      // pink/magenta
+  regulatory: "hsl(45 90% 50%)",    // golden yellow
+  partnership: "hsl(180 60% 45%)",  // cyan
+  commercial: "hsl(120 50% 45%)",   // green
+};
+
 const STAGES = [
-  { name: "Research", icon: FlaskConical, color: "bg-chart-1" },
-  { name: "Development", icon: Lightbulb, color: "bg-chart-2" },
-  { name: "Pilot", icon: Rocket, color: "bg-chart-3" },
-  { name: "Production", icon: Factory, color: "bg-chart-4" },
-  { name: "Scaling", icon: Zap, color: "bg-chart-5" },
-  { name: "Regulatory", icon: FileText, color: "bg-primary" },
-  { name: "Partnership", icon: Handshake, color: "bg-accent" },
-  { name: "Commercial", icon: ShoppingCart, color: "bg-success" },
+  { name: "Research", icon: FlaskConical, color: STAGE_COLORS.research },
+  { name: "Development", icon: Lightbulb, color: STAGE_COLORS.development },
+  { name: "Pilot", icon: Rocket, color: STAGE_COLORS.pilot },
+  { name: "Production", icon: Factory, color: STAGE_COLORS.production },
+  { name: "Scaling", icon: Zap, color: STAGE_COLORS.scaling },
+  { name: "Regulatory", icon: FileText, color: STAGE_COLORS.regulatory },
+  { name: "Partnership", icon: Handshake, color: STAGE_COLORS.partnership },
+  { name: "Commercial", icon: ShoppingCart, color: STAGE_COLORS.commercial },
 ];
 
 // Known energy and infrastructure companies with their typical focus areas and logo domains
@@ -294,7 +306,10 @@ export const CompetitiveLandscape = ({ results, synthesis, situationRoomMode = f
         <div className={cn("flex flex-wrap gap-2 pb-4 border-b border-border/30", situationRoomMode && "gap-3")}>
           {STAGES.map((stage, idx) => (
             <div key={stage.name} className={cn("flex items-center gap-1", situationRoomMode ? "text-sm" : "text-xs")}>
-              <div className={cn("rounded-full", stage.color, situationRoomMode ? "w-4 h-4" : "w-3 h-3")} />
+              <div 
+                className={cn("rounded-full", situationRoomMode ? "w-4 h-4" : "w-3 h-3")} 
+                style={{ backgroundColor: stage.color }}
+              />
               <span className="text-muted-foreground">{stage.name}</span>
             </div>
           ))}
@@ -327,8 +342,11 @@ export const CompetitiveLandscape = ({ results, synthesis, situationRoomMode = f
                   <div className="absolute inset-y-0 left-0 right-0 flex items-center">
                     <div className={cn("w-full bg-muted rounded-full overflow-hidden", situationRoomMode ? "h-5" : "h-3")}>
                       <div 
-                        className={cn("h-full transition-all duration-500", STAGES[company.stage].color)}
-                        style={{ width: `${((company.stage + 1) / STAGES.length) * 100}%` }}
+                        className="h-full transition-all duration-500"
+                        style={{ 
+                          width: `${((company.stage + 1) / STAGES.length) * 100}%`,
+                          backgroundColor: STAGES[company.stage].color
+                        }}
                       />
                     </div>
                   </div>
@@ -339,9 +357,11 @@ export const CompetitiveLandscape = ({ results, synthesis, situationRoomMode = f
                         key={stage.name}
                         className={cn(
                           "rounded-full border-2 border-background z-10",
-                          idx <= company.stage ? stage.color : 'bg-muted',
                           situationRoomMode ? "w-6 h-6" : "w-4 h-4"
                         )}
+                        style={{ 
+                          backgroundColor: idx <= company.stage ? stage.color : 'hsl(var(--muted))'
+                        }}
                         title={stage.name}
                       />
                     ))}

@@ -163,4 +163,9 @@ Corporate Energy & Strategy-focused palette:
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Style native date input calendar icon to be white */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
 }
