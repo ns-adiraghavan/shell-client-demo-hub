@@ -57,7 +57,8 @@ serve(async (req) => {
       console.log('Using Semantic Scholar fallback');
       
       try {
-        const semanticUrl = `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=${maxResults}&fields=paperId,title,abstract,authors,year,url,venue,citationCount,externalIds,openAccessPdf`;
+        // Request more fields including tldr for better abstract fallback
+        const semanticUrl = `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=${maxResults}&fields=paperId,title,abstract,authors,authors.affiliations,year,url,venue,citationCount,externalIds,openAccessPdf,tldr`;
         
         const response = await fetch(semanticUrl, {
           headers: {
@@ -96,12 +97,28 @@ serve(async (req) => {
               publicationUrl = `https://www.semanticscholar.org/paper/${paper.paperId}`;
             }
             
+            // Build abstract - try multiple sources
+            let abstractText = paper.abstract;
+            if (!abstractText || abstractText === 'Abstract not available') {
+              // Fallback to tldr (auto-generated summary)
+              if (paper.tldr?.text) {
+                abstractText = paper.tldr.text;
+              }
+            }
+            
+            // Build authors with affiliations where available
+            const authorsWithAffiliations = paper.authors?.map((a: any) => {
+              const name = a.name || 'Unknown';
+              const affiliation = a.affiliations?.[0] || '';
+              return affiliation ? `${name} (${affiliation})` : name;
+            }).slice(0, 5).join(', ') || 'Unknown';
+            
             return {
               source: 'Google Scholar',
               id: paper.paperId || `scholar-${Date.now()}-${Math.random()}`,
               title: paper.title || 'No title',
-              abstract: paper.abstract || 'Abstract not available',
-              authors: paper.authors?.map((a: any) => a.name).slice(0, 5).join(', ') || 'Unknown',
+              abstract: abstractText || 'Abstract not available',
+              authors: authorsWithAffiliations,
               date: paper.year?.toString() || 'Unknown',
               url: publicationUrl
             };

@@ -3,7 +3,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
-import { Database, FileText, GraduationCap, Scale, Newspaper } from "lucide-react";
+import { Database, FileText, GraduationCap, Scale, Newspaper, Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SearchFiltersProps {
   sources: {
@@ -75,6 +81,16 @@ export const SearchFilters = ({ sources, setSources, maxResults, setMaxResults }
               onChange={(e) => handleMaxResultsInput(e.target.value)}
               className="w-20 h-8 text-sm bg-background"
             />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[280px]">
+                  <p className="text-sm">Maximum results limited to 100 per source in this version. Enterprise deployments support higher limits.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           <Slider 
             value={[maxResults]} 

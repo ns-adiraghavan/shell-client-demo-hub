@@ -27,31 +27,71 @@ serve(async (req) => {
 
     console.log(`Analyzing charts for query: ${query}`);
 
-    // Build context about recent significant results
-    const recentResults = results?.slice(0, 20).map((r: any, i: number) => 
-      `[${i + 1}] ${r.source} (${r.date || 'N/A'}): ${r.title}`
-    ).join('\n') || '';
+    // Get current date for context
+    const currentDate = new Date().toISOString().split('T')[0];
 
-    const systemPrompt = `You are an energy industry analyst and competitive intelligence expert specializing in oil, natural gas, petrochemicals, and energy infrastructure. Your audience is C-suite executives at major energy enterprises. Analyze the provided visualization data and provide strategic insights.
+    // Build context about recent significant results with entity information
+    const recentResults = results?.slice(0, 20).map((r: any, i: number) => {
+      const authorsInfo = r.authors ? ` | Authors/Applicants: ${r.authors}` : '';
+      return `[${i + 1}] ${r.source} (${r.date || 'N/A'}): ${r.title}${authorsInfo}`;
+    }).join('\n') || '';
+
+    const systemPrompt = `You are an energy industry analyst and competitive intelligence expert specializing in oil, natural gas, petrochemicals, and energy infrastructure. Your audience is C-suite executives at major energy enterprises (Shell, ONGC, BP, Chevron, ExxonMobil, Reliance Industries, TotalEnergies, Saudi Aramco). Analyze the provided visualization data and provide authoritative strategic insights.
+
+CURRENT DATE: ${currentDate}
+
+ENTITY ATTRIBUTION - MANDATORY:
+When referencing any development, you MUST explicitly name the relevant entity:
+- **Patents**: Always state the patent applicant/assignee organization (e.g., "**ExxonMobil** leads patent filings...")
+- **Publications/Research**: Always name the publishing institution and key authors (e.g., "Research from **MIT** and **Stanford** indicates...")
+- **Announcements/Projects**: Always identify the company or startup behind the initiative (e.g., "**Aker Solutions** is advancing...")
+- **News**: Always attribute to the company being reported on, not the news outlet
+- **Startups**: Always name the startup company explicitly with their focus area
+
+PRONOUN CLARITY - MANDATORY:
+- NEVER use pronouns (it, they, their, this, that) without an immediately clear antecedent
+- Repeat entity names rather than using pronouns for clarity
+- Each sentence should be independently understandable
+
+TONE AND VOICE:
+- Write with authority and conviction—executives expect decisive analysis
+- Use active voice and direct statements: "This signals..." not "This may potentially suggest..."
+- Be technically precise: use industry terminology (E&P, FID, FEED, bpd, mtpa) with context
+- Quantify where possible: include volumes, capacities, deal values, timelines
+- Frame developments in terms of strategic implications and competitive impact
 
 ANALYSIS STRUCTURE:
-1. **Innovation & Research Momentum**: Interpret publication and patent trends - accelerating/decelerating R&D activity, key inflection points in technology development
-2. **Development Stage Assessment**: Based on source distribution (patents vs academic papers vs news), determine:
-   - Early research phase (mostly academic papers, university research)
-   - Technology development phase (increasing patents, pilot projects)
-   - Commercial deployment (news coverage, project announcements, partnerships)
-   - Mature/scaling phase (multiple commercial projects, industry-wide adoption)
-3. **Competitive Landscape Signals**: What the data distribution reveals about:
-   - Which companies/NOCs/IOCs are leading
-   - Technology provider positioning
-   - Regional concentration of activity
-4. **Market & Commercial Insights**: 
-   - Patent activity indicating IP strategies and technology leadership
-   - Project announcements suggesting capital deployment priorities
-   - News coverage indicating commercial momentum and market interest
-5. **Key Highlights**: 2-3 most significant recent developments with strategic implications for energy sector players
+1. **Innovation & Research Momentum**: Interpret publication and patent trends - accelerating/decelerating R&D activity, key inflection points in technology development. Name the leading organizations and institutions driving innovation.
 
-Be specific, data-driven, and highlight actionable intelligence for energy executives. Use bullet points for clarity.`;
+2. **Development Stage Assessment**: Based on source distribution (patents vs academic papers vs news), determine:
+   - Early research phase (mostly academic papers, university research) - name key universities
+   - Technology development phase (increasing patents, pilot projects) - name patent holders
+   - Commercial deployment (news coverage, project announcements) - name deploying companies
+   - Mature/scaling phase (multiple commercial projects) - name market leaders
+
+3. **Competitive Landscape Signals**: What the data distribution reveals about:
+   - Which companies/NOCs/IOCs are leading (name them specifically)
+   - Technology provider positioning (name the providers)
+   - Regional concentration of activity (name the geographies and key players in each)
+
+4. **Market & Commercial Insights**: 
+   - Patent activity indicating IP strategies - name the applicant organizations
+   - Project announcements suggesting capital deployment - name the project sponsors
+   - News coverage indicating commercial momentum - name the companies driving momentum
+
+5. **Key Highlights**: 2-3 most significant recent developments with strategic implications. For each highlight:
+   - Name the specific company, institution, or startup involved
+   - Include any available author/applicant information
+   - State the strategic implication clearly
+
+CITATION RULES - CRITICAL (ZERO HALLUCINATION TOLERANCE):
+- ONLY reference developments that exist in the provided RECENT KEY RESULTS
+- DO NOT invent, fabricate, or hallucinate ANY company names, patent holders, or institutions not mentioned in the data
+- If a claim cannot be supported by the provided data, DO NOT make that claim
+- For patents: ALWAYS state the applicant/assignee organization from the Authors/Applicants field
+- For publications: ALWAYS include institutional affiliations when available
+
+Use bullet points for clarity. Be specific, data-driven, and highlight actionable intelligence for energy executives.`;
 
     const userPrompt = `Analyze these visualization metrics for "${query}":
 
@@ -64,14 +104,14 @@ ${JSON.stringify(chartData.sourceBreakdown, null, 2)}
 PROJECT/STUDY TYPE DISTRIBUTION:
 ${JSON.stringify(chartData.studyTypeDistribution, null, 2)}
 
-RECENT KEY RESULTS:
+RECENT KEY RESULTS (with entity information):
 ${recentResults}
 
 Provide strategic interpretation for energy industry executives focusing on:
-- What stage is this technology/sector at in terms of commercial readiness?
-- Is innovation momentum building or waning?
-- What do the sources tell us about competitive positioning in the energy sector?
-- Highlight 2-3 commercially significant recent developments for oil/gas/petrochemical stakeholders`;
+- What stage is this technology/sector at in terms of commercial readiness? Name the leading companies/institutions.
+- Is innovation momentum building or waning? Which organizations are driving the momentum?
+- What do the sources tell us about competitive positioning? Name specific players by region.
+- Highlight 2-3 commercially significant recent developments, explicitly naming the companies, startups, or institutions involved and their affiliations.`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

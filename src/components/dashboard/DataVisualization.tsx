@@ -356,7 +356,7 @@ export const DataVisualization = ({ results, isLoading, query, situationRoomMode
               <div className="p-2 bg-primary/15 rounded-lg">
                 <Brain className="h-5 w-5 text-primary" />
               </div>
-              <h3 className="text-lg font-bold text-foreground">Strategic Intelligence Analysis</h3>
+              <h3 className="text-lg font-bold text-foreground">Strategic Market Analysis</h3>
             </div>
             {isAnalyzing ? (
               <div className="flex items-center gap-3 text-muted-foreground">
